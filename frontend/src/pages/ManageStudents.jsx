@@ -5,10 +5,23 @@ import megImage from "../assets/meg.png";
 import begImage from "../assets/beg.png";
 import ssecImage from "../assets/ssec.png";
 
+import "./ManageStudents.css";
+
 function ManageStudents() {
+
+  /* ========================================
+     STATES
+  ======================================== */
+
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [selectedStudents, setSelectedStudents] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+
+
+  /* ========================================
+     DEPARTMENTS
+  ======================================== */
 
   const departments = [
     {
@@ -29,14 +42,24 @@ function ManageStudents() {
     },
   ];
 
-  const levels = ["1A", "1B", "1C", "2A", "2B", "2C"];
 
-  /*
-    Temporary frontend student data.
+  /* ========================================
+     LEVELS
+  ======================================== */
 
-    Later this data will come from backend API
-    according to selected department and level.
-  */
+  const levels = [
+    "1A",
+    "1B",
+    "1C",
+    "2A",
+    "2B",
+    "2C",
+  ];
+
+
+  /* ========================================
+     TEMPORARY STUDENT DATA
+  ======================================== */
 
   const students = [
     {
@@ -101,92 +124,206 @@ function ManageStudents() {
     },
   ];
 
-  // Department select
+
+  /* ========================================
+     FILTER STUDENTS
+  ======================================== */
+
+  const filteredStudents = students.filter((student) => {
+
+    const search = searchTerm.toLowerCase().trim();
+
+    return (
+      student.name.toLowerCase().includes(search) ||
+      student.email.toLowerCase().includes(search)
+    );
+
+  });
+
+
+  /* ========================================
+     DEPARTMENT SELECT
+  ======================================== */
+
   const handleDepartmentClick = (department) => {
+
     setSelectedDepartment(department);
+
     setSelectedLevel(null);
+
     setSelectedStudents([]);
+
+    setSearchTerm("");
+
   };
 
-  // Level select
+
+  /* ========================================
+     LEVEL SELECT
+  ======================================== */
+
   const handleLevelClick = (level) => {
+
     setSelectedLevel(level);
+
     setSelectedStudents([]);
+
+    setSearchTerm("");
+
   };
 
-  // Student selection
+
+  /* ========================================
+     STUDENT SELECT
+  ======================================== */
+
   const handleStudentSelect = (studentId) => {
+
     setSelectedStudents((currentSelected) => {
 
-      // If already selected → remove
+      /* Remove if already selected */
+
       if (currentSelected.includes(studentId)) {
+
         return currentSelected.filter(
           (id) => id !== studentId
         );
+
       }
 
-      // Maximum 10 students
+
+      /* Maximum 10 students */
+
       if (currentSelected.length >= 10) {
+
         alert("You can select maximum 10 students.");
+
         return currentSelected;
+
       }
 
-      // Add student
-      return [...currentSelected, studentId];
+
+      /* Add student */
+
+      return [
+        ...currentSelected,
+        studentId,
+      ];
+
     });
+
   };
 
-  // Save selected students
+
+  /* ========================================
+     SAVE STUDENTS
+  ======================================== */
+
   const handleSave = () => {
+
     if (selectedStudents.length !== 10) {
+
       alert("Please select exactly 10 students.");
+
       return;
+
     }
 
-    console.log("Department:", selectedDepartment);
-    console.log("Level:", selectedLevel);
-    console.log("Selected Students:", selectedStudents);
 
-    alert("10 students selected successfully.");
+    console.log(
+      "Department:",
+      selectedDepartment
+    );
+
+    console.log(
+      "Level:",
+      selectedLevel
+    );
+
+    console.log(
+      "Selected Students:",
+      selectedStudents
+    );
+
+
+    alert(
+      "10 students selected successfully."
+    );
+
   };
 
-  // Back to department
+
+  /* ========================================
+     BACK TO DEPARTMENTS
+  ======================================== */
+
   const handleBackToDepartments = () => {
+
     setSelectedDepartment(null);
+
     setSelectedLevel(null);
+
     setSelectedStudents([]);
+
+    setSearchTerm("");
+
   };
 
-  // Back to levels
+
+  /* ========================================
+     BACK TO LEVELS
+  ======================================== */
+
   const handleBackToLevels = () => {
+
     setSelectedLevel(null);
+
     setSelectedStudents([]);
+
+    setSearchTerm("");
+
   };
+
+
+  /* ========================================
+     UI
+  ======================================== */
 
   return (
+
     <div className="manage-students">
 
-      {/* =========================================
-          STEP 1 — DEPARTMENT SELECTION
-      ========================================== */}
+
+      {/* =====================================
+          STEP 1
+          DEPARTMENT SELECTION
+      ====================================== */}
 
       {!selectedDepartment && (
+
         <section>
 
-          <h1>Select Department</h1>
+          <h1>
+            Select Department
+          </h1>
 
           <p>
             Choose a department to continue.
           </p>
 
+
           <div className="department-grid">
 
             {departments.map((department) => (
+
               <button
                 key={department.name}
                 className="department-card"
+
                 onClick={() =>
-                  handleDepartmentClick(department.name)
+                  handleDepartmentClick(
+                    department.name
+                  )
                 }
               >
 
@@ -196,164 +333,285 @@ function ManageStudents() {
                   className="department-image"
                 />
 
-                <h2>{department.name}</h2>
+
+                <h2>
+                  {department.name}
+                </h2>
 
               </button>
+
             ))}
 
           </div>
 
         </section>
+
       )}
 
-      {/* =========================================
-          STEP 2 — LEVEL SELECTION
-      ========================================== */}
 
-      {selectedDepartment && !selectedLevel && (
-        <section>
+      {/* =====================================
+          STEP 2
+          LEVEL SELECTION
+      ====================================== */}
 
-          <button
-            className="back-button"
-            onClick={handleBackToDepartments}
-          >
-            ← Back
-          </button>
+      {selectedDepartment &&
+        !selectedLevel && (
 
-          <h1>{selectedDepartment}</h1>
-
-          <p>
-            Select the level for this department.
-          </p>
-
-          <div className="level-grid">
-
-            {levels.map((level) => (
-              <button
-                key={level}
-                className="level-card"
-                onClick={() =>
-                  handleLevelClick(level)
-                }
-              >
-                {level}
-              </button>
-            ))}
-
-          </div>
-
-        </section>
-      )}
-
-      {/* =========================================
-          STEP 3 — STUDENT SELECTION
-      ========================================== */}
-
-      {selectedDepartment && selectedLevel && (
-        <section>
-
-          <button
-            className="back-button"
-            onClick={handleBackToLevels}
-          >
-            ← Back
-          </button>
-
-          <div className="student-page-header">
-
-            <div>
-              <h1>
-                {selectedDepartment} - {selectedLevel}
-              </h1>
-
-              <p>
-                Select exactly 10 permanent students.
-              </p>
-            </div>
-
-            <div className="selection-count">
-              {selectedStudents.length} / 10
-            </div>
-
-          </div>
-
-          {/* Student List */}
-
-          <div className="students-list">
-
-            {students.map((student) => {
-
-              const isSelected =
-                selectedStudents.includes(student.id);
-
-              return (
-                <div
-                  key={student.id}
-                  className={`student-row ${isSelected ? "selected" : ""
-                    }`}
-                  onClick={() =>
-                    handleStudentSelect(student.id)
-                  }
-                >
-
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={() =>
-                      handleStudentSelect(student.id)
-                    }
-                    onClick={(event) =>
-                      event.stopPropagation()
-                    }
-                  />
-
-                  <div className="student-info">
-
-                    <h3>
-                      {student.name}
-                    </h3>
-
-                    <p>
-                      {student.email}
-                    </p>
-
-                  </div>
-
-                </div>
-              );
-            })}
-
-          </div>
-
-          {/* Save */}
-
-          <div className="save-section">
-
-            <p>
-              Selected students:
-              <strong>
-                {" "}
-                {selectedStudents.length} / 10
-              </strong>
-            </p>
+          <section>
 
             <button
-              className="save-button"
-              onClick={handleSave}
-              disabled={selectedStudents.length !== 10}
+              className="back-button"
+              onClick={
+                handleBackToDepartments
+              }
             >
-              Save Selection
+              ← Back
             </button>
 
-          </div>
 
-        </section>
-      )}
+            <h1>
+              {selectedDepartment}
+            </h1>
+
+
+            <p>
+              Select the level for this
+              department.
+            </p>
+
+
+            <div className="level-grid">
+
+              {levels.map((level) => (
+
+                <button
+                  key={level}
+                  className="level-card"
+
+                  onClick={() =>
+                    handleLevelClick(level)
+                  }
+                >
+                  {level}
+                </button>
+
+              ))}
+
+            </div>
+
+          </section>
+
+        )}
+
+
+      {/* =====================================
+          STEP 3
+          STUDENT SELECTION
+      ====================================== */}
+
+      {selectedDepartment &&
+        selectedLevel && (
+
+          <section>
+
+
+            {/* BACK */}
+
+            <button
+              className="back-button"
+              onClick={
+                handleBackToLevels
+              }
+            >
+              ← Back
+            </button>
+
+
+            {/* HEADER */}
+
+            <div className="student-page-header">
+
+              <div>
+
+                <h1>
+                  {selectedDepartment}
+                  {" - "}
+                  {selectedLevel}
+                </h1>
+
+                <p>
+                  Select exactly 10 permanent
+                  students.
+                </p>
+
+              </div>
+
+
+              <div className="selection-count">
+
+                {selectedStudents.length}
+                {" / 10"}
+
+              </div>
+
+            </div>
+
+
+            {/* =================================
+                SEARCH
+            ================================== */}
+
+            <div className="student-search">
+
+              <input
+                type="text"
+
+                placeholder="Search student by name or email..."
+
+                value={searchTerm}
+
+                onChange={(event) =>
+                  setSearchTerm(
+                    event.target.value
+                  )
+                }
+              />
+
+            </div>
+
+
+            {/* =================================
+                STUDENT LIST
+            ================================== */}
+
+            <div className="students-list">
+
+              {filteredStudents.length > 0 ? (
+
+                filteredStudents.map(
+                  (student) => {
+
+                    const isSelected =
+                      selectedStudents.includes(
+                        student.id
+                      );
+
+
+                    return (
+
+                      <div
+                        key={student.id}
+
+                        className={`student-row ${isSelected
+                          ? "selected"
+                          : ""
+                          }`}
+
+                        onClick={() =>
+                          handleStudentSelect(
+                            student.id
+                          )
+                        }
+                      >
+
+
+                        {/* CHECKBOX */}
+
+                        <input
+                          type="checkbox"
+
+                          checked={isSelected}
+
+                          onChange={() =>
+                            handleStudentSelect(
+                              student.id
+                            )
+                          }
+
+                          onClick={(event) =>
+                            event.stopPropagation()
+                          }
+                        />
+
+
+                        {/* STUDENT INFO */}
+
+                        <div className="student-info">
+
+                          <h3>
+                            {student.name}
+                          </h3>
+
+                          <p>
+                            {student.email}
+                          </p>
+
+                        </div>
+
+                      </div>
+
+                    );
+
+                  }
+                )
+
+              ) : (
+
+                <div className="no-students">
+
+                  No students found.
+
+                </div>
+
+              )}
+
+            </div>
+
+
+            {/* =================================
+                SAVE SECTION
+            ================================== */}
+
+            <div className="save-section">
+
+              <p>
+
+                Selected students:
+
+                <strong>
+                  {" "}
+                  {selectedStudents.length}
+                  {" / 10"}
+                </strong>
+
+              </p>
+
+
+              <button
+                className="save-button"
+
+                onClick={handleSave}
+
+                disabled={
+                  selectedStudents.length !== 10
+                }
+              >
+
+                Save Selection
+
+              </button>
+
+            </div>
+
+
+          </section>
+
+        )}
 
     </div>
+
   );
+
 }
 
 export default ManageStudents;
-
-
