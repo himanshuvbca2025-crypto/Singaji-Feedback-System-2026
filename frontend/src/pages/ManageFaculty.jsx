@@ -38,7 +38,7 @@ function ManageFaculty() {
     },
   ];
 
-  // Faculty according to department state
+  // Faculty data by department
   const [facultyData, setFacultyData] = useState({
     ITEG: [
       {
@@ -136,6 +136,9 @@ function ManageFaculty() {
     subject: "",
   });
 
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletingFaculty, setDeletingFaculty] = useState(null);
+
   // Department select
   const handleDepartmentClick = (department) => {
     setSelectedDepartment(department);
@@ -176,10 +179,7 @@ function ManageFaculty() {
   // Save New Faculty
   const handleSaveNew = (e) => {
     e.preventDefault();
-    if (!newFaculty.name || !newFaculty.email || !newFaculty.subject) {
-      alert("Please fill out all fields.");
-      return;
-    }
+    if (!newFaculty.name || !newFaculty.email || !newFaculty.subject) return;
 
     const created = {
       id: Date.now().toString(),
@@ -195,6 +195,27 @@ function ManageFaculty() {
     setIsAddModalOpen(false);
   };
 
+  // Open Delete Modal
+  const handleOpenDelete = (faculty) => {
+    setDeletingFaculty(faculty);
+    setIsDeleteModalOpen(true);
+  };
+
+  // Confirm Delete
+  const handleConfirmDelete = () => {
+    if (!deletingFaculty) return;
+
+    setFacultyData((prevData) => ({
+      ...prevData,
+      [selectedDepartment]: prevData[selectedDepartment].filter(
+        (item) => item.id !== deletingFaculty.id
+      ),
+    }));
+
+    setIsDeleteModalOpen(false);
+    setDeletingFaculty(null);
+  };
+
   // Selected department faculty list
   const selectedFaculty = selectedDepartment
     ? facultyData[selectedDepartment] || []
@@ -207,8 +228,8 @@ function ManageFaculty() {
       {!selectedDepartment && (
         <section>
           <div className="faculty-page-title">
-            <h1>Select Department</h1>
-            <p>Choose a department to manage faculty members.</p>
+            <h1>Manage Faculty</h1>
+            <p>Choose a department to view and manage faculty members.</p>
           </div>
 
           <div className="faculty-department-grid">
@@ -254,40 +275,52 @@ function ManageFaculty() {
           </div>
 
           <div className="faculty-list">
-            {selectedFaculty.map((member) => (
-              <div key={member.id} className="faculty-row">
-                {/* Avatar */}
-                <div className="faculty-avatar">
-                  {member.name
-                    .replace("Dr. ", "")
-                    .replace("Prof. ", "")
-                    .charAt(0)}
-                </div>
+            {selectedFaculty.length > 0 ? (
+              selectedFaculty.map((member) => (
+                <div key={member.id} className="faculty-row">
+                  {/* Avatar */}
+                  <div className="faculty-avatar">
+                    {member.name
+                      .replace("Dr. ", "")
+                      .replace("Prof. ", "")
+                      .charAt(0)}
+                  </div>
 
-                {/* Faculty Info */}
-                <div className="faculty-info">
-                  <h3>{member.name}</h3>
-                  <p>{member.email}</p>
-                  <span className="faculty-subject-tag">{member.subject}</span>
-                </div>
+                  {/* Faculty Info */}
+                  <div className="faculty-info">
+                    <h3>{member.name}</h3>
+                    <p>{member.email}</p>
+                    <span className="faculty-subject-tag">{member.subject}</span>
+                  </div>
 
-                {/* Actions */}
-                <div className="faculty-actions">
-                  <button
-                    className="btn-edit"
-                    onClick={() => handleOpenEdit(member)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="btn-view"
-                    onClick={() => handleViewHistory(member.id)}
-                  >
-                    View History
-                  </button>
+                  {/* Actions */}
+                  <div className="faculty-actions">
+                    <button
+                      className="btn-edit"
+                      onClick={() => handleOpenEdit(member)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="btn-view"
+                      onClick={() => handleViewHistory(member.id)}
+                    >
+                      View History
+                    </button>
+                    <button
+                      className="btn-delete"
+                      onClick={() => handleOpenDelete(member)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="faculty-empty">
+                No faculty members found. Click "+ Add Faculty" to add one.
               </div>
-            ))}
+            )}
           </div>
 
           <div className="faculty-count">
@@ -417,6 +450,40 @@ function ManageFaculty() {
             </button>
           </div>
         </form>
+      </Modal>
+
+
+      {/* DELETE CONFIRMATION MODAL */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        title="Delete Faculty Member"
+      >
+        <div className="confirm-delete-body">
+          <span className="confirm-icon">🗑️</span>
+          <p>
+            Are you sure you want to delete{" "}
+            <strong>{deletingFaculty?.name}</strong>?
+            <br />
+            This action cannot be undone.
+          </p>
+        </div>
+        <div className="modal-actions">
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => setIsDeleteModalOpen(false)}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn-danger"
+            onClick={handleConfirmDelete}
+          >
+            Delete
+          </button>
+        </div>
       </Modal>
 
     </div>

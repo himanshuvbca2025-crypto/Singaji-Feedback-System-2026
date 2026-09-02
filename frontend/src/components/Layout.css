@@ -1,30 +1,38 @@
+/* ========================================
+   APP LAYOUT — Clean Light UI
+   No background image
+======================================== */
+
 .app-layout {
-    min-height: 100vh;
-    width: 100%;
-
-    background-image:
-        linear-gradient(rgba(245, 247, 251, 0.55),
-            rgba(245, 247, 251, 0.55)),
-        url("../assets/back.png");
-
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-
-    box-sizing: border-box;
+  min-height: 100vh;
+  width: 100%;
+  background: #f5f7fb;
+  box-sizing: border-box;
 }
+
+
+/* ========================================
+   APP BODY
+======================================== */
 
 .app-body {
-    display: flex;
-    min-height: calc(100vh - 76px);
+  display: flex;
+  min-height: calc(100vh - 64px);
 }
 
+
+/* ========================================
+   MAIN CONTENT AREA
+   Expands when sidebar is collapsed
+======================================== */
+
 .main-content {
-    flex: 1;
-    min-width: 0;
-    padding: 30px;
-    overflow-y: auto;
-    box-sizing: border-box;
+  flex: 1;
+  min-width: 0;
+  padding: 28px 30px;
+  overflow-y: auto;
+  box-sizing: border-box;
+  transition: margin-left 0.28s ease;
 }
 
 
@@ -33,7 +41,7 @@
 ======================================== */
 
 @media (max-width: 768px) {
-    .main-content {
-        padding: 20px 14px;
-    }
+  .main-content {
+    padding: 20px 16px;
+  }
 }

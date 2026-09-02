@@ -22,6 +22,7 @@ import ManageQuestions from "../pages/ManageQuestions.jsx";
 import Reports from "../pages/Reports.jsx";
 import ManageCourses from "../pages/ManageCourses.jsx";
 import ManageLectures from "../pages/ManageLectures.jsx";
+import AdminFeedback from "../pages/AdminFeedback.jsx";
 
 import Layout from "../components/Layout.jsx";
 
@@ -146,6 +147,14 @@ function AppRoutes() {
           <Route
             path="lectures"
             element={<ManageLectures />}
+          />
+
+
+          {/* Feedback */}
+
+          <Route
+            path="feedback"
+            element={<AdminFeedback />}
           />
 
 

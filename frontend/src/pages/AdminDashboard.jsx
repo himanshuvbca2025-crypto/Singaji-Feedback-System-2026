@@ -1,154 +1,217 @@
 import "./AdminDashboard.css";
 
+/* ============================================================
+   MOCK DASHBOARD DATA
+   Replace with real API calls when backend is available
+============================================================ */
+
+const recentFeedback = [
+  {
+    id: 1,
+    student: "ITEG-2A",
+    subject: "Programming in C++ & Java",
+    faculty: "Dr. Rahul Sharma",
+    rating: 4.8,
+    comment: "Excellent teaching style with great practical examples.",
+    date: "Today, 11:30 AM",
+  },
+  {
+    id: 2,
+    student: "B.Tech-3A",
+    subject: "Computer Networks & Security",
+    faculty: "Dr. S.K. Mehta",
+    rating: 4.6,
+    comment: "Very knowledgeable. Concepts explained clearly.",
+    date: "Today, 10:15 AM",
+  },
+  {
+    id: 3,
+    student: "ITEG-1B",
+    subject: "Web Development & Frameworks",
+    faculty: "Dr. Amit Singh",
+    rating: 4.7,
+    comment: "Loved the hands-on sessions. Very interactive.",
+    date: "Today, 09:45 AM",
+  },
+];
+
+const lowScoreFeedback = [
+  {
+    id: 1,
+    course: "Thermodynamics",
+    faculty: "Prof. Raj Kumar",
+    department: "MEG",
+    rating: 3.2,
+    comment: "Coverage is too fast, difficult to follow.",
+    date: "Today, 12:00 PM",
+  },
+  {
+    id: 2,
+    course: "Applied Mathematics",
+    faculty: "Prof. Vikash Meena",
+    department: "BEG",
+    rating: 3.4,
+    comment: "Needs more numerical practice during lectures.",
+    date: "Today, 09:00 AM",
+  },
+  {
+    id: 3,
+    course: "Engineering Physics",
+    faculty: "Dr. Mohit Jain",
+    department: "BEG",
+    rating: 3.1,
+    comment: "Lab sessions are not well organized.",
+    date: "Yesterday",
+  },
+];
+
+function StarRating({ value }) {
+  const stars = [];
+  for (let i = 1; i <= 5; i++) {
+    stars.push(
+      <span key={i} className={`star ${i <= Math.round(value) ? "star-filled" : "star-empty"}`}>
+        ★
+      </span>
+    );
+  }
+  return <div className="star-row">{stars}</div>;
+}
+
 function AdminDashboard() {
+  const completionPct = 86;
+
   return (
     <div className="admin-dashboard">
 
       {/* Dashboard Header */}
       <div className="dashboard-header">
         <h1>Admin Dashboard</h1>
-        <p>
-          Overview of today's academic and feedback activity
-        </p>
+        <p>Overview of today's academic and feedback activity</p>
       </div>
 
 
-      {/* Main Statistics */}
+      {/* ========================
+          STAT CARDS (4)
+      ======================== */}
       <div className="dashboard-stats">
 
         {/* Today's Lectures */}
         <div className="stat-card">
           <div className="stat-card-top">
-            <span className="stat-title">
-              Today's Lectures Held
-            </span>
-            <span className="stat-icon">
-              🎓
-            </span>
+            <span className="stat-title">Today's Lectures Held</span>
+            <span className="stat-icon">🎓</span>
           </div>
-
-          <div className="stat-value">
-            12
-          </div>
-
-          <div className="stat-description">
-            Lectures conducted today
-          </div>
+          <div className="stat-value">12</div>
+          <div className="stat-description">Lectures conducted today</div>
         </div>
 
 
         {/* Low Score Alerts */}
-        <div className="stat-card alert-card">
+        <div className="stat-card stat-card-alert">
           <div className="stat-card-top">
-            <span className="stat-title">
-              Low Score Alerts
-            </span>
-            <span className="stat-icon">
-              ⚠️
-            </span>
+            <span className="stat-title">Low Score Alerts</span>
+            <span className="stat-icon">⚠️</span>
           </div>
-
-          <div className="stat-value">
-            3
-          </div>
-
-          <div className="stat-description">
-            Classes require administrative review
-          </div>
+          <div className="stat-value stat-value-alert">3</div>
+          <div className="stat-description">Classes require administrative review</div>
         </div>
 
 
         {/* Campus Average */}
         <div className="stat-card">
           <div className="stat-card-top">
-            <span className="stat-title">
-              Today's Campus Avg
-            </span>
-            <span className="stat-icon">
-              ⭐
-            </span>
+            <span className="stat-title">Today's Campus Avg</span>
+            <span className="stat-icon">⭐</span>
           </div>
-
           <div className="stat-value">
             4.2
-            <span className="stat-max">
-              / 5
-            </span>
+            <span className="stat-max"> / 5</span>
           </div>
-
-          <div className="stat-description">
-            Overall feedback rating
-          </div>
+          <div className="stat-description">Overall feedback rating</div>
         </div>
 
 
         {/* Feedback Completion */}
         <div className="stat-card">
           <div className="stat-card-top">
-            <span className="stat-title">
-              Feedback Completion
-            </span>
-            <span className="stat-icon">
-              ✓
-            </span>
+            <span className="stat-title">Feedback Completion</span>
+            <span className="stat-icon">✅</span>
           </div>
-
-          <div className="stat-value">
-            86%
-          </div>
-
-          <div className="stat-description">
-            Students completed feedback
+          <div className="stat-value">{completionPct}%</div>
+          <div className="stat-description">Students completed feedback</div>
+          <div className="completion-bar-bg">
+            <div
+              className="completion-bar-fill"
+              style={{ width: `${completionPct}%` }}
+            />
           </div>
         </div>
 
       </div>
 
 
-      {/* Feedback Overview */}
-      <div className="feedback-overview">
+      {/* ========================
+          LOWER SECTIONS (2-col)
+      ======================== */}
+      <div className="dashboard-lower">
 
-        <div className="overview-header">
-          <div>
-            <h2>Today's Feedback Summary</h2>
-            <p>
-              Real-time response breakdown across departments
-            </p>
+        {/* ---- TOP RECENT FEEDBACK ---- */}
+        <div className="dashboard-section">
+          <div className="section-header">
+            <h2>Recent High-Quality Feedback</h2>
+            <span className="section-badge section-badge-green">Top Rated</span>
+          </div>
+
+          <div className="feedback-cards">
+            {recentFeedback.map((fb) => (
+              <div key={fb.id} className="feedback-item">
+                <div className="feedback-item-top">
+                  <div className="feedback-item-info">
+                    <span className="feedback-class-tag">{fb.student}</span>
+                    <span className="feedback-faculty">{fb.faculty}</span>
+                  </div>
+                  <div className="feedback-rating-badge">
+                    ⭐ {fb.rating}
+                  </div>
+                </div>
+                <p className="feedback-subject">{fb.subject}</p>
+                <p className="feedback-comment">"{fb.comment}"</p>
+                <StarRating value={fb.rating} />
+                <p className="feedback-date">{fb.date}</p>
+              </div>
+            ))}
           </div>
         </div>
 
 
-        <div className="overview-stats">
-
-          <div className="overview-item">
-            <span className="overview-label">
-              Total Eligible Students
-            </span>
-            <strong>
-              350
-            </strong>
+        {/* ---- NEEDS ATTENTION ---- */}
+        <div className="dashboard-section">
+          <div className="section-header">
+            <h2>Needs Attention</h2>
+            <span className="section-badge section-badge-red">Low Score</span>
           </div>
 
-
-          <div className="overview-item">
-            <span className="overview-label">
-              Feedbacks Submitted
-            </span>
-            <strong>
-              301
-            </strong>
+          <div className="feedback-cards">
+            {lowScoreFeedback.map((fb) => (
+              <div key={fb.id} className="feedback-item feedback-item-alert">
+                <div className="feedback-item-top">
+                  <div className="feedback-item-info">
+                    <span className="feedback-class-tag alert-tag">{fb.department}</span>
+                    <span className="feedback-faculty">{fb.faculty}</span>
+                  </div>
+                  <div className="feedback-rating-badge rating-badge-alert">
+                    ⚠️ {fb.rating}
+                  </div>
+                </div>
+                <p className="feedback-subject">{fb.course}</p>
+                <p className="feedback-comment">"{fb.comment}"</p>
+                <div className="alert-footer">
+                  <span className="feedback-date">{fb.date}</span>
+                  <button className="review-btn">Review</button>
+                </div>
+              </div>
+            ))}
           </div>
-
-
-          <div className="overview-item">
-            <span className="overview-label">
-              Pending Submissions
-            </span>
-            <strong>
-              49
-            </strong>
-          </div>
-
         </div>
 
       </div>

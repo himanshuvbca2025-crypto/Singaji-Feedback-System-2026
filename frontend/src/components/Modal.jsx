@@ -1,4 +1,5 @@
 import React from 'react';
+import './Modal.css';
 
 function Modal({ isOpen, onClose, title, children }) {
   if (!isOpen) return null;
@@ -8,7 +9,7 @@ function Modal({ isOpen, onClose, title, children }) {
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{title}</h2>
-          <button className="modal-close" onClick={onClose}>
+          <button className="modal-close" onClick={onClose} aria-label="Close modal">
             &times;
           </button>
         </div>

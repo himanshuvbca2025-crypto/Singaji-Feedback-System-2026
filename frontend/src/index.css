@@ -2,6 +2,8 @@
    Singaji Feedback System – Global Styles
    ============================================= */
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 * {
   margin: 0;
   padding: 0;
@@ -9,23 +11,15 @@
 }
 
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', Arial, sans-serif;
   background: #f5f7fb;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
 }
 
-.admin-layout {
-  min-height: 100vh;
-}
-
-.admin-body {
-  display: flex;
-  min-height: calc(100vh - 60px);
-}
-
-.admin-content {
-  flex: 1;
-  padding: 30px;
-}
+/* =============================================
+   UTILITY SHARED ACROSS ADMIN PAGES
+   ============================================= */
 
 .page-header {
   margin-bottom: 30px;
@@ -33,52 +27,12 @@ body {
 
 .page-header h1 {
   font-size: 30px;
-  margin-bottom: 8px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 6px;
 }
 
 .page-header p {
-  color: #666;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.stat-card,
-.overview-card {
-  background: white;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-}
-
-.stat-card h3,
-.overview-card h3 {
-  color: #555;
-  margin-bottom: 12px;
-}
-
-.stat-card p,
-.overview-card p {
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.feedback-overview {
-  background: white;
-  padding: 25px;
-  border-radius: 12px;
-}
-
-.feedback-overview h2 {
-  margin-bottom: 20px;
-}
-
-.overview-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  font-size: 14px;
+  color: #6b7280;
 }

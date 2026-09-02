@@ -3,8 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth.js";
 
 import ssecLogo from "../assets/rename.png";
-import backgroundImage from "../assets/back.png";
-
 import "./Login.css";
 
 function Login() {
@@ -37,22 +35,30 @@ function Login() {
 
     if (email === adminEmail && password === adminPassword) {
       setError("");
-      login({ email: adminEmail, role: "Admin", name: "Admin" });
+
+      login({
+        email: adminEmail,
+        role: "Admin",
+        name: "Admin",
+      });
+
       navigate("/admin/dashboard");
     } else if (
       (email === facultyEmail || email === facultyAltEmail) &&
       password === facultyPassword
     ) {
       setError("");
+
       login({
         email: facultyAltEmail,
         role: "Faculty",
         name: "Dr. Rahul Sharma",
         department: "ITEG",
       });
+
       navigate("/faculty/dashboard");
     } else {
-      setError("Invalid email or password");
+      setError("Invalid email or password. Please try again.");
     }
   };
 
@@ -69,116 +75,91 @@ function Login() {
   };
 
   return (
-    <div
-      className="hero-section"
-      style={{
-        backgroundImage: `url(${backgroundImage})`,
-      }}
-    >
-      <div className="hero-overlay"></div>
+    <div className="login-page">
+      <div className="login-card">
 
-      <div className="hero-content">
-
-        <div className="hero-title">
-          <h1>Singaji Educational Society</h1>
-          <p>Feedback Management System</p>
+        <div className="login-logo-wrapper">
+          <img
+            src={ssecLogo}
+            alt="SSISM Logo"
+            className="login-logo"
+          />
         </div>
 
-        <div className="login-glass-card">
+        <h1 className="login-title">Welcome</h1>
 
-          <div className="login-logo-wrapper">
-            <img
-              src={ssecLogo}
-              alt="SSEC Logo"
-              className="login-logo"
+        <p className="login-subtitle">
+          Sign in to your account to continue
+        </p>
+
+        <div className="demo-credentials-hints">
+          <button
+            type="button"
+            className="demo-chip"
+            onClick={handleFillDemoAdmin}
+          >
+            Demo Admin
+          </button>
+
+          <button
+            type="button"
+            className="demo-chip faculty-chip"
+            onClick={handleFillDemoFaculty}
+          >
+            Demo Faculty
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="login-form">
+
+          <div className="login-form-group">
+            <label htmlFor="email">Email Address</label>
+
+            <input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError("");
+              }}
+              required
             />
           </div>
 
-          <h2>Welcome</h2>
+          <div className="login-form-group">
+            <label htmlFor="password">Password</label>
 
-          <p className="login-subtitle">
-            Login to continue
-          </p>
-
-          <div className="demo-credentials-hints">
-            <button
-              type="button"
-              className="demo-chip"
-              onClick={handleFillDemoAdmin}
-            >
-              Demo Admin
-            </button>
-            <button
-              type="button"
-              className="demo-chip faculty-chip"
-              onClick={handleFillDemoFaculty}
-            >
-              Demo Faculty
-            </button>
+            <input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError("");
+              }}
+              required
+            />
           </div>
 
-          <form onSubmit={handleSubmit}>
-
-            <div className="form-group">
-              <label htmlFor="email">
-                Email Address
-              </label>
-
-              <input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  setError("");
-                }}
-                required
-              />
+          {error && (
+            <div className="login-error">
+              <span>⚠</span> {error}
             </div>
+          )}
 
-            <div className="form-group">
-              <label htmlFor="password">
-                Password
-              </label>
+          <button type="submit" className="login-button">
+            Sign In
+          </button>
 
-              <input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setError("");
-                }}
-                required
-              />
-            </div>
+        </form>
 
-            {error && (
-              <p className="login-error">
-                {error}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              className="login-button"
-            >
-              Login
-            </button>
-
-          </form>
-
-          <div className="register-link">
-            <span>Don't have an account?</span>
-
-            <Link to="/register">
-              Register
-            </Link>
-          </div>
-
-        </div>
+        {/* <div className="register-link">
+          <span>Don't have an account?</span>
+          <Link to="/register">Register</Link>
+        </div> */}
 
       </div>
     </div>

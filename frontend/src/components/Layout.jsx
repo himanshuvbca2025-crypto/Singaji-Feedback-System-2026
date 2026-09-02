@@ -2,6 +2,7 @@ import { Outlet, Navigate } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 import Sidebar from "../components/Sidebar.jsx";
 import useAuth from "../hooks/useAuth.js";
+import { SidebarProvider } from "../context/SidebarContext.jsx";
 import "./Layout.css";
 
 function Layout() {
@@ -12,21 +13,23 @@ function Layout() {
   }
 
   return (
-    <div className="app-layout">
+    <SidebarProvider>
+      <div className="app-layout">
 
-      <Navbar />
+        <Navbar />
 
-      <div className="app-body">
+        <div className="app-body">
 
-        <Sidebar />
+          <Sidebar />
 
-        <main className="main-content">
-          <Outlet />
-        </main>
+          <main className="main-content">
+            <Outlet />
+          </main>
+
+        </div>
 
       </div>
-
-    </div>
+    </SidebarProvider>
   );
 }
 
