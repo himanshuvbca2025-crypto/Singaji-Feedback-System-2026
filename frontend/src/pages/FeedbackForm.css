@@ -1,0 +1,126 @@
+.feedback-form-container {
+    min-height: 100vh;
+    background-image: linear-gradient(rgba(245, 247, 251, 0.55), rgba(245, 247, 251, 0.55)), url("../assets/back.png");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.feedback-form-main {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.feedback-card-wrapper {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.25s ease;
+}
+
+.feedback-card-wrapper:hover {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+}
+
+.lecture-info-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.lecture-info-header h2 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    color: #111827;
+}
+
+.lecture-info-header p {
+    margin: 0;
+    font-size: 14px;
+    color: #4b5563;
+}
+
+.questions-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-q-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.q-text {
+    font-size: 15px;
+    font-weight: 500;
+    color: #111827;
+    margin: 0;
+}
+
+.star-rating-options {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.star-btn {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    color: #d1d5db;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.star-btn.active {
+    color: #ea580c;
+}
+
+
+.rating-num-label {
+    margin-left: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+}
+
+.form-q-block textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+}
+
+.submit-feedback-btn {
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.submission-success-card {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.submission-success-card h2 {
+    margin: 0 0 10px;
+    font-size: 28px;
+    color: #065f46;
+}
+
+.submission-success-card p {
+    margin: 0 0 24px;
+    font-size: 15px;
+    color: #4b5563;
+}

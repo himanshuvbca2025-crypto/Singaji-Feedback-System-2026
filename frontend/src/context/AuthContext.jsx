@@ -1,35 +1,36 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 
 // Create the AuthContext
 export const AuthContext = createContext(null);
 
-/**
- * AuthProvider
- * Wraps the application and provides authentication state.
- * Real authentication logic will be implemented when backend is ready.
- */
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(() => {
+    try {
+      const storedUser = localStorage.getItem('authUser');
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch {
+      return null;
+    }
+  });
 
-  // Placeholder: will call authService.login() when backend is ready
-  const login = (userData, authToken) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!localStorage.getItem('authUser');
+  });
+
+  const login = (userData) => {
     setUser(userData);
-    setToken(authToken);
     setIsAuthenticated(true);
+    localStorage.setItem('authUser', JSON.stringify(userData));
   };
 
-  // Placeholder: will call authService.logout() when backend is ready
   const logout = () => {
     setUser(null);
-    setToken(null);
     setIsAuthenticated(false);
+    localStorage.removeItem('authUser');
   };
 
   const value = {
     user,
-    token,
     isAuthenticated,
     login,
     logout,
@@ -37,3 +38,4 @@ export function AuthProvider({ children }) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
+

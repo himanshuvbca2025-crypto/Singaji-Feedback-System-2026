@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth.js";
 
 import ssecLogo from "../assets/rename.png";
 import backgroundImage from "../assets/back.png";
@@ -8,10 +9,21 @@ import "./Login.css";
 
 function Login() {
   const navigate = useNavigate();
+  const { login, isAuthenticated, user } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === "Faculty") {
+        navigate("/faculty/dashboard", { replace: true });
+      } else {
+        navigate("/admin/dashboard", { replace: true });
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -19,13 +31,41 @@ function Login() {
     const adminEmail = "admin@gmail.com";
     const adminPassword = "admin123";
 
+    const facultyEmail = "faculty@gmail.com";
+    const facultyAltEmail = "rahul@singaji.edu.in";
+    const facultyPassword = "faculty123";
+
     if (email === adminEmail && password === adminPassword) {
       setError("");
-
+      login({ email: adminEmail, role: "Admin", name: "Admin" });
       navigate("/admin/dashboard");
+    } else if (
+      (email === facultyEmail || email === facultyAltEmail) &&
+      password === facultyPassword
+    ) {
+      setError("");
+      login({
+        email: facultyAltEmail,
+        role: "Faculty",
+        name: "Dr. Rahul Sharma",
+        department: "ITEG",
+      });
+      navigate("/faculty/dashboard");
     } else {
       setError("Invalid email or password");
     }
+  };
+
+  const handleFillDemoAdmin = () => {
+    setEmail("admin@gmail.com");
+    setPassword("admin123");
+    setError("");
+  };
+
+  const handleFillDemoFaculty = () => {
+    setEmail("faculty@gmail.com");
+    setPassword("faculty123");
+    setError("");
   };
 
   return (
@@ -59,6 +99,23 @@ function Login() {
           <p className="login-subtitle">
             Login to continue
           </p>
+
+          <div className="demo-credentials-hints">
+            <button
+              type="button"
+              className="demo-chip"
+              onClick={handleFillDemoAdmin}
+            >
+              Demo Admin
+            </button>
+            <button
+              type="button"
+              className="demo-chip faculty-chip"
+              onClick={handleFillDemoFaculty}
+            >
+              Demo Faculty
+            </button>
+          </div>
 
           <form onSubmit={handleSubmit}>
 

@@ -22,14 +22,13 @@ function AdminDashboard() {
             <span className="stat-title">
               Today's Lectures Held
             </span>
-
             <span className="stat-icon">
               🎓
             </span>
           </div>
 
           <div className="stat-value">
-            24
+            12
           </div>
 
           <div className="stat-description">
@@ -39,23 +38,22 @@ function AdminDashboard() {
 
 
         {/* Low Score Alerts */}
-        <div className="stat-card">
+        <div className="stat-card alert-card">
           <div className="stat-card-top">
             <span className="stat-title">
               Low Score Alerts
             </span>
-
             <span className="stat-icon">
               ⚠️
             </span>
           </div>
 
           <div className="stat-value">
-            05
+            3
           </div>
 
           <div className="stat-description">
-            Classes need attention
+            Classes require administrative review
           </div>
         </div>
 
@@ -66,7 +64,6 @@ function AdminDashboard() {
             <span className="stat-title">
               Today's Campus Avg
             </span>
-
             <span className="stat-icon">
               ⭐
             </span>
@@ -91,14 +88,13 @@ function AdminDashboard() {
             <span className="stat-title">
               Feedback Completion
             </span>
-
             <span className="stat-icon">
               ✓
             </span>
           </div>
 
           <div className="stat-value">
-            87%
+            86%
           </div>
 
           <div className="stat-description">
@@ -114,10 +110,9 @@ function AdminDashboard() {
 
         <div className="overview-header">
           <div>
-            <h2>Today's Feedback Overview</h2>
-
+            <h2>Today's Feedback Summary</h2>
             <p>
-              Current feedback submission status
+              Real-time response breakdown across departments
             </p>
           </div>
         </div>
@@ -127,33 +122,30 @@ function AdminDashboard() {
 
           <div className="overview-item">
             <span className="overview-label">
-              Total Feedback
+              Total Eligible Students
             </span>
-
             <strong>
-              320
+              350
             </strong>
           </div>
 
 
           <div className="overview-item">
             <span className="overview-label">
-              Submitted
+              Feedbacks Submitted
             </span>
-
             <strong>
-              278
+              301
             </strong>
           </div>
 
 
           <div className="overview-item">
             <span className="overview-label">
-              Pending
+              Pending Submissions
             </span>
-
             <strong>
-              42
+              49
             </strong>
           </div>
 

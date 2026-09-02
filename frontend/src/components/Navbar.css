@@ -119,29 +119,34 @@
 .navbar-logout {
     border: none;
 
-    padding: 9px 16px;
+    padding: 9px 18px;
 
     border-radius: 8px;
 
-    background: rgba(17, 24, 39, 0.90);
+    background: linear-gradient(135deg, #ea580c 0%, #d97706 100%);
 
     color: #ffffff;
 
     font-size: 13px;
 
-    font-weight: 600;
+    font-weight: 700;
 
     cursor: pointer;
+
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
 
     transition: all 0.2s ease;
 }
 
 
 .navbar-logout:hover {
-    background: rgba(17, 24, 39, 1);
+    background: linear-gradient(135deg, #c2410c 0%, #b45309 100%);
 
     transform: translateY(-1px);
+
+    box-shadow: 0 6px 16px rgba(234, 88, 12, 0.35);
 }
+
 
 
 /* ========================================

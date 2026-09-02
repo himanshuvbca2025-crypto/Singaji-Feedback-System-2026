@@ -17,6 +17,7 @@ import FacultyDashboard from "../pages/FacultyDashboard.jsx";
 import AdminDashboard from "../pages/AdminDashboard.jsx";
 import ManageStudents from "../pages/ManageStudents.jsx";
 import ManageFaculty from "../pages/ManageFaculty.jsx";
+import FacultyHistory from "../pages/FacultyHistory.jsx";
 import ManageQuestions from "../pages/ManageQuestions.jsx";
 import Reports from "../pages/Reports.jsx";
 import ManageCourses from "../pages/ManageCourses.jsx";
@@ -118,6 +119,11 @@ function AppRoutes() {
             element={<ManageFaculty />}
           />
 
+          <Route
+            path="faculty/history/:facultyId"
+            element={<FacultyHistory />}
+          />
+
 
           {/* Questions */}
 
@@ -151,6 +157,7 @@ function AppRoutes() {
           />
 
         </Route>
+
 
 
         {/* =========================

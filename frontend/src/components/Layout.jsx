@@ -1,28 +1,33 @@
-import { Outlet } from "react-router-dom";
-
-import Navbar from "./Navbar";
-import Sidebar from "./Sidebar";
-
+import { Outlet, Navigate } from "react-router-dom";
+import Navbar from "../components/Navbar.jsx";
+import Sidebar from "../components/Sidebar.jsx";
+import useAuth from "../hooks/useAuth.js";
 import "./Layout.css";
 
 function Layout() {
-    return (
-        <div className="app-layout">
+  const { isAuthenticated } = useAuth();
 
-            <Navbar />
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
-            <div className="app-body">
+  return (
+    <div className="app-layout">
 
-                <Sidebar />
+      <Navbar />
 
-                <main className="main-content">
-                    <Outlet />
-                </main>
+      <div className="app-body">
 
-            </div>
+        <Sidebar />
 
-        </div>
-    );
+        <main className="main-content">
+          <Outlet />
+        </main>
+
+      </div>
+
+    </div>
+  );
 }
 
 export default Layout;

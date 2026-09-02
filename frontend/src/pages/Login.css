@@ -184,7 +184,7 @@
 
 
 .login-subtitle {
-    margin: 7px 0 25px;
+    margin: 7px 0 15px;
 
     text-align: center;
 
@@ -192,6 +192,45 @@
 
     color: rgba(255, 255, 255, 0.8);
 }
+
+
+/* DEMO HINTS CHIPS */
+
+.demo-credentials-hints {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.demo-chip {
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+    transition: all 0.2s ease;
+}
+
+.demo-chip:hover {
+    background: rgba(255, 255, 255, 0.35);
+    border-color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.demo-chip.faculty-chip {
+    background: rgba(234, 88, 12, 0.4);
+    border-color: rgba(234, 88, 12, 0.6);
+}
+
+.demo-chip.faculty-chip:hover {
+    background: rgba(234, 88, 12, 0.6);
+}
+
 
 
 /* ========================================
@@ -266,15 +305,17 @@
 
     border-radius: 9px;
 
-    background: orange;
+    background: linear-gradient(135deg, #ea580c 0%, #d97706 100%);
 
-    color: #111827;
+    color: #ffffff;
 
     font-size: 15px;
 
     font-weight: 700;
 
     cursor: pointer;
+
+    box-shadow: 0 4px 15px rgba(234, 88, 12, 0.4);
 
     transition: 0.2s ease;
 }
@@ -283,9 +324,12 @@
 .login-button:hover {
     transform: translateY(-2px);
 
+    background: linear-gradient(135deg, #c2410c 0%, #b45309 100%);
+
     box-shadow:
-        0 8px 20px rgba(0, 0, 0, 0.2);
+        0 8px 20px rgba(234, 88, 12, 0.5);
 }
+
 
 
 /* ========================================
