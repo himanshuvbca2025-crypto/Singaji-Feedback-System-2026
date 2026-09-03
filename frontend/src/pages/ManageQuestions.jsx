@@ -52,6 +52,7 @@ function ManageQuestions() {
   // Modal state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const [newQuestion, setNewQuestion] = useState({
     text: "",
@@ -95,13 +96,19 @@ function ManageQuestions() {
   };
 
   // Delete question handler
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this question?")) {
-      const updated = questions.filter((q) => q.id !== id);
-      // Re-number
-      const renumbered = updated.map((q, idx) => ({ ...q, number: idx + 1 }));
-      setQuestions(renumbered);
-    }
+  const handleOpenDelete = (q) => {
+    setEditingQuestion(q);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!editingQuestion) return;
+    const updated = questions.filter((q) => q.id !== editingQuestion.id);
+    // Re-number
+    const renumbered = updated.map((q, idx) => ({ ...q, number: idx + 1 }));
+    setQuestions(renumbered);
+    setIsDeleteModalOpen(false);
+    setEditingQuestion(null);
   };
 
   return (
@@ -118,34 +125,38 @@ function ManageQuestions() {
       </div>
 
       <div className="questions-list">
-        {questions.map((q) => (
-          <div key={q.id} className="question-card">
-            <div className="q-number-badge">Q{q.number}</div>
+        {questions.length > 0 ? (
+          questions.map((q) => (
+            <div key={q.id} className="question-card">
+              <div className="q-number-badge">Q{q.number}</div>
 
-            <div className="q-content">
-              <h3>{q.text}</h3>
-              <div className="q-meta">
-                <span className="q-category-tag">{q.category}</span>
-                <span
-                  className={`q-status-tag ${
-                    q.status === "Active" ? "active" : "inactive"
-                  }`}
-                >
-                  {q.status}
-                </span>
+              <div className="q-content">
+                <h3>{q.text}</h3>
+                <div className="q-meta">
+                  <span className="q-category-tag">{q.category}</span>
+                  <span
+                    className={`q-status-tag ${
+                      q.status === "Active" ? "active" : "inactive"
+                    }`}
+                  >
+                    {q.status}
+                  </span>
+                </div>
+              </div>
+
+              <div className="q-actions">
+                <button className="btn-edit" onClick={() => handleOpenEdit(q)}>
+                  Edit
+                </button>
+                <button className="btn-delete" onClick={() => handleOpenDelete(q)}>
+                  Delete
+                </button>
               </div>
             </div>
-
-            <div className="q-actions">
-              <button className="btn-edit" onClick={() => handleOpenEdit(q)}>
-                Edit
-              </button>
-              <button className="btn-delete" onClick={() => handleDelete(q.id)}>
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <div className="no-data-box">No feedback questions available. Add a question to get started.</div>
+        )}
       </div>
 
       {/* ADD QUESTION MODAL */}
@@ -286,6 +297,39 @@ function ManageQuestions() {
           </form>
         )}
       </Modal>
+
+      {/* DELETE CONFIRMATION MODAL */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        title="Delete Question"
+      >
+        <div className="confirm-delete-body">
+          <span className="confirm-icon">🗑️</span>
+          <p>
+            Are you sure you want to delete Question {editingQuestion?.number}?
+            <br />
+            This action cannot be undone.
+          </p>
+        </div>
+        <div className="modal-actions">
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => setIsDeleteModalOpen(false)}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn-danger"
+            onClick={handleConfirmDelete}
+          >
+            Delete
+          </button>
+        </div>
+      </Modal>
+
     </div>
   );
 }

@@ -9,28 +9,22 @@ const recentFeedback = [
   {
     id: 1,
     student: "ITEG-2A",
-    subject: "Programming in C++ & Java",
     faculty: "Dr. Rahul Sharma",
     rating: 4.8,
-    comment: "Excellent teaching style with great practical examples.",
     date: "Today, 11:30 AM",
   },
   {
     id: 2,
     student: "B.Tech-3A",
-    subject: "Computer Networks & Security",
     faculty: "Dr. S.K. Mehta",
     rating: 4.6,
-    comment: "Very knowledgeable. Concepts explained clearly.",
     date: "Today, 10:15 AM",
   },
   {
     id: 3,
     student: "ITEG-1B",
-    subject: "Web Development & Frameworks",
     faculty: "Dr. Amit Singh",
     rating: 4.7,
-    comment: "Loved the hands-on sessions. Very interactive.",
     date: "Today, 09:45 AM",
   },
 ];
@@ -38,29 +32,23 @@ const recentFeedback = [
 const lowScoreFeedback = [
   {
     id: 1,
-    course: "Thermodynamics",
     faculty: "Prof. Raj Kumar",
     department: "MEG",
     rating: 3.2,
-    comment: "Coverage is too fast, difficult to follow.",
     date: "Today, 12:00 PM",
   },
   {
     id: 2,
-    course: "Applied Mathematics",
     faculty: "Prof. Vikash Meena",
     department: "BEG",
     rating: 3.4,
-    comment: "Needs more numerical practice during lectures.",
     date: "Today, 09:00 AM",
   },
   {
     id: 3,
-    course: "Engineering Physics",
     faculty: "Dr. Mohit Jain",
     department: "BEG",
     rating: 3.1,
-    comment: "Lab sessions are not well organized.",
     date: "Yesterday",
   },
 ];
@@ -175,7 +163,7 @@ function AdminDashboard() {
                   </div>
                 </div>
                 <p className="feedback-subject">{fb.subject}</p>
-                <p className="feedback-comment">"{fb.comment}"</p>
+
                 <StarRating value={fb.rating} />
                 <p className="feedback-date">{fb.date}</p>
               </div>
@@ -204,7 +192,7 @@ function AdminDashboard() {
                   </div>
                 </div>
                 <p className="feedback-subject">{fb.course}</p>
-                <p className="feedback-comment">"{fb.comment}"</p>
+
                 <div className="alert-footer">
                   <span className="feedback-date">{fb.date}</span>
                   <button className="review-btn">Review</button>

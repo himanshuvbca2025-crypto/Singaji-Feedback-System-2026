@@ -60,6 +60,7 @@ function ManageLectures() {
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const [newLecture, setNewLecture] = useState({
     subject: "",
@@ -113,10 +114,16 @@ function ManageLectures() {
   };
 
   // Delete lecture
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to cancel/delete this lecture?")) {
-      setLectures(lectures.filter((l) => l.id !== id));
-    }
+  const handleOpenDelete = (lec) => {
+    setActiveLecture(lec);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!activeLecture) return;
+    setLectures(lectures.filter((l) => l.id !== activeLecture.id));
+    setIsDeleteModalOpen(false);
+    setActiveLecture(null);
   };
 
   return (
@@ -133,44 +140,48 @@ function ManageLectures() {
       </div>
 
       <div className="lectures-list">
-        {lectures.map((lec) => (
-          <div key={lec.id} className="lecture-row-card">
-            <div className="lecture-main-info">
-              <div className="lecture-time-badge">
-                <span>📅 {lec.date}</span>
-                <strong>⏰ {lec.time}</strong>
+        {lectures.length > 0 ? (
+          lectures.map((lec) => (
+            <div key={lec.id} className="lecture-row-card">
+              <div className="lecture-main-info">
+                <div className="lecture-time-badge">
+                  <span>📅 {lec.date}</span>
+                  <strong>⏰ {lec.time}</strong>
+                </div>
+
+                <div className="lecture-details">
+                  <h3>{lec.subject}</h3>
+                  <p>
+                    👨‍🏫 <strong>{lec.faculty}</strong> • 🏛 {lec.department} Department
+                  </p>
+                  <span className="room-tag">📍 Room / Venue: {lec.room}</span>
+                </div>
               </div>
 
-              <div className="lecture-details">
-                <h3>{lec.subject}</h3>
-                <p>
-                  👨‍🏫 <strong>{lec.faculty}</strong> • 🏛 {lec.department} Department
-                </p>
-                <span className="room-tag">📍 Room / Venue: {lec.room}</span>
-              </div>
-            </div>
-
-            <div className="lecture-status-actions">
-              <span
-                className={`status-badge ${lec.status.toLowerCase().replace(" ", "-")}`}
-              >
-                {lec.status}
-              </span>
-
-              <div className="lecture-buttons">
-                <button className="btn-edit" onClick={() => handleOpenEdit(lec)}>
-                  Edit
-                </button>
-                <button
-                  className="btn-delete"
-                  onClick={() => handleDelete(lec.id)}
+              <div className="lecture-status-actions">
+                <span
+                  className={`status-badge ${lec.status.toLowerCase().replace(" ", "-")}`}
                 >
-                  Delete
-                </button>
+                  {lec.status}
+                </span>
+
+                <div className="lecture-buttons">
+                  <button className="btn-edit" onClick={() => handleOpenEdit(lec)}>
+                    Edit
+                  </button>
+                  <button
+                    className="btn-delete"
+                    onClick={() => handleOpenDelete(lec)}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <div className="no-data-box">No lectures scheduled. Add one to get started.</div>
+        )}
       </div>
 
       {/* ADD LECTURE MODAL */}
@@ -402,6 +413,40 @@ function ManageLectures() {
           </form>
         )}
       </Modal>
+      
+      {/* DELETE CONFIRMATION MODAL */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        title="Delete Lecture"
+      >
+        <div className="confirm-delete-body">
+          <span className="confirm-icon">🗑️</span>
+          <p>
+            Are you sure you want to cancel and delete the lecture{" "}
+            <strong>{activeLecture?.subject}</strong>?
+            <br />
+            This action cannot be undone.
+          </p>
+        </div>
+        <div className="modal-actions">
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => setIsDeleteModalOpen(false)}
+          >
+            Keep Lecture
+          </button>
+          <button
+            type="button"
+            className="btn-danger"
+            onClick={handleConfirmDelete}
+          >
+            Yes, Delete
+          </button>
+        </div>
+      </Modal>
+
     </div>
   );
 }

@@ -56,6 +56,7 @@ function ManageCourses() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const [newCourse, setNewCourse] = useState({
     name: "",
@@ -113,10 +114,16 @@ function ManageCourses() {
   };
 
   // Delete course
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to remove this course?")) {
-      setCourses(courses.filter((c) => c.id !== id));
-    }
+  const handleOpenDelete = (course) => {
+    setActiveCourse(course);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!activeCourse) return;
+    setCourses(courses.filter((c) => c.id !== activeCourse.id));
+    setIsDeleteModalOpen(false);
+    setActiveCourse(null);
   };
 
   return (
@@ -133,50 +140,54 @@ function ManageCourses() {
       </div>
 
       <div className="courses-grid">
-        {courses.map((course) => (
-          <div key={course.id} className="course-card">
-            <div className="course-card-top">
-              <span className="course-code-badge">{course.code}</span>
-              <span className="course-dept-badge">{course.department}</span>
-            </div>
+        {courses.length > 0 ? (
+          courses.map((course) => (
+            <div key={course.id} className="course-card">
+              <div className="course-card-top">
+                <span className="course-code-badge">{course.code}</span>
+                <span className="course-dept-badge">{course.department}</span>
+              </div>
 
-            <h2>{course.name}</h2>
+              <h2>{course.name}</h2>
 
-            <div className="course-details">
-              <p>
-                <strong>Semester:</strong> {course.semester}
-              </p>
-              <p>
-                <strong>Faculty:</strong> {course.faculty}
-              </p>
-              <p>
-                <strong>Status:</strong>{" "}
-                <span className="status-active">{course.status}</span>
-              </p>
-            </div>
+              <div className="course-details">
+                <p>
+                  <strong>Semester:</strong> {course.semester}
+                </p>
+                <p>
+                  <strong>Faculty:</strong> {course.faculty}
+                </p>
+                <p>
+                  <strong>Status:</strong>{" "}
+                  <span className="status-active">{course.status}</span>
+                </p>
+              </div>
 
-            <div className="course-actions">
-              <button
-                className="btn-view"
-                onClick={() => handleOpenView(course)}
-              >
-                View
-              </button>
-              <button
-                className="btn-edit"
-                onClick={() => handleOpenEdit(course)}
-              >
-                Edit
-              </button>
-              <button
-                className="btn-delete"
-                onClick={() => handleDelete(course.id)}
-              >
-                Delete
-              </button>
+              <div className="course-actions">
+                <button
+                  className="btn-view"
+                  onClick={() => handleOpenView(course)}
+                >
+                  View
+                </button>
+                <button
+                  className="btn-edit"
+                  onClick={() => handleOpenEdit(course)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="btn-delete"
+                  onClick={() => handleOpenDelete(course)}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <div className="no-data-box">No courses available. Add a course to get started.</div>
+        )}
       </div>
 
       {/* ADD COURSE MODAL */}
@@ -392,6 +403,40 @@ function ManageCourses() {
           </div>
         )}
       </Modal>
+
+      {/* DELETE CONFIRMATION MODAL */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        title="Delete Course"
+      >
+        <div className="confirm-delete-body">
+          <span className="confirm-icon">🗑️</span>
+          <p>
+            Are you sure you want to delete{" "}
+            <strong>{activeCourse?.name}</strong>?
+            <br />
+            This action cannot be undone.
+          </p>
+        </div>
+        <div className="modal-actions">
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => setIsDeleteModalOpen(false)}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn-danger"
+            onClick={handleConfirmDelete}
+          >
+            Delete
+          </button>
+        </div>
+      </Modal>
+
     </div>
   );
 }

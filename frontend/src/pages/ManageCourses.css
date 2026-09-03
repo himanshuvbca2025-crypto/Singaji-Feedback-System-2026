@@ -72,13 +72,8 @@
 }
 
 .course-card:hover {
-    /* HOVER GLASS TRANSPARENT BLUR */
-    background: rgba(255, 255, 255, 0.22);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-color: rgba(255, 255, 255, 0.5);
-
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    border-color: #d1d5db;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
     transform: translateY(-4px);
 }
 

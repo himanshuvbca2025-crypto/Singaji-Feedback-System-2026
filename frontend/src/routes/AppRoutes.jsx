@@ -13,11 +13,12 @@ import FeedbackForm from "../pages/FeedbackForm.jsx";
 import FeedbackHistory from "../pages/FeedbackHistory.jsx";
 
 import FacultyDashboard from "../pages/FacultyDashboard.jsx";
+import FacultySchedule from "../pages/FacultySchedule.jsx";
+import FacultyHistory from "../pages/FacultyHistory.jsx";
 
 import AdminDashboard from "../pages/AdminDashboard.jsx";
 import ManageStudents from "../pages/ManageStudents.jsx";
 import ManageFaculty from "../pages/ManageFaculty.jsx";
-import FacultyHistory from "../pages/FacultyHistory.jsx";
 import ManageQuestions from "../pages/ManageQuestions.jsx";
 import Reports from "../pages/Reports.jsx";
 import ManageCourses from "../pages/ManageCourses.jsx";
@@ -25,6 +26,7 @@ import ManageLectures from "../pages/ManageLectures.jsx";
 import AdminFeedback from "../pages/AdminFeedback.jsx";
 
 import Layout from "../components/Layout.jsx";
+import FacultyLayout from "../components/FacultyLayout.jsx";
 
 
 function AppRoutes() {
@@ -83,13 +85,33 @@ function AppRoutes() {
         ========================== */}
 
         <Route
-          path="/faculty/dashboard"
-          element={<FacultyDashboard />}
-        />
+          path="/faculty"
+          element={<FacultyLayout />}
+        >
+
+          {/* Faculty Dashboard */}
+          <Route
+            path="dashboard"
+            element={<FacultyDashboard />}
+          />
+
+          {/* Faculty Schedule */}
+          <Route
+            path="schedule"
+            element={<FacultySchedule />}
+          />
+
+          {/* Faculty Feedback History */}
+          <Route
+            path="history"
+            element={<FacultyHistory />}
+          />
+
+        </Route>
 
 
         {/* =========================
-            ADMIN LAYOUT
+            ADMIN
         ========================== */}
 
         <Route
@@ -168,7 +190,6 @@ function AppRoutes() {
         </Route>
 
 
-
         {/* =========================
             UNKNOWN ROUTE
         ========================== */}
@@ -184,4 +205,4 @@ function AppRoutes() {
   );
 }
 
-export default AppRoutes;
+export default AppRoutes; 
