@@ -1,6 +1,5 @@
 import { useState } from "react";
 import "./AdminFeedback.css";
-
 /* ============================================================
    MOCK FEEDBACK DATA
    Replace with real API calls when backend is available
@@ -13,7 +12,8 @@ const allFeedback = [
     faculty: "Dr. Rahul Sharma",
     department: "ITEG",
     rating: 4.8,
-    comment: "Excellent teaching style. Concepts are very clearly explained with practical examples.",
+    comment:
+      "Excellent teaching style. Concepts are very clearly explained with practical examples.",
     date: "2026-09-02",
     status: "Reviewed",
   },
@@ -23,7 +23,8 @@ const allFeedback = [
     faculty: "Prof. Neha Jain",
     department: "ITEG",
     rating: 4.4,
-    comment: "Good coverage of topics. Lab sessions could be improved.",
+    comment:
+      "Good coverage of topics. Lab sessions could be improved.",
     date: "2026-09-02",
     status: "Pending",
   },
@@ -33,7 +34,8 @@ const allFeedback = [
     faculty: "Prof. Raj Kumar",
     department: "MEG",
     rating: 3.2,
-    comment: "Speed of coverage is too fast. Practical availability is lacking.",
+    comment:
+      "Speed of coverage is too fast. Practical availability is lacking.",
     date: "2026-09-02",
     status: "Needs Review",
   },
@@ -43,7 +45,8 @@ const allFeedback = [
     faculty: "Dr. S.K. Mehta",
     department: "B.Tech",
     rating: 4.6,
-    comment: "Very detailed explanations. Highly knowledgeable faculty.",
+    comment:
+      "Very detailed explanations. Highly knowledgeable faculty.",
     date: "2026-09-01",
     status: "Reviewed",
   },
@@ -53,7 +56,8 @@ const allFeedback = [
     faculty: "Prof. Vikash Meena",
     department: "BEG",
     rating: 3.4,
-    comment: "Need more numerical practice during class sessions.",
+    comment:
+      "Need more numerical practice during class sessions.",
     date: "2026-09-01",
     status: "Needs Review",
   },
@@ -63,7 +67,8 @@ const allFeedback = [
     faculty: "Dr. Amit Singh",
     department: "ITEG",
     rating: 4.7,
-    comment: "Very interactive and engaging. Loved the hands-on approach.",
+    comment:
+      "Very interactive and engaging. Loved the hands-on approach.",
     date: "2026-09-01",
     status: "Reviewed",
   },
@@ -73,7 +78,8 @@ const allFeedback = [
     faculty: "Dr. Priya Verma",
     department: "MEG",
     rating: 4.2,
-    comment: "Good conceptual clarity. Could include more real-world examples.",
+    comment:
+      "Good conceptual clarity. Could include more real-world examples.",
     date: "2026-08-31",
     status: "Pending",
   },
@@ -83,7 +89,8 @@ const allFeedback = [
     faculty: "Dr. Mohit Jain",
     department: "BEG",
     rating: 3.1,
-    comment: "Lab sessions are not well organized. Theory is okay.",
+    comment:
+      "Lab sessions are not well organized. Theory is okay.",
     date: "2026-08-31",
     status: "Needs Review",
   },
@@ -95,7 +102,9 @@ function StarDisplay({ value }) {
       {[1, 2, 3, 4, 5].map((i) => (
         <span
           key={i}
-          className={i <= Math.round(value) ? "star-on" : "star-off"}
+          className={
+            i <= Math.round(value) ? "star-on" : "star-off"
+          }
         >
           ★
         </span>
@@ -110,15 +119,26 @@ function AdminFeedback() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const filtered = allFeedback.filter((fb) => {
-    const matchDept = deptFilter === "All" || fb.department === deptFilter;
-    const matchStatus = statusFilter === "All" || fb.status === statusFilter;
+    const matchDept =
+      deptFilter === "All" || fb.department === deptFilter;
+
+    const matchStatus =
+      statusFilter === "All" || fb.status === statusFilter;
+
     const matchSearch =
-      fb.faculty.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      fb.course.toLowerCase().includes(searchTerm.toLowerCase());
+      fb.faculty
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      fb.course
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
     return matchDept && matchStatus && matchSearch;
   });
 
-  const lowScoreCount = allFeedback.filter((fb) => fb.rating < 3.5).length;
+  const lowScoreCount = allFeedback.filter(
+    (fb) => fb.rating < 3.5
+  ).length;
 
   return (
     <div className="admin-feedback-page">
@@ -127,42 +147,77 @@ function AdminFeedback() {
       <div className="af-header">
         <div>
           <h1>Feedback Management</h1>
-          <p>View and manage all student feedback submissions across departments.</p>
+          <p>
+            View and manage all student feedback submissions
+            across departments.
+          </p>
         </div>
 
         {lowScoreCount > 0 && (
           <div className="af-alert-pill">
-            ⚠️ {lowScoreCount} low score alert{lowScoreCount > 1 ? "s" : ""}
+            ⚠️ {lowScoreCount} low score alert
+            {lowScoreCount > 1 ? "s" : ""}
           </div>
         )}
       </div>
 
       {/* Summary Cards */}
       <div className="af-summary-grid">
+
         <div className="af-summary-card">
-          <span className="af-summary-label">Total Submissions</span>
-          <strong className="af-summary-value">{allFeedback.length}</strong>
-        </div>
-        <div className="af-summary-card">
-          <span className="af-summary-label">Campus Average</span>
+          <span className="af-summary-label">
+            Total Submissions
+          </span>
           <strong className="af-summary-value">
-            ⭐ {(allFeedback.reduce((s, f) => s + f.rating, 0) / allFeedback.length).toFixed(1)}
+            {allFeedback.length}
           </strong>
         </div>
+
         <div className="af-summary-card">
-          <span className="af-summary-label">Needs Review</span>
-          <strong className="af-summary-value af-value-alert">{lowScoreCount}</strong>
-        </div>
-        <div className="af-summary-card">
-          <span className="af-summary-label">Reviewed</span>
+          <span className="af-summary-label">
+            Campus Average
+          </span>
+
           <strong className="af-summary-value">
-            {allFeedback.filter((f) => f.status === "Reviewed").length}
+            ⭐{" "}
+            {(
+              allFeedback.reduce(
+                (s, f) => s + f.rating,
+                0
+              ) / allFeedback.length
+            ).toFixed(1)}
           </strong>
         </div>
+
+        <div className="af-summary-card">
+          <span className="af-summary-label">
+            Needs Review
+          </span>
+
+          <strong className="af-summary-value af-value-alert">
+            {lowScoreCount}
+          </strong>
+        </div>
+
+        <div className="af-summary-card">
+          <span className="af-summary-label">
+            Reviewed
+          </span>
+
+          <strong className="af-summary-value">
+            {
+              allFeedback.filter(
+                (f) => f.status === "Reviewed"
+              ).length
+            }
+          </strong>
+        </div>
+
       </div>
 
       {/* Filters */}
       <div className="af-filters">
+
         <input
           type="text"
           className="af-search"
@@ -174,7 +229,9 @@ function AdminFeedback() {
         <select
           className="af-select"
           value={deptFilter}
-          onChange={(e) => setDeptFilter(e.target.value)}
+          onChange={(e) =>
+            setDeptFilter(e.target.value)
+          }
         >
           <option value="All">All Departments</option>
           <option value="ITEG">ITEG</option>
@@ -186,18 +243,24 @@ function AdminFeedback() {
         <select
           className="af-select"
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) =>
+            setStatusFilter(e.target.value)
+          }
         >
           <option value="All">All Status</option>
           <option value="Reviewed">Reviewed</option>
           <option value="Pending">Pending</option>
-          <option value="Needs Review">Needs Review</option>
+          <option value="Needs Review">
+            Needs Review
+          </option>
         </select>
+
       </div>
 
       {/* Table */}
       <div className="af-table-wrap">
         <table className="af-table">
+
           <thead>
             <tr>
               <th>Course / Faculty</th>
@@ -208,45 +271,82 @@ function AdminFeedback() {
               <th>Status</th>
             </tr>
           </thead>
+
           <tbody>
             {filtered.length > 0 ? (
               filtered.map((fb) => (
                 <tr
                   key={fb.id}
-                  className={fb.rating < 3.5 ? "af-row-alert" : ""}
+                  className={
+                    fb.rating < 3.5
+                      ? "af-row-alert"
+                      : ""
+                  }
                 >
+
                   <td>
-                    <div className="af-course-name">{fb.course}</div>
-                    <div className="af-faculty-name">{fb.faculty}</div>
+                    <div className="af-course-name">
+                      {fb.course}
+                    </div>
+
+                    <div className="af-faculty-name">
+                      {fb.faculty}
+                    </div>
                   </td>
+
                   <td>
-                    <span className="af-dept-tag">{fb.department}</span>
+                    <span className="af-dept-tag">
+                      {fb.department}
+                    </span>
                   </td>
+
                   <td>
-                    <div className="af-rating-value">{fb.rating}</div>
-                    <StarDisplay value={fb.rating} />
+                    <div className="af-rating-value">
+                      {fb.rating}
+                    </div>
+
+                    <StarDisplay
+                      value={fb.rating}
+                    />
                   </td>
+
                   <td>
-                    <p className="af-comment">"{fb.comment}"</p>
+                    <p className="af-comment">
+                      "{fb.comment}"
+                    </p>
                   </td>
+
                   <td>
-                    <span className="af-date">{fb.date}</span>
+                    <span className="af-date">
+                      {fb.date}
+                    </span>
                   </td>
+
                   <td>
-                    <span className={`af-status-badge af-status-${fb.status.toLowerCase().replace(" ", "-")}`}>
+                    <span
+                      className={`af-status-badge af-status-${fb.status
+                        .toLowerCase()
+                        .replace(" ", "-")}`}
+                    >
                       {fb.status}
                     </span>
                   </td>
+
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="af-empty">
-                  No feedback entries match your filters.
+                <td
+                  colSpan="6"
+                  className="af-empty"
+                >
+                  No feedback entries match your
+                  filters.
                 </td>
               </tr>
             )}
           </tbody>
+
         </table>
       </div>
 

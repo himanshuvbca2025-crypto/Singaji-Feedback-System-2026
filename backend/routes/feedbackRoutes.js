@@ -1,5 +1,5 @@
 const express = require('express');
-const router = express.Router();
+
 const {
   submitFeedback,
   getFeedbackHistory,
@@ -7,16 +7,10 @@ const {
   getFeedbackByFaculty,
 } = require('../controllers/feedbackController');
 
-// POST   /api/feedback
-router.post('/', submitFeedback);
+const router = express.Router();
 
-// GET    /api/feedback
-router.get('/', getAllFeedback);
+router.post('/submit', submitFeedback);
 
-// GET    /api/feedback/history
-router.get('/history', getFeedbackHistory);
-
-// GET    /api/feedback/faculty/:facultyId
-router.get('/faculty/:facultyId', getFeedbackByFaculty);
+router.get('/all', getAllFeedback);
 
 module.exports = router;

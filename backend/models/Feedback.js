@@ -1,57 +1,88 @@
 const mongoose = require('mongoose');
 
-/**
- * Feedback Model
- * Stores a student's feedback submission for a course/faculty.
- * TODO: Implement full schema when business logic is defined.
- */
 const feedbackSchema = new mongoose.Schema(
   {
-    student: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Student',
-      required: true,
-    },
-    course: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Course',
-      required: true,
-    },
-    faculty: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Faculty',
-      required: true,
-    },
-    responses: [
-      {
-        question: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Question',
-        },
-        rating: {
-          type: Number,
-          min: 1,
-          max: 5,
-        },
-      },
-    ],
-    averageRating: {
-      type: Number,
-      default: 0,
-    },
-    comments: {
+    studentName: {
       type: String,
+      required: true,
       trim: true,
     },
-    semester: {
-      type: Number,
+
+    level: {
+      type: String,
+      required: true,
+      trim: true,
     },
-    submittedAt: {
+
+    section: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    facultyName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    subject: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    metrics: {
+      Explanation: {
+        type: Number,
+        required: true,
+        min: 1,
+        max: 5,
+      },
+
+      Punctuality: {
+        type: Number,
+        required: true,
+        min: 1,
+        max: 5,
+      },
+
+      Engagement: {
+        type: Number,
+        required: true,
+        min: 1,
+        max: 5,
+      },
+
+      Resolution: {
+        type: Number,
+        required: true,
+        min: 1,
+        max: 5,
+      },
+
+      Overall: {
+        type: Number,
+        required: true,
+        min: 1,
+        max: 5,
+      },
+    },
+
+    remarks: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+
+    timestamp: {
       type: Date,
       default: Date.now,
     },
   },
-  { timestamps: true }
+  {
+    collection: 'Feedbacks',
+  }
 );
 
 module.exports = mongoose.model('Feedback', feedbackSchema);

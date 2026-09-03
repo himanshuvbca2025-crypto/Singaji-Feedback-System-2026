@@ -1,45 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "../components/Modal.jsx";
 import "./ManageQuestions.css";
 
 function ManageQuestions() {
-  const [questions, setQuestions] = useState([
-    {
-      id: "1",
-      number: 1,
-      text: "How effectively does the faculty cover the course syllabus on schedule?",
-      category: "Teaching",
-      status: "Active",
-    },
-    {
-      id: "2",
-      number: 2,
-      text: "Does the faculty communicate concepts clearly and encourage student queries?",
-      category: "Communication",
-      status: "Active",
-    },
-    {
-      id: "3",
-      number: 3,
-      text: "How well does the faculty demonstrate in-depth knowledge of the subject matter?",
-      category: "Subject Knowledge",
-      status: "Active",
-    },
-    {
-      id: "4",
-      number: 4,
-      text: "Is classroom decorum and discipline maintained during lectures?",
-      category: "Classroom Management",
-      status: "Active",
-    },
-    {
-      id: "5",
-      number: 5,
-      text: "Overall rating for the faculty member's teaching quality.",
-      category: "Overall Experience",
-      status: "Active",
-    },
-  ]);
+  const [questions, setQuestions] = useState([]);
 
   const categories = [
     "Teaching",
@@ -48,6 +12,34 @@ function ManageQuestions() {
     "Classroom Management",
     "Overall Experience",
   ];
+
+  useEffect(() => {
+  const fetchQuestions = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/questions"
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        setQuestions(
+          data.questions.map((q) => ({
+            id: q._id,
+            number: q.order,
+            text: q.text,
+            category: q.category,
+            status: q.isActive ? "Active" : "Inactive",
+          }))
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching questions:", error);
+    }
+  };
+
+  fetchQuestions();
+}, []);
 
   // Modal state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -63,37 +55,109 @@ function ManageQuestions() {
   const [editingQuestion, setEditingQuestion] = useState(null);
 
   // Add question handler
-  const handleAddQuestion = (e) => {
-    e.preventDefault();
-    if (!newQuestion.text.trim()) return;
+ const handleAddQuestion = async (e) => {
+  e.preventDefault();
 
-    const created = {
-      id: Date.now().toString(),
-      number: questions.length + 1,
-      ...newQuestion,
+  if (!newQuestion.text.trim()) return;
+
+  try {
+    const response = await fetch(
+      "http://localhost:5000/api/questions/create",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: newQuestion.text,
+          category: newQuestion.category,
+          status: newQuestion.status,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error(data.message);
+      return;
+    }
+
+    const createdQuestion = {
+      id: data.question._id,
+      number: data.question.order,
+      text: data.question.text,
+      category: data.question.category,
+      status: data.question.isActive ? "Active" : "Inactive",
     };
 
-    setQuestions([...questions, created]);
-    setNewQuestion({ text: "", category: "Teaching", status: "Active" });
-    setIsAddModalOpen(false);
-  };
+    setQuestions([...questions, createdQuestion]);
 
+    setNewQuestion({
+      text: "",
+      category: "Teaching",
+      status: "Active",
+    });
+
+    setIsAddModalOpen(false);
+  } catch (error) {
+    console.error("Error creating question:", error);
+  }
+};
   // Edit question handler
   const handleOpenEdit = (q) => {
-    setEditingQuestion({ ...q });
-    setIsEditModalOpen(true);
-  };
+  setEditingQuestion({ ...q });
+  setIsEditModalOpen(true);
+};
 
-  const handleSaveEdit = (e) => {
-    e.preventDefault();
-    if (!editingQuestion || !editingQuestion.text.trim()) return;
+ const handleSaveEdit = async (e) => {
+  e.preventDefault();
+
+  if (!editingQuestion || !editingQuestion.text.trim()) return;
+
+  try {
+    const response = await fetch(
+      `http://localhost:5000/api/questions/${editingQuestion.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: editingQuestion.text,
+          category: editingQuestion.category,
+          status: editingQuestion.status,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error(data.message);
+      return;
+    }
+
+    const updatedQuestion = {
+      id: data.question._id,
+      number: data.question.order,
+      text: data.question.text,
+      category: data.question.category,
+      status: data.question.isActive ? "Active" : "Inactive",
+    };
 
     setQuestions(
-      questions.map((q) => (q.id === editingQuestion.id ? editingQuestion : q))
+      questions.map((q) =>
+        q.id === editingQuestion.id ? updatedQuestion : q
+      )
     );
+
     setIsEditModalOpen(false);
     setEditingQuestion(null);
-  };
+  } catch (error) {
+    console.error("Error updating question:", error);
+  }
+};
 
   // Delete question handler
   const handleOpenDelete = (q) => {
@@ -110,6 +174,33 @@ function ManageQuestions() {
     setIsDeleteModalOpen(false);
     setEditingQuestion(null);
   };
+const handleDelete = async (id) => {
+  if (
+    window.confirm("Are you sure you want to delete this question?")
+  ) {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/questions/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error(data.message);
+        return;
+      }
+
+      setQuestions(
+        questions.filter((q) => q.id !== id)
+      );
+    } catch (error) {
+      console.error("Error deleting question:", error);
+    }
+  }
+};
 
   return (
     <div className="manage-questions-page">
@@ -157,6 +248,7 @@ function ManageQuestions() {
         ) : (
           <div className="no-data-box">No feedback questions available. Add a question to get started.</div>
         )}
+           
       </div>
 
       {/* ADD QUESTION MODAL */}

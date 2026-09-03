@@ -1,40 +1,65 @@
-/**
- * Auth Controller
- * Handles user registration and login.
- * TODO: Implement when backend authentication is ready.
- */
+const bcrypt = require('bcryptjs');
+const Admin = require('../models/admin');
 
-// @desc    Register a new user
-// @route   POST /api/auth/register
-// @access  Public
-const registerUser = async (req, res) => {
-  try {
-    res.status(501).json({ message: 'registerUser – not yet implemented' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+const adminLogin = async (req, res) => {
+    try {
+        const { gmail, password } = req.body;
+
+
+        if (!gmail || !password) {
+            return res.status(400).json({
+                success: false,
+                message: 'Gmail and password are required'
+            });
+        }
+
+        const admin = await Admin.findOne({ gmail });
+
+        console.log(admin);
+        
+
+        if (!admin) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid gmail or password'
+            });
+        }
+
+        const isPasswordMatch = await bcrypt.compare(
+            password,
+            admin.password
+        );
+
+        console.log(isPasswordMatch);
+        
+
+        if (!isPasswordMatch) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid gmail or password'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Admin login successful',
+            admin: {
+                id: admin._id,
+                username: admin.username,
+                gmail: admin.gmail
+            }
+        });
+
+    } catch (error) {
+        console.error('Admin login error:', error);
+
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
 };
 
-// @desc    Login user and return JWT
-// @route   POST /api/auth/login
-// @access  Public
-const loginUser = async (req, res) => {
-  try {
-    res.status(501).json({ message: 'loginUser – not yet implemented' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+module.exports = {
+    adminLogin
 };
-
-// @desc    Get current logged-in user profile
-// @route   GET /api/auth/me
-// @access  Private
-const getMe = async (req, res) => {
-  try {
-    res.status(501).json({ message: 'getMe – not yet implemented' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-module.exports = { registerUser, loginUser, getMe };

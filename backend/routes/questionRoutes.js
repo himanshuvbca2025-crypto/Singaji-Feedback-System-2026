@@ -1,5 +1,5 @@
 const express = require('express');
-const router = express.Router();
+
 const {
   getAllQuestions,
   createQuestion,
@@ -7,16 +7,14 @@ const {
   deleteQuestion,
 } = require('../controllers/questionController');
 
-// GET    /api/questions
+const router = express.Router();
+
 router.get('/', getAllQuestions);
 
-// POST   /api/questions
-router.post('/', createQuestion);
+router.post('/create', createQuestion);
 
-// PUT    /api/questions/:id
 router.put('/:id', updateQuestion);
 
-// DELETE /api/questions/:id
 router.delete('/:id', deleteQuestion);
 
 module.exports = router;

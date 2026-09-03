@@ -1,24 +1,34 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const connectDB = require('./config/db');
 
-// Load environment variables from .env
+
+const authRoutes = require('./routes/authRoutes');
+const feedbackRoutes = require('./routes/feedbackRoutes');
+const questionRoutes = require('./routes/questionRoutes');
+const reportRoutes = require('./routes/reportRoutes');
+
 dotenv.config();
 
 const app = express();
 
-// ─── Middleware ───────────────────────────────────────────────
 app.use(express.json());
 app.use(cors());
 
-// ─── Health Check Route ───────────────────────────────────────
-app.get('/', (req, res) => {
-  res.json({ message: 'Singaji Feedback System API is running.' });
-});
+connectDB();
 
-// ─── Server ───────────────────────────────────────────────────
+
+app.use('/api/auth', authRoutes);
+
+app.use('/api/feedback', feedbackRoutes);
+
+app.use('/api/questions', questionRoutes);
+
+app.use('/api/reports', reportRoutes);
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });

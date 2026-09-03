@@ -23,50 +23,47 @@ function Login() {
     }
   }, [isAuthenticated, user, navigate]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
 
-    const adminEmail = "admin@gmail.com";
-    const adminPassword = "admin123";
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const facultyEmail = "faculty@gmail.com";
-    const facultyAltEmail = "rahul@singaji.edu.in";
-    const facultyPassword = "faculty123";
-
-    if (email === adminEmail && password === adminPassword) {
-      setError("");
-
-      login({
-        email: adminEmail,
-        role: "Admin",
-        name: "Admin",
-      });
-
-      navigate("/admin/dashboard");
-    } else if (
-      (email === facultyEmail || email === facultyAltEmail) &&
-      password === facultyPassword
-    ) {
-      setError("");
-
-      login({
-        email: facultyAltEmail,
-        role: "Faculty",
-        name: "Dr. Rahul Sharma",
-        department: "ITEG",
-      });
-
-      navigate("/faculty/dashboard");
-    } else {
-      setError("Invalid email or password. Please try again.");
-    }
-  };
-
-  const handleFillDemoAdmin = () => {
-    setEmail("admin@gmail.com");
-    setPassword("admin123");
+  try {
     setError("");
-  };
+
+    const response = await fetch(
+      "http://localhost:5000/api/auth/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          gmail: email,
+          password: password,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setError(data.message || "Invalid email or password");
+      return;
+    }
+
+    // Login successful
+    login({
+      email: data.admin.gmail,
+      role: "Admin",
+      name: data.admin.username || "Admin",
+    });
+
+    navigate("/admin/dashboard");
+  } catch (error) {
+    console.error("Login error:", error);
+    setError("Unable to connect to server. Please try again.");
+  }
+};
 
   const handleFillDemoFaculty = () => {
     setEmail("faculty@gmail.com");
@@ -93,13 +90,6 @@ function Login() {
         </p>
 
         <div className="demo-credentials-hints">
-          <button
-            type="button"
-            className="demo-chip"
-            onClick={handleFillDemoAdmin}
-          >
-            Demo Admin
-          </button>
 
           <button
             type="button"
