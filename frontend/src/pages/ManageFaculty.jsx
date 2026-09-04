@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import itegImage from "../assets/iteg.png";
@@ -13,6 +13,13 @@ function ManageFaculty() {
   const navigate = useNavigate();
 
   const [selectedDepartment, setSelectedDepartment] = useState(null);
+
+  const [facultyData, setFacultyData] = useState({
+  ITEG: [],
+  MEG: [],
+  BEG: [],
+  "B.Tech": [],
+});
 
   // Departments
   const departments = [
@@ -38,106 +45,47 @@ function ManageFaculty() {
     },
   ];
 
-  // Faculty data by department
-  const [facultyData, setFacultyData] = useState({
-    ITEG: [
-      {
-        id: "1",
-        name: "Dr. Rahul Sharma",
-        email: "rahul.sharma@singaji.edu.in",
-        subject: "Programming in C++ & Java",
-      },
-      {
-        id: "2",
-        name: "Prof. Neha Jain",
-        email: "neha.jain@singaji.edu.in",
-        subject: "Database Management Systems",
-      },
-      {
-        id: "3",
-        name: "Dr. Amit Singh",
-        email: "amit.singh@singaji.edu.in",
-        subject: "Web Development & Frameworks",
-      },
-    ],
+  useEffect(() => {
+  const fetchFaculty = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/faculty"
+      );
 
-    MEG: [
-      {
-        id: "4",
-        name: "Dr. Priya Verma",
-        email: "priya.verma@singaji.edu.in",
-        subject: "Fluid Mechanics",
-      },
-      {
-        id: "5",
-        name: "Prof. Raj Kumar",
-        email: "raj.kumar@singaji.edu.in",
-        subject: "Thermodynamics",
-      },
-      {
-        id: "6",
-        name: "Dr. Anjali Patel",
-        email: "anjali.patel@singaji.edu.in",
-        subject: "Engineering Graphics",
-      },
-    ],
+      const data = await response.json();
 
-    BEG: [
-      {
-        id: "7",
-        name: "Dr. Vikash Meena",
-        email: "vikash.meena@singaji.edu.in",
-        subject: "Applied Mathematics",
-      },
-      {
-        id: "8",
-        name: "Prof. Pooja Sharma",
-        email: "pooja.sharma@singaji.edu.in",
-        subject: "Technical Communication",
-      },
-      {
-        id: "9",
-        name: "Dr. Mohit Jain",
-        email: "mohit.jain@singaji.edu.in",
-        subject: "Engineering Physics",
-      },
-    ],
+      if (!response.ok) {
+        console.error(data.message);
+        return;
+      }
 
-    "B.Tech": [
-      {
-        id: "10",
-        name: "Dr. S.K. Mehta",
-        email: "sk.mehta@singaji.edu.in",
-        subject: "Computer Networks & Security",
-      },
-      {
-        id: "11",
-        name: "Prof. Rohan Verma",
-        email: "rohan.verma@singaji.edu.in",
-        subject: "Data Structures & Algorithms",
-      },
-      {
-        id: "12",
-        name: "Dr. Sneha Gupta",
-        email: "sneha.gupta@singaji.edu.in",
-        subject: "Artificial Intelligence & ML",
-      },
-    ],
-  });
+      if (data.success) {
+        setFacultyData(data.sections);
+      }
+    } catch (error) {
+      console.error("Error fetching faculty:", error);
+    }
+  };
 
+  fetchFaculty();
+}, []);
+  
   // Modal States
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingFaculty, setEditingFaculty] = useState(null);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [newFaculty, setNewFaculty] = useState({
-    name: "",
-    email: "",
-    subject: "",
-  });
 
+  const [newFaculty, setNewFaculty] = useState({
+  name: "",
+  email: "",
+  subjects: [],
+});
+
+  const [subjectInput, setSubjectInput] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deletingFaculty, setDeletingFaculty] = useState(null);
+  const [editSubjectInput, setEditSubjectInput] = useState("");
 
   // Department select
   const handleDepartmentClick = (department) => {
@@ -156,45 +104,145 @@ function ManageFaculty() {
 
   // Open Edit Modal
   const handleOpenEdit = (faculty) => {
-    setEditingFaculty({ ...faculty });
-    setIsEditModalOpen(true);
-  };
+  setEditingFaculty({
+    id: faculty.id,
+    name: faculty.name,
+    email: faculty.email,
+    subjects: [...faculty.subjects],
+  });
+
+  setIsEditModalOpen(true);
+};
 
   // Save Edit Faculty
-  const handleSaveEdit = (e) => {
-    e.preventDefault();
-    if (!editingFaculty) return;
+ const handleSaveEdit = async (e) => {
+  e.preventDefault();
 
-    setFacultyData((prevData) => ({
-      ...prevData,
-      [selectedDepartment]: prevData[selectedDepartment].map((item) =>
-        item.id === editingFaculty.id ? editingFaculty : item
-      ),
-    }));
+  if (!editingFaculty) return;
 
-    setIsEditModalOpen(false);
-    setEditingFaculty(null);
-  };
+  if (editingFaculty.subjects.length === 0) {
+  alert("At least one subject is required");
+  return;
+}
+
+  try {
+    const response = await fetch(
+      `http://localhost:5000/api/faculty/${editingFaculty.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: editingFaculty.name,
+          gmail: editingFaculty.email,
+          subjects: editingFaculty.subjects,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "Failed to update faculty");
+      return;
+    }
+
+    if (data.success) {
+      setFacultyData((prevData) => ({
+        ...prevData,
+        [selectedDepartment]: prevData[selectedDepartment].map((item) =>
+          item.facultyId === data.faculty.facultyId
+            ? data.faculty
+            : item
+        ),
+      }));
+
+      setIsEditModalOpen(false);
+      setEditingFaculty(null);
+
+    }
+  } catch (error) {
+    console.error("Error updating faculty:", error);
+    alert("Server error. Please check backend.");
+  }
+};
 
   // Save New Faculty
-  const handleSaveNew = (e) => {
-    e.preventDefault();
-    if (!newFaculty.name || !newFaculty.email || !newFaculty.subject) return;
+ // Save New Faculty
+const handleSaveNew = async (e) => {
+  e.preventDefault();
 
-    const created = {
-      id: Date.now().toString(),
-      ...newFaculty,
-    };
+  if (!newFaculty.name.trim()) {
+    alert("Please enter faculty name");
+    return;
+  }
 
-    setFacultyData((prevData) => ({
-      ...prevData,
-      [selectedDepartment]: [...(prevData[selectedDepartment] || []), created],
-    }));
+  if (!newFaculty.email.trim()) {
+    alert("Please enter faculty email");
+    return;
+  }
 
-    setNewFaculty({ name: "", email: "", subject: "" });
-    setIsAddModalOpen(false);
-  };
+  // Input me likha hua subject bhi subjects array me add karo
+  let finalSubjects = [...newFaculty.subjects];
 
+  if (subjectInput.trim()) {
+    finalSubjects.push(subjectInput.trim());
+  }
+
+  if (finalSubjects.length === 0) {
+    alert("Please enter at least one subject");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      "http://localhost:5000/api/faculty/create",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newFaculty.name.trim(),
+          gmail: newFaculty.email.trim(),
+          subjects: finalSubjects,
+          section: selectedDepartment,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "Failed to add faculty");
+      return;
+    }
+
+    if (data.success) {
+      setFacultyData((prevData) => ({
+        ...prevData,
+        [selectedDepartment]: [
+          ...(prevData[selectedDepartment] || []),
+          data.faculty,
+        ],
+      }));
+
+      setNewFaculty({
+        name: "",
+        email: "",
+        subjects: [],
+      });
+
+      setSubjectInput("");
+      setIsAddModalOpen(false);
+
+    }
+  } catch (error) {
+    console.error("Error creating faculty:", error);
+    alert("Server error. Please check backend.");
+  }
+};
   // Open Delete Modal
   const handleOpenDelete = (faculty) => {
     setDeletingFaculty(faculty);
@@ -202,24 +250,55 @@ function ManageFaculty() {
   };
 
   // Confirm Delete
-  const handleConfirmDelete = () => {
-    if (!deletingFaculty) return;
+  const handleConfirmDelete = async () => {
+  if (!deletingFaculty) return;
 
-    setFacultyData((prevData) => ({
-      ...prevData,
-      [selectedDepartment]: prevData[selectedDepartment].filter(
-        (item) => item.id !== deletingFaculty.id
-      ),
-    }));
+  try {
+    const response = await fetch(
+      `http://localhost:5000/api/faculty/${deletingFaculty.id}`,
+      {
+        method: "DELETE",
+      }
+    );
 
-    setIsDeleteModalOpen(false);
-    setDeletingFaculty(null);
-  };
+    const data = await response.json();
+
+    console.log("Delete Faculty Response:", data);
+
+    if (!response.ok) {
+      alert(data.message || "Failed to delete faculty");
+      return;
+    }
+
+    if (data.success) {
+      setFacultyData((prevData) => ({
+        ...prevData,
+        [selectedDepartment]: prevData[selectedDepartment].filter(
+          (item) => item.facultyId !== deletingFaculty.id
+        ),
+      }));
+
+      setIsDeleteModalOpen(false);
+      setDeletingFaculty(null);
+
+
+    }
+  } catch (error) {
+    console.error("Error deleting faculty:", error);
+    alert("Server error. Please check backend.");
+  }
+};
 
   // Selected department faculty list
   const selectedFaculty = selectedDepartment
-    ? facultyData[selectedDepartment] || []
-    : [];
+  ? (facultyData[selectedDepartment] || []).map((member) => ({
+      id: member.facultyId,
+      name: member.name,
+      email: member.gmail,
+      subjects: member.subjects,
+    }))
+  : [];
+
 
   return (
     <div className="manage-faculty">
@@ -290,7 +369,9 @@ function ManageFaculty() {
                   <div className="faculty-info">
                     <h3>{member.name}</h3>
                     <p>{member.email}</p>
-                    <span className="faculty-subject-tag">{member.subject}</span>
+                   <span className="faculty-subject-tag">
+                     {member.subjects.join(" & ")}
+                   </span>
                   </div>
 
                   {/* Actions */}
@@ -362,17 +443,72 @@ function ManageFaculty() {
               />
             </div>
 
-            <div className="modal-form-group">
-              <label>Subject</label>
-              <input
-                type="text"
-                value={editingFaculty.subject}
-                onChange={(e) =>
-                  setEditingFaculty({ ...editingFaculty, subject: e.target.value })
-                }
-                required
-              />
-            </div>
+  <div className="modal-form-group">
+  <label>Subjects</label>
+
+  <input
+    type="text"
+    placeholder="Enter subject"
+    value={editSubjectInput}
+    onChange={(e) => setEditSubjectInput(e.target.value)}
+  />
+
+  <button
+    type="button"
+    className="btn-secondary"
+    onClick={() => {
+      if (!editSubjectInput.trim()) return;
+
+      setEditingFaculty((prev) => ({
+        ...prev,
+        subjects: [
+          ...prev.subjects,
+          editSubjectInput.trim(),
+        ],
+      }));
+
+      setEditSubjectInput("");
+    }}
+  >
+    + Add Subject
+  </button>
+
+  {editingFaculty.subjects.length > 0 && (
+    <div style={{ marginTop: "10px" }}>
+      {editingFaculty.subjects.map((subject, index) => (
+        <div
+          key={index}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: "8px",
+            padding: "8px 10px",
+            border: "1px solid #ddd",
+            borderRadius: "6px",
+          }}
+        >
+          <span>{subject}</span>
+
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => {
+              setEditingFaculty((prev) => ({
+                ...prev,
+                subjects: prev.subjects.filter(
+                  (_, i) => i !== index
+                ),
+              }));
+            }}
+          >
+            Remove
+          </button>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
 
             <div className="modal-actions">
               <button
@@ -423,19 +559,43 @@ function ManageFaculty() {
               required
             />
           </div>
+<div className="modal-form-group">
+  <label>Subjects</label>
 
-          <div className="modal-form-group">
-            <label>Subject</label>
-            <input
-              type="text"
-              placeholder="e.g. Cloud Computing"
-              value={newFaculty.subject}
-              onChange={(e) =>
-                setNewFaculty({ ...newFaculty, subject: e.target.value })
-              }
-              required
-            />
-          </div>
+  <input
+    type="text"
+    placeholder="Enter subject"
+    value={subjectInput}
+    onChange={(e) => setSubjectInput(e.target.value)}
+  />
+
+  <button
+    type="button"
+    className="btn-secondary"
+    onClick={() => {
+      if (!subjectInput.trim()) return;
+
+      setNewFaculty((prev) => ({
+        ...prev,
+        subjects: [...prev.subjects, subjectInput.trim()],
+      }));
+
+      setSubjectInput("");
+    }}
+  >
+    + Add Subject
+  </button>
+
+  {newFaculty.subjects.length > 0 && (
+    <div style={{ marginTop: "10px" }}>
+      {newFaculty.subjects.map((subject, index) => (
+        <div key={index}>
+          {subject}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
 
           <div className="modal-actions">
             <button

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import itegImage from "../assets/iteg.png";
 import megImage from "../assets/meg.png";
@@ -19,10 +19,13 @@ function ManageStudents() {
   const [searchTerm, setSearchTerm] = useState("");
   const [saveSuccessMessage, setSaveSuccessMessage] = useState("");
 
+  const [studentData, setStudentData] = useState({
+  ITEG: {},
+  MEG: {},
+  BEG: {},
+  "B.Tech": {},
+});
 
-  /* ========================================
-     DEPARTMENTS
-  ======================================== */
 
   const departments = [
     {
@@ -47,49 +50,47 @@ function ManageStudents() {
     },
   ];
 
-
-  /* ========================================
-     LEVELS
-  ======================================== */
-
   const levels = ["1A", "1B", "1C", "2A", "2B", "2C"];
 
+useEffect(() => {
+  const fetchStudents = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/students"
+      );
 
-  /* ========================================
-     STRUCTURED STUDENT DATA (Department -> Level -> Students)
-  ======================================== */
+      const data = await response.json();
 
-  const getStudentList = (dept, lvl) => {
-    if (!dept || !lvl) return [];
+      if (!response.ok) {
+        console.error(data.message);
+        return;
+      }
 
-    const baseStudents = [
-      { id: 1, name: "Aarav Sharma", email: "aarav.sharma@singaji.edu.in" },
-      { id: 2, name: "Ananya Patel", email: "ananya.patel@singaji.edu.in" },
-      { id: 3, name: "Rohan Verma", email: "rohan.verma@singaji.edu.in" },
-      { id: 4, name: "Priya Singh", email: "priya.singh@singaji.edu.in" },
-      { id: 5, name: "Vikram Rathore", email: "vikram.r@singaji.edu.in" },
-      { id: 6, name: "Sneha Gupta", email: "sneha.gupta@singaji.edu.in" },
-      { id: 7, name: "Aditya Kumar", email: "aditya.k@singaji.edu.in" },
-      { id: 8, name: "Ishita Joshi", email: "ishita.j@singaji.edu.in" },
-      { id: 9, name: "Devendra Meena", email: "devendra.m@singaji.edu.in" },
-      { id: 10, name: "Kavya Tiwari", email: "kavya.t@singaji.edu.in" },
-      { id: 11, name: "Nikhil Saxena", email: "nikhil.s@singaji.edu.in" },
-      { id: 12, name: "Pooja Choudhary", email: "pooja.c@singaji.edu.in" },
-      { id: 13, name: "Siddharth Jain", email: "siddharth.j@singaji.edu.in" },
-      { id: 14, name: "Tanvi Mishra", email: "tanvi.m@singaji.edu.in" },
-    ];
-
-    const deptPrefix = dept.toUpperCase().replace(".", "");
-    return baseStudents.map((s) => ({
-      id: `${deptPrefix}-${lvl}-${s.id}`,
-      name: `${s.name} (${deptPrefix}-${lvl})`,
-      email: `${s.email.split('@')[0]}.${lvl.toLowerCase()}@singaji.edu.in`,
-    }));
+      if (data.success) {
+        setStudentData(data.sections);
+      }
+    } catch (error) {
+      console.error("Error fetching students:", error);
+    }
   };
 
-  const currentStudentsList = getStudentList(selectedDepartment, selectedLevel);
+  fetchStudents();
+}, []);
 
+  /* ========================================
+     DEPARTMENTS
+  ======================================== */
 
+const currentStudentsList =
+  selectedDepartment && selectedLevel
+    ? (studentData[selectedDepartment]?.[selectedLevel] || []).map(
+        (student) => ({
+          id: student.studentId,
+          name: `${student.name} (${student.section}-${student.level})`,
+          email: student.gmail,
+        })
+      )
+    : [];
   /* ========================================
      FILTER STUDENTS
   ======================================== */

@@ -1,38 +1,49 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-/**
- * User Model
- * Represents all system users (students, faculty, admin).
- * TODO: Implement full schema when business logic is defined.
- */
-const userSchema = new mongoose.Schema(
+const studentSchema = new mongoose.Schema(
   {
+    studentId: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+
     name: {
       type: String,
       required: true,
       trim: true,
     },
-    email: {
+
+    gmail: {
       type: String,
       required: true,
       unique: true,
       lowercase: true,
+      trim: true,
     },
+
     password: {
       type: String,
       required: true,
     },
-    role: {
+
+    section: {
       type: String,
-      enum: ['student', 'faculty', 'admin'],
-      default: 'student',
+      required: true,
+      enum: ["ITEG", "MEG", "BEG", "B.Tech"],
     },
-    isActive: {
-      type: Boolean,
-      default: true,
+
+    level: {
+      type: String,
+      required: true,
+      enum: ["1A", "1B", "1C", "2A", "2B", "2C"],
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    collection: "Students",
+  }
 );
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model("Student", studentSchema);

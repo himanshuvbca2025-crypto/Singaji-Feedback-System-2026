@@ -1,57 +1,5 @@
+import { useEffect, useState } from "react";
 import "./AdminDashboard.css";
-
-/* ============================================================
-   MOCK DASHBOARD DATA
-   Replace with real API calls when backend is available
-============================================================ */
-
-const recentFeedback = [
-  {
-    id: 1,
-    student: "ITEG-2A",
-    faculty: "Dr. Rahul Sharma",
-    rating: 4.8,
-    date: "Today, 11:30 AM",
-  },
-  {
-    id: 2,
-    student: "B.Tech-3A",
-    faculty: "Dr. S.K. Mehta",
-    rating: 4.6,
-    date: "Today, 10:15 AM",
-  },
-  {
-    id: 3,
-    student: "ITEG-1B",
-    faculty: "Dr. Amit Singh",
-    rating: 4.7,
-    date: "Today, 09:45 AM",
-  },
-];
-
-const lowScoreFeedback = [
-  {
-    id: 1,
-    faculty: "Prof. Raj Kumar",
-    department: "MEG",
-    rating: 3.2,
-    date: "Today, 12:00 PM",
-  },
-  {
-    id: 2,
-    faculty: "Prof. Vikash Meena",
-    department: "BEG",
-    rating: 3.4,
-    date: "Today, 09:00 AM",
-  },
-  {
-    id: 3,
-    faculty: "Dr. Mohit Jain",
-    department: "BEG",
-    rating: 3.1,
-    date: "Yesterday",
-  },
-];
 
 function StarRating({ value }) {
   const stars = [];
@@ -66,7 +14,62 @@ function StarRating({ value }) {
 }
 
 function AdminDashboard() {
+   const [recentFeedback, setRecentFeedback] = useState([]);
+  const [lowScoreFeedback, setLowScoreFeedback] = useState([]);
   const completionPct = 86;
+
+    useEffect(() => {
+    const fetchFeedbackReport = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/reports"
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.error(data.message);
+          return;
+        }
+
+        if (data.success) {
+        const topRated = data.topRatedFaculty.map(
+         (faculty, index) => ({
+          id: index + 1,
+          student: faculty.department,
+          faculty: faculty.facultyName,
+          rating: faculty.rating,
+          date: "",
+          subject: faculty.subject || "Subject not available",
+     })
+   );
+
+          const lowRated = data.lowScoreDetails.map(
+           (faculty, index) => ({
+           id: index + 1,
+           faculty: faculty.facultyName,
+           department: faculty.department,
+            rating: faculty.rating,
+           date: faculty.date
+          ? new Date(faculty.date).toLocaleDateString()
+           : "",
+           course: faculty.subject || "Subject not available",
+       })
+    );
+
+          setRecentFeedback(topRated);
+          setLowScoreFeedback(lowRated);
+        }
+      } catch (error) {
+        console.error(
+          "Error fetching feedback report:",
+          error
+        );
+      }
+    };
+
+    fetchFeedbackReport();
+  }, []);
 
   return (
     <div className="admin-dashboard">

@@ -31,6 +31,22 @@ function Login() {
   try {
     setError("");
 
+    // Demo Faculty Login
+    if (
+      email === "faculty@gmail.com" &&
+      password === "faculty123"
+    ) {
+      login({
+        email: "faculty@gmail.com",
+        role: "Faculty",
+        name: "Demo Faculty",
+      });
+
+      navigate("/faculty/dashboard");
+      return;
+    }
+
+    // Admin Login
     const response = await fetch(
       "http://localhost:5000/api/auth/login",
       {
@@ -52,7 +68,6 @@ function Login() {
       return;
     }
 
-    // Login successful
     login({
       email: data.admin.gmail,
       role: "Admin",
@@ -65,7 +80,6 @@ function Login() {
     setError("Unable to connect to server. Please try again.");
   }
 };
-
   const handleFillDemoFaculty = () => {
     setEmail("faculty@gmail.com");
     setPassword("faculty123");

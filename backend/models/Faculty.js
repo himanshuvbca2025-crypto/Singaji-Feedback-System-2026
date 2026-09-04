@@ -1,38 +1,53 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-/**
- * Faculty Model
- * Extends user information specific to faculty members.
- * TODO: Implement full schema when business logic is defined.
- */
 const facultySchema = new mongoose.Schema(
   {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    employeeId: {
+    facultyId: {
       type: String,
+      required: true,
       unique: true,
       trim: true,
     },
-    department: {
+
+    name: {
       type: String,
+      required: true,
       trim: true,
     },
-    designation: {
+
+    gmail: {
       type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
       trim: true,
     },
-    courses: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Course',
-      },
-    ],
+
+    password: {
+      type: String,
+      required: true,
+    },
+
+    section: {
+      type: String,
+      required: true,
+      enum: ["ITEG", "MEG", "BEG", "B.Tech"],
+    },
+
+    subjects: {
+      type: [String],
+      required: true,
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    collection: "Faculties",
+  }
 );
 
-module.exports = mongoose.model('Faculty', facultySchema);
+module.exports = mongoose.model("Faculty", facultySchema);

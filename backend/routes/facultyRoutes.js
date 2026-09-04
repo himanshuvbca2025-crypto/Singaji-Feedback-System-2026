@@ -1,26 +1,19 @@
-const express = require('express');
-const router = express.Router();
+const express = require("express");
+
 const {
   getAllFaculty,
-  getFacultyById,
   createFaculty,
   updateFaculty,
   deleteFaculty,
-} = require('../controllers/facultyController');
+} = require("../controllers/facultyController");
 
-// GET    /api/faculty
-router.get('/', getAllFaculty);
+const router = express.Router();
 
-// POST   /api/faculty
-router.post('/', createFaculty);
+router.get("/", getAllFaculty);
+router.post("/create", createFaculty);
+router.put("/:facultyId", updateFaculty);
+router.delete("/:facultyId", deleteFaculty);
 
-// GET    /api/faculty/:id
-router.get('/:id', getFacultyById);
 
-// PUT    /api/faculty/:id
-router.put('/:id', updateFaculty);
-
-// DELETE /api/faculty/:id
-router.delete('/:id', deleteFaculty);
 
 module.exports = router;
