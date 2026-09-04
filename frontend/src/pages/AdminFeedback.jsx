@@ -1,79 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./AdminFeedback.css";
-/* ============================================================
-   MOCK FEEDBACK DATA
-   Replace with real API calls when backend is available
-============================================================ */
-
-const allFeedback = [
-  {
-    id: 1,
-    faculty: "Dr. Rahul Sharma",
-    department: "ITEG",
-    rating: 4.8,
-    date: "2026-09-02",
-    status: "view",
-  },
-  {
-    id: 2,
-
-    faculty: "Prof. Neha Jain",
-    department: "ITEG",
-    rating: 4.4,
-    date: "2026-09-02",
-    status: "view",
-  },
-  {
-    id: 3,
-
-    faculty: "Prof. Raj Kumar",
-    department: "MEG",
-    rating: 3.2,
-    date: "2026-09-02",
-    status: "view",
-  },
-  {
-    id: 4,
-
-    faculty: "Dr. S.K. Mehta",
-    department: "B.Tech",
-    rating: 4.6,
-    date: "2026-09-01",
-    status: "view",
-  },
-  {
-    id: 5,
-    faculty: "Prof. Vikash Meena",
-    department: "BEG",
-    rating: 3.4,
-    date: "2026-09-01",
-    status: "view",
-  },
-  {
-    id: 6,
-    faculty: "Dr. Amit Singh",
-    department: "ITEG",
-    rating: 4.7,
-    date: "2026-09-01",
-    status: "view",
-  },
-  {
-    id: 7,
-    faculty: "Dr. Priya Verma",
-    department: "MEG",
-    rating: 4.2,
-    date: "2026-08-31",
-    status: "view",
-  },
-  {
-    id: 8,
-    faculty: "Dr. Mohit Jain",
-    department: "BEG",
-    rating: 3.1,
-    date: "2026-08-31",
-    status: "view",
-  },
-];
 
 function StarDisplay({ value }) {
   return (
@@ -93,31 +19,91 @@ function StarDisplay({ value }) {
 }
 
 function AdminFeedback() {
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [deptFilter, setDeptFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filtered = allFeedback.filter((fb) => {
-    const matchDept =
-      deptFilter === "All" || fb.department === deptFilter;
 
-    const matchStatus =
-      statusFilter === "All" || fb.status === statusFilter;
+  useEffect(() => {
+  const fetchFeedbacks = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/feedback/all"
+      );
 
-    const matchSearch =
-      fb.faculty
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      fb.course
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
+      const data = await response.json();
 
-    return matchDept && matchStatus && matchSearch;
-  });
+      if (!response.ok) {
+        console.error(data.message);
+        return;
+      }
 
-  const lowScoreCount = allFeedback.filter(
-    (fb) => fb.rating < 3.5
+      if (data.success) {
+        setFeedbacks(data.feedbacks);
+      }
+    } catch (error) {
+      console.error("Error fetching feedbacks:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchFeedbacks();
+}, []);
+
+ const filtered = feedbacks.filter((fb) => {
+  const matchDept =
+    deptFilter === "All" ||
+    fb.department === deptFilter;
+
+  const rating = Number(fb.overallRating || 0);
+
+  const status =
+    rating < 3.5 ? "Needs Review" : "Pending";
+
+  const matchStatus =
+    statusFilter === "All" ||
+    status === statusFilter;
+
+  const search = searchTerm.toLowerCase().trim();
+
+  const matchSearch =
+    fb.facultyName
+      ?.toLowerCase()
+      .includes(search) ||
+    fb.subjects?.some((subject) =>
+      subject.toLowerCase().includes(search)
+    );
+
+  return matchDept && matchStatus && matchSearch;
+});
+
+  const lowScoreCount = feedbacks.filter(
+    (fb) => Number(fb.overallRating) < 3.5
   ).length;
+
+  const totalSubmissions = feedbacks.reduce(
+    (total, fb) =>
+      total + Number(fb.totalFeedbacks || 0),
+    0
+  );
+
+  const totalRatingPoints = feedbacks.reduce(
+    (total, fb) =>
+      total +
+      Number(fb.overallRating || 0) *
+        Number(fb.totalFeedbacks || 0),
+    0
+  );
+
+  const campusAverage =
+    totalSubmissions > 0
+      ? (totalRatingPoints / totalSubmissions).toFixed(1)
+      : "0.0";
+
 
   return (
     <div className="admin-feedback-page">
@@ -147,9 +133,10 @@ function AdminFeedback() {
           <span className="af-summary-label">
             Total Submissions
           </span>
-          <strong className="af-summary-value">
-            {allFeedback.length}
-          </strong>
+         <strong className="af-summary-value"> 
+           {totalSubmissions} 
+        </strong>
+
         </div>
 
         <div className="af-summary-card">
@@ -157,15 +144,10 @@ function AdminFeedback() {
             Campus Average
           </span>
 
+          
           <strong className="af-summary-value">
-            ⭐{" "}
-            {(
-              allFeedback.reduce(
-                (s, f) => s + f.rating,
-                0
-              ) / allFeedback.length
-            ).toFixed(1)}
-          </strong>
+            ⭐ {campusAverage}
+         </strong>
         </div>
 
         <div className="af-summary-card">
@@ -183,13 +165,9 @@ function AdminFeedback() {
             Reviewed
           </span>
 
-          <strong className="af-summary-value">
-            {
-              allFeedback.filter(
-                (f) => f.status === "Reviewed"
-              ).length
-            }
-          </strong>
+        <strong className="af-summary-value">
+         0
+        </strong>
         </div>
 
       </div>
@@ -250,83 +228,78 @@ function AdminFeedback() {
             </tr>
           </thead>
 
-          <tbody>
-            {filtered.length > 0 ? (
-              filtered.map((fb) => (
-                <tr
-                  key={fb.id}
-                  className={
-                    fb.rating < 3.5
-                      ? "af-row-alert"
-                      : ""
-                  }
-                >
+         <tbody>
+  {filtered.length > 0 ? (
+    filtered.map((fb) => {
+      const status =
+        Number(fb.overallRating) < 3.5
+          ? "Needs Review"
+          : "Pending";
 
-                  <td>
-                    <div className="af-course-name">
-                      {fb.course}
-                    </div>
+      return (
+        <tr
+          key={`${fb.facultyName}-${fb.department}`}
+          className={
+            Number(fb.overallRating) < 3.5
+              ? "af-row-alert"
+              : ""
+          }
+        >
+          <td>
+            <div className="af-faculty-name">
+            {fb.facultyName}
+          </div>
 
-                    <div className="af-faculty-name">
-                      {fb.faculty}
-                    </div>
-                  </td>
+         <div className="af-course-name">
+          {fb.subjects?.join(", ")}
+          </div>
+</td>
 
-                  <td>
-                    <span className="af-dept-tag">
-                      {fb.department}
-                    </span>
-                  </td>
+          <td>
+            <span className="af-dept-tag">
+              {fb.department}
+            </span>
+          </td>
 
-                  <td>
-                    <div className="af-rating-value">
-                      {fb.rating}
-                    </div>
+          <td>
+            <div className="af-rating-value">
+              {fb.overallRating}
+            </div>
 
-                    <StarDisplay
-                      value={fb.rating}
-                    />
-                  </td>
+            <StarDisplay value={fb.overallRating} />
+          </td>
 
+          <td>
+            <span className="af-date">
+              {new Date(fb.date).toLocaleDateString()}
+            </span>
+          </td>
 
-
-                  <td>
-                    <span className="af-date">
-                      {fb.date}
-                    </span>
-                  </td>
-
-                  <td>
-                    <span
-                      className={`af-status-badge af-status-${fb.status
-                        .toLowerCase()
-                        .replace(" ", "-")}`}
-                    >
-                      {fb.status}
-                    </span>
-                  </td>
-
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="6"
-                  className="af-empty"
-                >
-                  No feedback entries match your
-                  filters.
-                </td>
-              </tr>
-            )}
-          </tbody>
+        <td>
+          <button className="af-view-btn">
+             View
+           </button>
+        </td>
+        </tr>
+      );
+    })
+  ) : (
+    <tr>
+      <td colSpan="6" className="af-empty">
+        {loading
+          ? "Loading feedbacks..."
+          : "No feedback entries match your filters."}
+      </td>
+    </tr>
+  )}
+</tbody>
 
         </table>
       </div>
 
-      <div className="af-table-footer">
-        Showing {filtered.length} of {allFeedback.length} entries
-      </div>
+     <div className="af-table-footer">
+      Showing {filtered.length} of {feedbacks.length} entries
+    </div>
 
     </div>
   );

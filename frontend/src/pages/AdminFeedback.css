@@ -204,17 +204,16 @@
    TABLE CELL CONTENT
 ======================================== */
 
-.af-course-name {
-  font-size: 14px;
+.af-faculty-name {
+  font-size: 16px;
   font-weight: 600;
   color: #111827;
-  margin-bottom: 2px;
 }
 
-.af-faculty-name {
-  font-size: 12px;
+.af-course-name {
+  margin-top: 3px;
+  font-size: 14px;
   color: #6b7280;
-  font-weight: 500;
 }
 
 .af-dept-tag {
@@ -346,4 +345,18 @@
   .af-search {
     min-width: unset;
   }
+}
+
+.af-view-btn {
+  border: none;
+  background: transparent;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+}
+
+.af-view-btn:hover {
+  text-decoration: underline;
 }
