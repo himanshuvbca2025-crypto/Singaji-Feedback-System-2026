@@ -8,91 +8,70 @@ import "./AdminFeedback.css";
 const allFeedback = [
   {
     id: 1,
-    course: "Programming in C++ & Java",
     faculty: "Dr. Rahul Sharma",
     department: "ITEG",
     rating: 4.8,
-    comment:
-      "Excellent teaching style. Concepts are very clearly explained with practical examples.",
     date: "2026-09-02",
-    status: "Reviewed",
+    status: "view",
   },
   {
     id: 2,
-    course: "Database Management Systems",
+
     faculty: "Prof. Neha Jain",
     department: "ITEG",
     rating: 4.4,
-    comment:
-      "Good coverage of topics. Lab sessions could be improved.",
     date: "2026-09-02",
-    status: "Pending",
+    status: "view",
   },
   {
     id: 3,
-    course: "Thermodynamics",
+
     faculty: "Prof. Raj Kumar",
     department: "MEG",
     rating: 3.2,
-    comment:
-      "Speed of coverage is too fast. Practical availability is lacking.",
     date: "2026-09-02",
-    status: "Needs Review",
+    status: "view",
   },
   {
     id: 4,
-    course: "Computer Networks & Security",
+
     faculty: "Dr. S.K. Mehta",
     department: "B.Tech",
     rating: 4.6,
-    comment:
-      "Very detailed explanations. Highly knowledgeable faculty.",
     date: "2026-09-01",
-    status: "Reviewed",
+    status: "view",
   },
   {
     id: 5,
-    course: "Applied Mathematics",
     faculty: "Prof. Vikash Meena",
     department: "BEG",
     rating: 3.4,
-    comment:
-      "Need more numerical practice during class sessions.",
     date: "2026-09-01",
-    status: "Needs Review",
+    status: "view",
   },
   {
     id: 6,
-    course: "Web Development & Frameworks",
     faculty: "Dr. Amit Singh",
     department: "ITEG",
     rating: 4.7,
-    comment:
-      "Very interactive and engaging. Loved the hands-on approach.",
     date: "2026-09-01",
-    status: "Reviewed",
+    status: "view",
   },
   {
     id: 7,
-    course: "Fluid Mechanics",
     faculty: "Dr. Priya Verma",
     department: "MEG",
     rating: 4.2,
-    comment:
-      "Good conceptual clarity. Could include more real-world examples.",
     date: "2026-08-31",
-    status: "Pending",
+    status: "view",
   },
   {
     id: 8,
-    course: "Engineering Physics",
     faculty: "Dr. Mohit Jain",
     department: "BEG",
     rating: 3.1,
-    comment:
-      "Lab sessions are not well organized. Theory is okay.",
     date: "2026-08-31",
-    status: "Needs Review",
+    status: "view",
   },
 ];
 
@@ -263,10 +242,9 @@ function AdminFeedback() {
 
           <thead>
             <tr>
-              <th>Course / Faculty</th>
+              <th>Faculty</th>
               <th>Dept</th>
               <th>Rating</th>
-              <th>Comment</th>
               <th>Date</th>
               <th>Status</th>
             </tr>
@@ -310,11 +288,7 @@ function AdminFeedback() {
                     />
                   </td>
 
-                  <td>
-                    <p className="af-comment">
-                      "{fb.comment}"
-                    </p>
-                  </td>
+
 
                   <td>
                     <span className="af-date">
