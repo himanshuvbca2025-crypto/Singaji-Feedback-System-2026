@@ -86,8 +86,10 @@ const currentStudentsList =
     ? (studentData[selectedDepartment]?.[selectedLevel] || []).map(
         (student) => ({
           id: student.studentId,
-          name: `${student.name} (${student.section}-${student.level})`,
+          name: student.name,
           email: student.gmail,
+          section: student.section,
+          level: student.level,
         })
       )
     : [];
@@ -137,17 +139,63 @@ const currentStudentsList =
     });
   };
 
-  const handleSave = () => {
-    if (selectedStudents.length !== 10) {
-      alert("Please select exactly 10 students before saving.");
-      return;
-    }
+  const handleSave = async () => {
+  if (selectedStudents.length !== 10) {
+    alert("Please select exactly 10 students before saving.");
+    return;
+  }
 
-    setSaveSuccessMessage(
-      `Successfully assigned 10 feedback students for ${selectedDepartment} - Level ${selectedLevel}.`
+  try {
+    const selectedStudentData = currentStudentsList
+      .filter((student) => selectedStudents.includes(student.id))
+      .map((student) => ({
+        name: student.name,
+        gmail: student.email,
+      }));
+
+    console.log("Selected students:", selectedStudentData);
+
+    const response = await fetch(
+      "http://localhost:5000/api/selected-students",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          department: selectedDepartment,
+          level: selectedLevel,
+          students: selectedStudentData,
+        }),
+      }
     );
-  };
 
+    const data = await response.json();
+
+    console.log("API Response:", data);
+
+   if (!response.ok) {
+  alert(data.message || "Failed to save students.");
+  return;
+}
+
+if (data.success) {
+  setSaveSuccessMessage(
+    `Selection saved successfully! 10 students have been assigned for ${selectedDepartment} — Level ${selectedLevel}.`
+  );
+
+  setSelectedStudents([]);
+
+  setTimeout(() => {
+    setSaveSuccessMessage("");
+  }, 3000);
+
+}
+  } catch (error) {
+    console.error("Error saving selected students:", error);
+    alert("Something went wrong while saving students.");
+  }
+};
   const handleBackToDepartments = () => {
     setSelectedDepartment(null);
     setSelectedLevel(null);
@@ -250,11 +298,12 @@ const currentStudentsList =
             </div>
           </div>
 
-          {saveSuccessMessage && (
-            <div className="save-success-banner">
-              ✓ {saveSuccessMessage}
-            </div>
-          )}
+         {saveSuccessMessage && (
+           <div className="save-success-toast">
+           <span className="toast-icon">✓</span>
+           <span>{saveSuccessMessage}</span>
+         </div>
+       )}
 
           {/* SEARCH */}
           <div className="student-search">

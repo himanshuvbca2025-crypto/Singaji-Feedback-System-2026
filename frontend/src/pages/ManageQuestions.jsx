@@ -165,42 +165,49 @@ function ManageQuestions() {
     setIsDeleteModalOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    if (!editingQuestion) return;
-    const updated = questions.filter((q) => q.id !== editingQuestion.id);
-    // Re-number
-    const renumbered = updated.map((q, idx) => ({ ...q, number: idx + 1 }));
-    setQuestions(renumbered);
-    setIsDeleteModalOpen(false);
-    setEditingQuestion(null);
-  };
-const handleDelete = async (id) => {
-  if (
-    window.confirm("Are you sure you want to delete this question?")
-  ) {
-    try {
-      const response = await fetch(
-        `http://localhost:5000/api/questions/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
+  const handleConfirmDelete = async () => {
+  if (!editingQuestion) return;
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        console.error(data.message);
-        return;
+  try {
+    const response = await fetch(
+      `http://localhost:5000/api/questions/${editingQuestion.id}`,
+      {
+        method: "DELETE",
       }
+    );
 
-      setQuestions(
-        questions.filter((q) => q.id !== id)
-      );
-    } catch (error) {
-      console.error("Error deleting question:", error);
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error(data.message);
+      alert(data.message || "Failed to delete question.");
+      return;
     }
+
+    if (data.success) {
+      const updated = questions.filter(
+        (q) => q.id !== editingQuestion.id
+      );
+
+      const renumbered = updated.map(
+        (q, idx) => ({
+          ...q,
+          number: idx + 1,
+        })
+      );
+
+      setQuestions(renumbered);
+
+      setIsDeleteModalOpen(false);
+      setEditingQuestion(null);
+
+    }
+  } catch (error) {
+    console.error("Error deleting question:", error);
+    alert("Something went wrong while deleting the question.");
   }
 };
+
 
   return (
     <div className="manage-questions-page">

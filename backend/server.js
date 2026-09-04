@@ -10,6 +10,7 @@ const questionRoutes = require('./routes/questionRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const studentsRoutes=require('./routes/studentRoutes')
 const facultyRoutes = require("./routes/facultyRoutes");
+const selectedStudentsRoutes = require("./routes/seletedstudentsRoutes");
 
 
 dotenv.config();
@@ -33,6 +34,8 @@ app.use('/api/reports', reportRoutes);
 app.use("/api/students", studentsRoutes);
 
 app.use("/api/faculty", facultyRoutes);
+
+app.use("/api/selected-students", selectedStudentsRoutes);
 
 const PORT = process.env.PORT || 5000;
 
