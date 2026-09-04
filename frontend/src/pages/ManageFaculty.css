@@ -251,7 +251,8 @@
     gap: 10px;
 }
 
-.btn-edit, .btn-view {
+.btn-edit,
+.btn-view {
     padding: 8px 14px;
     border-radius: 8px;
     font-size: 13px;

@@ -17,7 +17,7 @@ function Sidebar() {
     { to: "/admin/dashboard", icon: "▦", label: "Dashboard" },
     { to: "/admin/students", icon: "👨‍🎓", label: "Students" },
     { to: "/admin/faculty", icon: "👨‍🏫", label: "Faculty" },
-    { to: "/admin/courses", icon: "📚", label: "Courses" },
+    // { to: "/admin/courses", icon: "📚", label: "Courses" },
     { to: "/admin/lectures", icon: "🗓️", label: "Lectures" },
     { to: "/admin/questions", icon: "❓", label: "Questions" },
     { to: "/admin/feedback", icon: "💬", label: "Feedback" },

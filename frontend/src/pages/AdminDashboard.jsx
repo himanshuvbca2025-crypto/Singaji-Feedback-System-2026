@@ -195,7 +195,7 @@ function AdminDashboard() {
 
                 <div className="alert-footer">
                   <span className="feedback-date">{fb.date}</span>
-                  <button className="review-btn">Review</button>
+                  <button className="review-btn">view</button>
                 </div>
               </div>
             ))}

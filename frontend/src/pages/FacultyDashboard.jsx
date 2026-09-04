@@ -81,8 +81,8 @@ function LectureCell({ data, onShare }) {
         <span className="lecture-subject">{data.subject}</span>
         {data.faculty && <span className="lecture-faculty">{data.faculty}</span>}
         {data.link && (
-          <button 
-            className="share-btn" 
+          <button
+            className="share-btn"
             onClick={() => onShare(data.subject, data.faculty, data.link)}
             title="Share Meeting Link"
           >
@@ -97,7 +97,7 @@ function LectureCell({ data, onShare }) {
 function FacultyDashboard() {
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuth();
-  
+
   const [toastMessage, setToastMessage] = useState("");
   const [activeTab, setActiveTab] = useState("schedule");
 
@@ -153,62 +153,16 @@ function FacultyDashboard() {
     <div className="faculty-layout">
       {toastMessage && <div className="faculty-toast">{toastMessage}</div>}
 
-      {/* NAVBAR */}
-      <header className="faculty-navbar">
-        <div className="navbar-brand">
-          <img src={ssecLogo} alt="SSISM Logo" className="navbar-logo" />
-          <div className="navbar-brand-text">
-            <h1>Singaji Educational Society</h1>
-            <p>Feedback Management System</p>
-          </div>
-        </div>
-        <div className="navbar-right">
-          <div className="faculty-user-badge">
-            <span className="user-avatar">{facultyName.charAt(0)}</span>
-            <div className="user-info">
-              <strong className="user-name">{facultyName}</strong>
-              <span className="user-dept">{facultyDept} Department</span>
-            </div>
-          </div>
-        </div>
-      </header>
+
 
       {/* BODY */}
       <div className="faculty-body">
-        
-        {/* SIDEBAR */}
-        <aside className="faculty-sidebar">
-          <nav className="sidebar-menu">
-            <button className={`sidebar-link ${activeTab === "dashboard" ? "active" : ""}`} onClick={() => setActiveTab("dashboard")}>
-              <span className="sidebar-icon">🏠</span> <span className="sidebar-label">Dashboard</span>
-            </button>
-            <button className={`sidebar-link ${activeTab === "schedule" ? "active" : ""}`} onClick={() => setActiveTab("schedule")}>
-              <span className="sidebar-icon">📅</span> <span className="sidebar-label">My Schedule</span>
-            </button>
-            <button className={`sidebar-link ${activeTab === "lectures" ? "active" : ""}`} onClick={() => setActiveTab("lectures")}>
-              <span className="sidebar-icon">📚</span> <span className="sidebar-label">My Lectures</span>
-            </button>
-            <button className={`sidebar-link ${activeTab === "feedback" ? "active" : ""}`} onClick={() => setActiveTab("feedback")}>
-              <span className="sidebar-icon">📝</span> <span className="sidebar-label">Student Feedback</span>
-            </button>
-            <button className={`sidebar-link ${activeTab === "history" ? "active" : ""}`} onClick={() => setActiveTab("history")}>
-              <span className="sidebar-icon">📊</span> <span className="sidebar-label">Feedback History</span>
-            </button>
-            <button className={`sidebar-link ${activeTab === "profile" ? "active" : ""}`} onClick={() => setActiveTab("profile")}>
-              <span className="sidebar-icon">👤</span> <span className="sidebar-label">Profile</span>
-            </button>
 
-            <div className="sidebar-separator" />
 
-            <button className="sidebar-link logout-link" onClick={handleLogout}>
-              <span className="sidebar-icon">🚪</span> <span className="sidebar-label">Logout</span>
-            </button>
-          </nav>
-        </aside>
 
         {/* MAIN CONTENT */}
         <main className="faculty-main-content">
-          
+
           <div className="faculty-page-header">
             <div>
               <h1>Faculty Dashboard</h1>
@@ -222,7 +176,7 @@ function FacultyDashboard() {
 
           {activeTab === "schedule" && (
             <div className="schedule-section">
-              
+
               <div className="schedule-table-wrapper">
                 <table className="academic-timetable">
                   <thead>
@@ -260,7 +214,7 @@ function FacultyDashboard() {
                         <td className="td-class">{row.room}</td>
                         <td className="td-group">{row.group}</td>
                         <td className="td-strength">{row.strength}</td>
-                        
+
                         <LectureCell data={row.slot1} onShare={handleShare} />
 
                         {/* Merged Lunch Break Cell (only rendered on the first row) */}

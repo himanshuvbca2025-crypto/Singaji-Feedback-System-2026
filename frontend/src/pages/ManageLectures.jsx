@@ -413,7 +413,7 @@ function ManageLectures() {
           </form>
         )}
       </Modal>
-      
+
       {/* DELETE CONFIRMATION MODAL */}
       <Modal
         isOpen={isDeleteModalOpen}

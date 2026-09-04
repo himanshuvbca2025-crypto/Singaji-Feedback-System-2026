@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth.js";
 
@@ -7,21 +7,22 @@ import "./Login.css";
 
 function Login() {
   const navigate = useNavigate();
-  const { login, isAuthenticated, user } = useAuth();
+  // const { login, isAuthenticated, user } = useAuth();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      if (user.role === "Faculty") {
-        navigate("/faculty/dashboard", { replace: true });
-      } else {
-        navigate("/admin/dashboard", { replace: true });
-      }
-    }
-  }, [isAuthenticated, user, navigate]);
+  // useEffect(() => {
+  //   if (isAuthenticated && user) {
+  //     if (user.role === "Faculty") {
+  //       navigate("/faculty/dashboard", { replace: true });
+  //     } else {
+  //       navigate("/admin/dashboard", { replace: true });
+  //     }
+  //   }
+  // }, [isAuthenticated, user, navigate]);
 
 
  const handleSubmit = async (e) => {
