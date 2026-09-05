@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth.js";
 import ssecLogo from "../assets/rename.png";
 import "./FacultyDashboard.css";
-
+import Modal from "../components/Modal.jsx";
 // Mock Data for the Timetable
 const timetableData = [
   {
@@ -71,8 +71,7 @@ const timetableData = [
   },
 ];
 
-// Helper Component for a single Lecture Cell
-function LectureCell({ data, onShare }) {
+function LectureCell({ data }) {
   if (!data || !data.subject) return <td className="lecture-cell empty-cell">-</td>;
 
   return (
@@ -80,15 +79,6 @@ function LectureCell({ data, onShare }) {
       <div className="lecture-content">
         <span className="lecture-subject">{data.subject}</span>
         {data.faculty && <span className="lecture-faculty">{data.faculty}</span>}
-        {data.link && (
-          <button
-            className="share-btn"
-            onClick={() => onShare(data.subject, data.faculty, data.link)}
-            title="Share Meeting Link"
-          >
-            <span>🔗</span> Share
-          </button>
-        )}
       </div>
     </td>
   );
@@ -100,9 +90,22 @@ function FacultyDashboard() {
 
   const [toastMessage, setToastMessage] = useState("");
   const [activeTab, setActiveTab] = useState("schedule");
+  const [schedules, setSchedules] = useState(timetableData);
+
+  const [isAddScheduleOpen, setIsAddScheduleOpen] = useState(false);
+  const [newSchedule, setNewSchedule] = useState({
+    room: "",
+    group: "",
+    strength: "40",
+    slot1Subject: "",
+    slot1Faculty: "",
+    slot2Subject: "",
+    slot2Faculty: "",
+    slot3Subject: "",
+    slot3Faculty: "",
+  });
 
   const facultyName = user?.name || "Dr. Rahul Sharma";
-  const facultyDept = user?.department || "ITEG";
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -115,32 +118,37 @@ function FacultyDashboard() {
     setTimeout(() => setToastMessage(""), 3500);
   };
 
-  const handleShare = async (subject, faculty, link) => {
-    const shareData = {
-      title: `Meeting Link for ${subject}`,
-      text: `Join the lecture for ${subject} by ${faculty}.`,
-      url: link,
+  const handleAddScheduleSubmit = (e) => {
+    e.preventDefault();
+    if (!newSchedule.room || !newSchedule.group) {
+      alert("Classroom and Group Name are required!");
+      return;
+    }
+
+    const createdRow = {
+      id: schedules.length + 1,
+      room: newSchedule.room,
+      group: newSchedule.group,
+      strength: Number(newSchedule.strength) || 40,
+      slot1: { subject: newSchedule.slot1Subject, faculty: newSchedule.slot1Faculty || facultyName },
+      slot2: { subject: newSchedule.slot2Subject, faculty: newSchedule.slot2Faculty || facultyName },
+      slot3: { subject: newSchedule.slot3Subject, faculty: newSchedule.slot3Faculty || facultyName },
     };
 
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch (err) {
-        console.error("Error sharing:", err);
-      }
-    } else {
-      try {
-        await navigator.clipboard.writeText(`${shareData.text} Link: ${shareData.url}`);
-        showToast("Meeting link copied to clipboard!");
-      } catch (err) {
-        alert("Failed to copy link.");
-      }
-    }
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login", { replace: true });
+    setSchedules([...schedules, createdRow]);
+    setIsAddScheduleOpen(false);
+    setNewSchedule({
+      room: "",
+      group: "",
+      strength: "40",
+      slot1Subject: "",
+      slot1Faculty: "",
+      slot2Subject: "",
+      slot2Faculty: "",
+      slot3Subject: "",
+      slot3Faculty: "",
+    });
+    showToast("New lecture schedule added successfully!");
   };
 
   // Date formatting for header
@@ -153,30 +161,78 @@ function FacultyDashboard() {
     <div className="faculty-layout">
       {toastMessage && <div className="faculty-toast">{toastMessage}</div>}
 
-
-
-      {/* BODY */}
       <div className="faculty-body">
-
-
-
-        {/* MAIN CONTENT */}
         <main className="faculty-main-content">
-
           <div className="faculty-page-header">
             <div>
               <h1>Faculty Dashboard</h1>
-              <p>View your academic schedule and lecture details</p>
+              <p>View & manage your academic schedule and lecture details</p>
             </div>
-            <div className="faculty-date-display">
-              <strong>{formattedDate}</strong>
-              <span>{dayName} · Day 23</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+              <button
+                className="btn-add-schedule"
+                onClick={() => setIsAddScheduleOpen(true)}
+                style={{
+                  background: "#166534",
+                  color: "#ffffff",
+                  border: "none",
+                  padding: "10px 18px",
+                  borderRadius: "8px",
+                  fontWeight: "700",
+                  fontSize: "14px",
+                  cursor: "pointer"
+                }}
+              >
+                ➕ Add Schedule Row
+              </button>
+
+              <button
+                className="btn-share-schedule"
+                onClick={async () => {
+                  let text = `SANT SINGAJI INSTITUTE OF SCIENCE AND MANAGEMENT, SANDALPUR\n`;
+                  text += `Date: ${formattedDate} | Day: ${dayName}\n`;
+                  text += `====================================\n\n`;
+                  schedules.forEach((row) => {
+                    text += `Class: ${row.room} | Group: ${row.group} | Strength: ${row.strength}\n`;
+                    text += `[10:00 AM - 11:30 AM]: ${row.slot1?.subject || "Empty"} (${row.slot1?.faculty || "None"})\n`;
+                    text += `[11:30 AM - 12:10 PM]: LUNCH BREAK\n`;
+                    text += `[12:10 PM - 01:40 PM]: ${row.slot2?.subject || "Empty"} (${row.slot2?.faculty || "None"})\n`;
+                    text += `[01:40 PM - 02:00 PM]: TEA BREAK\n`;
+                    text += `[02:00 PM - 03:30 PM]: ${row.slot3?.subject || "Empty"} (${row.slot3?.faculty || "None"})\n`;
+                    text += `------------------------------------\n`;
+                  });
+                  if (navigator.share) {
+                    try {
+                      await navigator.share({ title: "Today Schedule", text });
+                    } catch (e) { }
+                  } else {
+                    await navigator.clipboard.writeText(text);
+                    showToast("Complete schedule copied to clipboard for Teams/Group share!");
+                  }
+                }}
+                style={{
+                  background: "#ea580c",
+                  color: "#ffffff",
+                  border: "none",
+                  padding: "10px 18px",
+                  borderRadius: "8px",
+                  fontWeight: "700",
+                  fontSize: "14px",
+                  cursor: "pointer"
+                }}
+              >
+                📢 Share Schedule on Teams
+              </button>
+
+              <div className="faculty-date-display">
+                <strong>{formattedDate}</strong>
+                <span>{dayName} · Day 23</span>
+              </div>
             </div>
           </div>
 
           {activeTab === "schedule" && (
             <div className="schedule-section">
-
               <div className="schedule-table-wrapper">
                 <table className="academic-timetable">
                   <thead>
@@ -208,32 +264,30 @@ function FacultyDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {timetableData.map((row, index) => (
+                    {schedules.map((row, index) => (
                       <tr key={row.id}>
                         <td className="td-sno">{row.id}</td>
                         <td className="td-class">{row.room}</td>
                         <td className="td-group">{row.group}</td>
                         <td className="td-strength">{row.strength}</td>
 
-                        <LectureCell data={row.slot1} onShare={handleShare} />
+                        <LectureCell data={row.slot1} />
 
-                        {/* Merged Lunch Break Cell (only rendered on the first row) */}
                         {index === 0 && (
-                          <td rowSpan={timetableData.length} className="break-cell lunch-break">
+                          <td rowSpan={schedules.length} className="break-cell lunch-break">
                             <div className="break-text">LUNCH BREAK</div>
                           </td>
                         )}
 
-                        <LectureCell data={row.slot2} onShare={handleShare} />
+                        <LectureCell data={row.slot2} />
 
-                        {/* Merged Tea Break Cell (only rendered on the first row) */}
                         {index === 0 && (
-                          <td rowSpan={timetableData.length} className="break-cell tea-break">
+                          <td rowSpan={schedules.length} className="break-cell tea-break">
                             <div className="break-text">TEA BREAK</div>
                           </td>
                         )}
 
-                        <LectureCell data={row.slot3} onShare={handleShare} />
+                        <LectureCell data={row.slot3} />
                       </tr>
                     ))}
                   </tbody>
@@ -242,13 +296,91 @@ function FacultyDashboard() {
             </div>
           )}
 
-          {activeTab !== "schedule" && (
-            <div className="placeholder-content">
-              <h2>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h2>
-              <p>This section is under construction.</p>
-            </div>
-          )}
+          {/* ADD SCHEDULE MODAL */}
+          <Modal
+            isOpen={isAddScheduleOpen}
+            onClose={() => setIsAddScheduleOpen(false)}
+            title="Create New Timetable Schedule"
+          >
+            <form onSubmit={handleAddScheduleSubmit} className="modal-form">
+              <div className="modal-form-group">
+                <label>Classroom / Venue</label>
+                <input
+                  type="text"
+                  placeholder="e.g. ITEG Lab 2 / F01"
+                  value={newSchedule.room}
+                  onChange={(e) => setNewSchedule({ ...newSchedule, room: e.target.value })}
+                  required
+                />
+              </div>
 
+              <div className="modal-form-group">
+                <label>Group Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. ITEG 1C (1st-Year)"
+                  value={newSchedule.group}
+                  onChange={(e) => setNewSchedule({ ...newSchedule, group: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="modal-form-group">
+                <label>Student Strength</label>
+                <input
+                  type="number"
+                  placeholder="e.g. 45"
+                  value={newSchedule.strength}
+                  onChange={(e) => setNewSchedule({ ...newSchedule, strength: e.target.value })}
+                />
+              </div>
+
+              <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "12px", marginTop: "12px" }}>
+                <strong>Slot 1 (10:00 AM - 11:30 AM)</strong>
+                <div className="modal-form-group" style={{ marginTop: "6px" }}>
+                  <input
+                    type="text"
+                    placeholder="Subject Name"
+                    value={newSchedule.slot1Subject}
+                    onChange={(e) => setNewSchedule({ ...newSchedule, slot1Subject: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "12px", marginTop: "12px" }}>
+                <strong>Slot 2 (12:10 PM - 01:40 PM)</strong>
+                <div className="modal-form-group" style={{ marginTop: "6px" }}>
+                  <input
+                    type="text"
+                    placeholder="Subject Name"
+                    value={newSchedule.slot2Subject}
+                    onChange={(e) => setNewSchedule({ ...newSchedule, slot2Subject: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "12px", marginTop: "12px" }}>
+                <strong>Slot 3 (02:00 PM - 03:30 PM)</strong>
+                <div className="modal-form-group" style={{ marginTop: "6px" }}>
+                  <input
+                    type="text"
+                    placeholder="Subject Name"
+                    value={newSchedule.slot3Subject}
+                    onChange={(e) => setNewSchedule({ ...newSchedule, slot3Subject: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="modal-actions">
+                <button type="button" className="btn-secondary" onClick={() => setIsAddScheduleOpen(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary">
+                  Save Schedule
+                </button>
+              </div>
+            </form>
+          </Modal>
         </main>
       </div>
     </div>

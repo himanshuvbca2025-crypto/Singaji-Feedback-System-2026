@@ -15,6 +15,8 @@ import FeedbackHistory from "../pages/FeedbackHistory.jsx";
 import FacultyDashboard from "../pages/FacultyDashboard.jsx";
 import FacultySchedule from "../pages/FacultySchedule.jsx";
 import FacultyHistory from "../pages/FacultyHistory.jsx";
+import FacultyFeedbackView from "../pages/FacultyFeedbackView.jsx";
+import FacultyProfile from "../pages/FacultyProfile.jsx";
 
 import AdminDashboard from "../pages/AdminDashboard.jsx";
 import ManageStudents from "../pages/ManageStudents.jsx";
@@ -101,10 +103,10 @@ function AppRoutes() {
             element={<FacultySchedule />}
           />
 
-          {/* Faculty Feedback History */}
+          {/* Faculty Profile */}
           <Route
-            path="history"
-            element={<FacultyHistory />}
+            path="profile"
+            element={<FacultyProfile />}
           />
 
         </Route>

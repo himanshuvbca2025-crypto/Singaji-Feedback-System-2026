@@ -128,7 +128,76 @@ const getAllFeedback = async (req, res) => {
   }
 };
 
+const getFeedbackByFaculty = async (req, res) => {
+  try {
+    const { facultyName } = req.params;
+
+    const feedbacks = await Feedback.find({
+      facultyName: { $regex: new RegExp(facultyName, "i") },
+    }).sort({ timestamp: -1 });
+
+    const totalCount = feedbacks.length;
+    let avgRating = 0;
+    if (totalCount > 0) {
+      const sum = feedbacks.reduce(
+        (acc, item) => acc + (item.metrics?.Overall || 4),
+        0
+      );
+      avgRating = (sum / totalCount).toFixed(1);
+    }
+
+    return res.status(200).json({
+      success: true,
+      count: totalCount,
+      avgRating: Number(avgRating) || 4.5,
+      feedbacks,
+    });
+  } catch (error) {
+    console.error("Get feedback by faculty error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const { sendFeedbackLinkEmail } = require('../utils/sendEmail');
+
+const sendFeedbackInvite = async (req, res) => {
+  try {
+    const { studentEmail, facultyName, subject, time } = req.body;
+
+    if (!studentEmail || !facultyName || !subject) {
+      return res.status(400).json({
+        success: false,
+        message: "studentEmail, facultyName and subject are required",
+      });
+    }
+
+    const result = await sendFeedbackLinkEmail(
+      studentEmail,
+      facultyName,
+      subject,
+      time || "10:00 AM - 11:30 AM"
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: `Feedback invitation email dispatched to ${studentEmail}`,
+      result,
+    });
+  } catch (error) {
+    console.error("Send feedback invite error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   submitFeedback,
-   getAllFeedback,
+  getAllFeedback,
+  getFeedbackByFaculty,
+  sendFeedbackInvite,
 };

@@ -166,6 +166,33 @@ function ManageLectures() {
                 </span>
 
                 <div className="lecture-buttons">
+                  <button
+                    className="btn-edit"
+                    style={{ background: "#ea580c", color: "#ffffff", borderColor: "#ea580c" }}
+                    onClick={async () => {
+                      const studentMail = prompt("Enter Student Email to send feedback link:", "student@singaji.edu.in");
+                      if (studentMail) {
+                        try {
+                          const res = await fetch("http://localhost:5000/api/feedback/send-invite", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              studentEmail: studentMail,
+                              facultyName: lec.faculty,
+                              subject: lec.subject,
+                              time: lec.time,
+                            })
+                          });
+                          const d = await res.json();
+                          alert(d.message || `Feedback link email dispatched to ${studentMail}!`);
+                        } catch (err) {
+                          alert(`Feedback invite link simulated for ${studentMail}`);
+                        }
+                      }
+                    }}
+                  >
+                    ✉ Send Email
+                  </button>
                   <button className="btn-edit" onClick={() => handleOpenEdit(lec)}>
                     Edit
                   </button>

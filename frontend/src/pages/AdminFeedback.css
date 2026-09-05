@@ -347,22 +347,6 @@
   }
 }
 
-<<<<<<< HEAD
-.af-view-btn {
-  border: none;
-  background: transparent;
-  color: #111827;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 6px 10px;
-}
-
-.af-view-btn:hover {
-  text-decoration: underline;
-}
-=======
-
 /* ========================================
    VIEW BUTTON
 ======================================== */
@@ -393,4 +377,3 @@
 .af-view-btn:active {
   transform: translateY(0);
 }
->>>>>>> c6ee73c (For matrix changes)

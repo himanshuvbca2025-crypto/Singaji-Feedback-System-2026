@@ -16,8 +16,6 @@ function FacultySidebar() {
   const navItems = [
     { to: "/faculty/dashboard", icon: "▦", label: "Dashboard" },
     { to: "/faculty/schedule", icon: "🗓️", label: "My Schedule" },
-    { to: "/faculty/feedback", icon: "💬", label: "Student Feedback" },
-    { to: "/faculty/history", icon: "⏳", label: "Feedback History" },
     { to: "/faculty/profile", icon: "👤", label: "Profile" },
   ];
 

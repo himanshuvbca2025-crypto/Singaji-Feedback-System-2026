@@ -1,9 +1,14 @@
-import { useParams, useNavigate } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import "./FacultyHistory.css";
 
 function FacultyHistory() {
   const { facultyId } = useParams();
   const navigate = useNavigate();
+
+  const [facultyData, setFacultyData] = useState(null);
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Mock faculty database matching ID or fallback
   const mockFacultyDetails = {
@@ -36,8 +41,8 @@ function FacultyHistory() {
     },
   };
 
-  const faculty = mockFacultyDetails[facultyId] || {
-    name: "Dr. Faculty Member",
+  const defaultFaculty = mockFacultyDetails[facultyId] || {
+    name: "Faculty Member",
     department: "Engineering",
     subject: "Core Specialization",
     email: "faculty@singaji.edu.in",
@@ -45,6 +50,34 @@ function FacultyHistory() {
     feedbackCount: 320,
     avgRating: 4.5,
   };
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const nameToQuery = defaultFaculty.name;
+        const res = await fetch(`http://localhost:5000/api/feedback/faculty/${encodeURIComponent(nameToQuery)}`);
+        const data = await res.json();
+        if (res.ok && data.success && data.feedbacks) {
+          setFeedbacks(data.feedbacks);
+          setFacultyData({
+            ...defaultFaculty,
+            feedbackCount: data.count || defaultFaculty.feedbackCount,
+            avgRating: data.avgRating || defaultFaculty.avgRating,
+          });
+        } else {
+          setFacultyData(defaultFaculty);
+        }
+      } catch (err) {
+        setFacultyData(defaultFaculty);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, [facultyId]);
+
+  const faculty = facultyData || defaultFaculty;
 
   const questionScores = [
     { question: "Punctuality & Class Readiness", score: 4.8, category: "Classroom Management" },
@@ -54,26 +87,33 @@ function FacultyHistory() {
     { question: "Availability for Doubts & Guidance", score: 4.4, category: "Overall Experience" },
   ];
 
-  const recentFeedbacks = [
-    {
-      date: "01 Sep 2026",
-      student: "Student (Level 1A)",
-      rating: 5,
-      comment: "Excellent lecture on Object Oriented Concepts with clear real-world examples.",
-    },
-    {
-      date: "28 Aug 2026",
-      student: "Student (Level 1B)",
-      rating: 4,
-      comment: "Very detailed explanation. Pace was smooth and well-managed.",
-    },
-    {
-      date: "25 Aug 2026",
-      student: "Student (Level 2A)",
-      rating: 5,
-      comment: "Great practical session and doubt clearing.",
-    },
-  ];
+  const displayFeedbacks = feedbacks.length > 0
+    ? feedbacks.map(item => ({
+        date: new Date(item.timestamp || Date.now()).toLocaleDateString("en-GB"),
+        student: `Student (${item.level || "Level 1A"})`,
+        rating: item.metrics?.Overall || 5,
+        comment: item.remarks || "Great explanation and interactive session.",
+      }))
+    : [
+        {
+          date: "01 Sep 2026",
+          student: "Student (Level 1A)",
+          rating: 5,
+          comment: "Excellent lecture on Object Oriented Concepts with clear real-world examples.",
+        },
+        {
+          date: "28 Aug 2026",
+          student: "Student (Level 1B)",
+          rating: 4,
+          comment: "Very detailed explanation. Pace was smooth and well-managed.",
+        },
+        {
+          date: "25 Aug 2026",
+          student: "Student (Level 2A)",
+          rating: 5,
+          comment: "Great practical session and doubt clearing.",
+        },
+      ];
 
   return (
     <div className="faculty-history-page">
@@ -144,7 +184,7 @@ function FacultyHistory() {
       <div className="history-section-card">
         <h2>Recent Student Comments</h2>
         <div className="comments-list">
-          {recentFeedbacks.map((fb, idx) => (
+          {displayFeedbacks.map((fb, idx) => (
             <div key={idx} className="comment-card">
               <div className="comment-top">
                 <span className="comment-date">{fb.date}</span>
