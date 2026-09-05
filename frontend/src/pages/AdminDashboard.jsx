@@ -21,6 +21,11 @@ function AdminDashboard() {
   submitted: 0,
   designated: 0,
 });
+const [overallReport, setOverallReport] = useState({
+  overallRating: 0,
+  totalSubmissions: 0,
+  lowScoreAlerts: 0,
+});
 
     useEffect(() => {
     const fetchFeedbackReport = async () => {
@@ -42,6 +47,14 @@ function AdminDashboard() {
            percentage: 0,
            submitted: 0,
            designated: 0,
+  }
+);
+
+setOverallReport(
+  data.overall || {
+    overallRating: 0,
+    totalSubmissions: 0,
+    lowScoreAlerts: 0,
   }
 );
         const topRated = data.topRatedFaculty.map(
@@ -114,7 +127,9 @@ function AdminDashboard() {
             <span className="stat-title">Low Score Alerts</span>
             <span className="stat-icon">⚠️</span>
           </div>
-          <div className="stat-value stat-value-alert">3</div>
+              <div className="stat-value stat-value-alert">
+               {overallReport.lowScoreAlerts}
+             </div>
           <div className="stat-description">Classes require administrative review</div>
         </div>
 
@@ -125,10 +140,10 @@ function AdminDashboard() {
             <span className="stat-title">Today's Campus Avg</span>
             <span className="stat-icon">⭐</span>
           </div>
-          <div className="stat-value">
-            4.2
-            <span className="stat-max"> / 5</span>
-          </div>
+               <div className="stat-value">
+               {overallReport.overallRating}
+             <span className="stat-max"> / 5</span>
+           </div>
           <div className="stat-description">Overall feedback rating</div>
         </div>
 
