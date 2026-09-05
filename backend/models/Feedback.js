@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const feedbackSchema = new mongoose.Schema(
   {
-    studentName: {
+    studentGmail: {
       type: String,
       required: true,
       trim: true,

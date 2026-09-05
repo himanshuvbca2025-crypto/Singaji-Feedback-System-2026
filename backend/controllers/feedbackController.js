@@ -3,7 +3,7 @@ const Feedback = require('../models/feedback');
 const submitFeedback = async (req, res) => {
   try {
     const {
-      studentName,
+      studentGmail,
       level,
       section,
       facultyName,
@@ -12,8 +12,22 @@ const submitFeedback = async (req, res) => {
       remarks,
     } = req.body;
 
+
+     const existingFeedback = await Feedback.findOne({
+      studentGmail,
+      facultyName,
+      subject,
+    });
+    if (existingFeedback) {
+      return res.status(400).json({
+        success: false,
+        message:
+          'You have already submitted feedback for this faculty and subject.',
+      });
+    }
+
     const feedback = await Feedback.create({
-      studentName,
+      studentGmail,
       level,
       section,
       facultyName,

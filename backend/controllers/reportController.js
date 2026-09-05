@@ -1,5 +1,5 @@
 const Feedback = require('../models/feedback');
-
+const SelectedStudents = require('../models/SeletedStudents');
 
 // @desc    Get complete reports
 // @route   GET /api/reports
@@ -8,6 +8,24 @@ const getOverallReport = async (req, res) => {
     // =========================================================
     // 1. OVERALL CAMPUS REPORT
     // =========================================================
+    const designatedStudents = await SelectedStudents.distinct('gmail');
+
+     const submittedStudents = await Feedback.distinct('studentGmail');
+
+         const submittedDesignatedStudents = submittedStudents.filter((gmail) =>
+          designatedStudents.includes(gmail)
+  );
+
+       const totalDesignatedStudents = designatedStudents.length;
+       const totalSubmittedStudents = submittedDesignatedStudents.length;
+
+        const feedbackCompletion =
+         totalDesignatedStudents > 0
+           ? Math.round(
+           (totalSubmittedStudents / totalDesignatedStudents) * 100
+         )
+        : 0;   
+
 
     const overallResult = await Feedback.aggregate([
       {
@@ -145,6 +163,12 @@ const getOverallReport = async (req, res) => {
       success: true,
 
       overall,
+
+      campusFeedbackCompletion: {
+      percentage: feedbackCompletion,
+      submitted: totalSubmittedStudents,
+      designated: totalDesignatedStudents,
+},
 
       /// Department Wise
 

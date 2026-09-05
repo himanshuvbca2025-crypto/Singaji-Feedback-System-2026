@@ -2,12 +2,19 @@ import { useEffect, useState } from "react";
 import "./Reports.css";
 
 function Reports() {
+  const allDepartments = ["ITEG", "MEG", "BEG", "B.Tech"];
   const [selectedDeptFilter, setSelectedDeptFilter] = useState("All");
 
   const [overallReport, setOverallReport] = useState({
   overallRating: 0,
   totalSubmissions: 0,
   lowScoreAlerts: 0,
+});
+
+const [campusCompletion, setCampusCompletion] = useState({
+  percentage: 0,
+  submitted: 0,
+  designated: 0,
 });
 
 const [departmentReports, setDepartmentReports] = useState([]);
@@ -23,12 +30,20 @@ useEffect(() => {
 
       const data = await response.json();
 
-      if (data.success) {
-        setOverallReport(data.overall);
-        setDepartmentReports(data.departments);
-        setTopFaculty(data.topRatedFaculty);
-        setLowScoreAlerts(data.lowScoreDetails);
-      }
+ if (data.success) {
+  setOverallReport(data.overall);
+  setDepartmentReports(data.departments);
+  setTopFaculty(data.topRatedFaculty);
+  setLowScoreAlerts(data.lowScoreDetails);
+
+  setCampusCompletion(
+    data.campusFeedbackCompletion || {
+      percentage: 0,
+      submitted: 0,
+      designated: 0,
+    }
+  );
+}
     } catch (error) {
       console.error("Error fetching report:", error);
     }
@@ -75,11 +90,18 @@ useEffect(() => {
               </p>
         </div>
 
-        <div className="kpi-report-card">
-          <span className="kpi-title">Campus Feedback Completion</span>
-          <div className="kpi-main-val">86%</div>
-          <p>301 / 350 designated students submitted</p>
-        </div>
+       <div className="kpi-report-card">
+        <span className="kpi-title">Campus Feedback Completion</span>
+
+        <div className="kpi-main-val">
+          {campusCompletion?.percentage || 0}%
+         </div>
+
+            <p>
+             {campusCompletion?.submitted || 0} /{" "}
+             {campusCompletion?.designated || 0} designated students submitted
+          </p>
+       </div>
 
         <div className="kpi-report-card">
           <span className="kpi-title">Active Low Score Alerts</span>
@@ -93,36 +115,55 @@ useEffect(() => {
       {/* Department Performance */}
       <div className="reports-section-card">
         <h2>Department Ratings & Completion</h2>
-        <div className="dept-perf-grid">
-         {departmentReports.filter((dept) =>
-           selectedDeptFilter === "All" ||
-         dept.department === selectedDeptFilter
-     )
-      .map((dept) => (
-              <div key={dept.department} className="dept-perf-card">
-                        <h3>{dept.department}</h3>
+      <div className="dept-perf-grid">
+  {allDepartments
+    .filter(
+      (deptName) =>
+        selectedDeptFilter === "All" ||
+        deptName === selectedDeptFilter
+    )
+    .map((deptName) => {
+      const dept = departmentReports.find(
+        (item) => item.department === deptName
+      );
 
-                         <div className="perf-score">
-                       ⭐ {dept.overallRating} / 5
-                       </div>
+      const rating = dept?.overallRating || 0;
+      const submissions = dept?.totalSubmissions || 0;
+      const alerts = dept?.lowScoreAlerts || 0;
 
-                <div className="perf-bar-bg">
-                   <div
-                     className="perf-bar-fill"
-                      style={{
-                        width: `${(dept.overallRating / 5) * 100}%`,}}>
+      return (
+        <div
+          key={deptName}
+          className="dept-perf-card"
+        >
+          <h3>{deptName}</h3>
 
-                        </div>
-                  </div>
+          <div className="perf-score">
+            ⭐ {rating} / 5
+          </div>
 
-                      <div className="perf-footer">
-                        <span>Submissions: {dept.totalSubmissions}</span>
-                   <span>
-                   Low Score Alerts: {dept.lowScoreAlerts}</span>
-                </div>
-              </div>
-            ))}
+          <div className="perf-bar-bg">
+            <div
+              className="perf-bar-fill"
+              style={{
+                width: `${(rating / 5) * 100}%`,
+              }}
+            ></div>
+          </div>
+
+          <div className="perf-footer">
+            <span>
+              Submissions: {submissions}
+            </span>
+
+            <span>
+              Low Score Alerts: {alerts}
+            </span>
+          </div>
         </div>
+      );
+    })}
+</div>
       </div>
 
       {/* Faculty Leaderboard & Low Score Alerts */}

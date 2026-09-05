@@ -14,9 +14,13 @@ function StarRating({ value }) {
 }
 
 function AdminDashboard() {
-   const [recentFeedback, setRecentFeedback] = useState([]);
+  const [recentFeedback, setRecentFeedback] = useState([]);
   const [lowScoreFeedback, setLowScoreFeedback] = useState([]);
-  const completionPct = 86;
+  const [campusCompletion, setCampusCompletion] = useState({
+  percentage: 0,
+  submitted: 0,
+  designated: 0,
+});
 
     useEffect(() => {
     const fetchFeedbackReport = async () => {
@@ -33,6 +37,13 @@ function AdminDashboard() {
         }
 
         if (data.success) {
+           setCampusCompletion(
+           data.campusFeedbackCompletion || {
+           percentage: 0,
+           submitted: 0,
+           designated: 0,
+  }
+);
         const topRated = data.topRatedFaculty.map(
          (faculty, index) => ({
           id: index + 1,
@@ -128,17 +139,25 @@ function AdminDashboard() {
             <span className="stat-title">Feedback Completion</span>
             <span className="stat-icon">✅</span>
           </div>
-          <div className="stat-value">{completionPct}%</div>
-          <div className="stat-description">Students completed feedback</div>
-          <div className="completion-bar-bg">
-            <div
-              className="completion-bar-fill"
-              style={{ width: `${completionPct}%` }}
-            />
-          </div>
-        </div>
+         <div className="stat-value">
+         {campusCompletion.percentage}%
+     </div>
 
+        <div className="stat-description">
+         {campusCompletion.submitted} / {campusCompletion.designated} students completed feedback
       </div>
+
+       <div className="completion-bar-bg">
+      <div
+        className="completion-bar-fill"
+        style={{
+         width: `${campusCompletion.percentage}%`,
+        }}
+      />
+        </div>
+     </div>
+
+   </div>
 
 
       {/* ========================
