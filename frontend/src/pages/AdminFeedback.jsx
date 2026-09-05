@@ -25,6 +25,7 @@ function AdminFeedback() {
   const [deptFilter, setDeptFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedFaculty, setSelectedFaculty] = useState(null);
 
 
   useEffect(() => {
@@ -197,6 +198,8 @@ function AdminFeedback() {
           <option value="B.Tech">B.Tech</option>
         </select>
 
+
+
         <select
           className="af-select"
           value={statusFilter}
@@ -228,71 +231,84 @@ function AdminFeedback() {
             </tr>
           </thead>
 
-         <tbody>
-  {filtered.length > 0 ? (
-    filtered.map((fb) => {
-      const status =
-        Number(fb.overallRating) < 3.5
-          ? "Needs Review"
-          : "Pending";
+          <tbody>
+            {filtered.length > 0 ? (
+              filtered.map((fb) => {
+                const status =
+                  Number(fb.overallRating) < 3.5
+                    ? "Needs Review"
+                    : "Pending";
 
-      return (
-        <tr
-          key={`${fb.facultyName}-${fb.department}`}
-          className={
-            Number(fb.overallRating) < 3.5
-              ? "af-row-alert"
-              : ""
-          }
-        >
-          <td>
-            <div className="af-faculty-name">
-            {fb.facultyName}
-          </div>
+                return (
+                  <tr
+                    key={`${fb.facultyName}-${fb.department}`}
+                    className={
+                      Number(fb.overallRating) < 3.5
+                        ? "af-row-alert"
+                        : ""
+                    }
+                  >
+                    <td>
+                      <div className="af-faculty-name">
+                        {fb.facultyName}
+                      </div>
 
-         <div className="af-course-name">
-          {fb.subjects?.join(", ")}
-          </div>
-</td>
+                      <div className="af-course-name">
+                        {fb.subjects?.join(", ")}
+                      </div>
+                    </td>
 
-          <td>
-            <span className="af-dept-tag">
-              {fb.department}
-            </span>
-          </td>
+                    <td>
+                      <span className="af-dept-tag">
+                        {fb.department}
+                      </span>
+                    </td>
 
-          <td>
-            <div className="af-rating-value">
-              {fb.overallRating}
-            </div>
+                    <td>
+                      <div className="af-rating-value">
+                        {fb.overallRating}
+                      </div>
 
-            <StarDisplay value={fb.overallRating} />
-          </td>
+                      <StarDisplay value={fb.overallRating} />
+                    </td>
 
-          <td>
-            <span className="af-date">
-              {new Date(fb.date).toLocaleDateString()}
-            </span>
-          </td>
+                    <td>
+                      <span className="af-date">
+                        {fb.date ? new Date(fb.date).toLocaleDateString() : "N/A"}
+                      </span>
+                    </td>
 
-        <td>
-          <button className="af-view-btn">
-             View
-           </button>
-        </td>
-        </tr>
-      );
-    })
-  ) : (
-    <tr>
-      <td colSpan="6" className="af-empty">
-        {loading
-          ? "Loading feedbacks..."
-          : "No feedback entries match your filters."}
-      </td>
-    </tr>
-  )}
-</tbody>
+                    <td>
+                      <span
+                        className={`af-status-badge af-status-${status
+                          .toLowerCase()
+                          .replace(" ", "-")}`}
+                      >
+                        {status}
+                      </span>
+                    </td>
+
+                    <td>
+                      <button
+                        className="af-view-btn"
+                        onClick={() => alert(`Viewing feedback of ${fb.facultyName}`)}
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan="6" className="af-empty">
+                  {loading
+                    ? "Loading feedbacks..."
+                    : "No feedback entries match your filters."}
+                </td>
+              </tr>
+            )}
+          </tbody>
 
         </table>
       </div>

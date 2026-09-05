@@ -347,6 +347,7 @@
   }
 }
 
+<<<<<<< HEAD
 .af-view-btn {
   border: none;
   background: transparent;
@@ -360,3 +361,36 @@
 .af-view-btn:hover {
   text-decoration: underline;
 }
+=======
+
+/* ========================================
+   VIEW BUTTON
+======================================== */
+
+.af-view-btn {
+  padding: 7px 16px;
+  border: 1px solid #ea580c;
+  border-radius: 7px;
+  background: #ea580c;
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+  white-space: nowrap;
+
+  transition: all 0.2s ease;
+}
+
+.af-view-btn:hover {
+  background: #c2410c;
+  border-color: #c2410c;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(234, 88, 12, 0.25);
+}
+
+.af-view-btn:active {
+  transform: translateY(0);
+}
+>>>>>>> c6ee73c (For matrix changes)

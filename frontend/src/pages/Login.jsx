@@ -25,86 +25,88 @@ function Login() {
   // }, [isAuthenticated, user, navigate]);
 
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  try {
-    setError("");
+    try {
+      setError("");
 
-    // Demo Faculty Login
-    if (
-      email === "faculty@gmail.com" &&
-      password === "faculty123"
-    ) {
+      // Demo Faculty Login
+      if (
+        email === "faculty@gmail.com" &&
+        password === "faculty123"
+      ) {
+        login({
+          email: "faculty@gmail.com",
+          role: "Faculty",
+          name: "Demo Faculty",
+        });
+
+        navigate("/faculty/dashboard");
+        return;
+      }
+
+      // Admin Login
+      const response = await fetch(
+        "http://localhost:5000/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            gmail: email,
+            password: password,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Invalid email or password");
+        return;
+      }
+
+      // Login successful
       login({
-        email: "faculty@gmail.com",
-        role: "Faculty",
-        name: "Demo Faculty",
+        email: data.admin.gmail,
+        role: "Admin",
+        name: data.admin.username || "Admin",
       });
 
-      navigate("/faculty/dashboard");
-      return;
+      navigate("/admin/dashboard");
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("Unable to connect to server. Please try again.");
     }
-
-    // Admin Login
-    const response = await fetch(
-      "http://localhost:5000/api/auth/login",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          gmail: email,
-          password: password,
-        }),
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      setError(data.message || "Invalid email or password");
-      return;
-    }
-
-    login({
-      email: data.admin.gmail,
-      role: "Admin",
-      name: data.admin.username || "Admin",
-    });
-
-    navigate("/admin/dashboard");
-  } catch (error) {
-    console.error("Login error:", error);
-    setError("Unable to connect to server. Please try again.");
-  }
-};
-  const handleFillDemoFaculty = () => {
-    setEmail("faculty@gmail.com");
-    setPassword("faculty123");
-    setError("");
   };
 
-  return (
-    <div className="login-page">
-      <div className="login-card">
+const handleFillDemoFaculty = () => {
+  setEmail("faculty@gmail.com");
+  setPassword("faculty123");
+  setError("");
+};
 
-        <div className="login-logo-wrapper">
-          <img
-            src={ssecLogo}
-            alt="SSISM Logo"
-            className="login-logo"
-          />
-        </div>
+return (
+  <div className="login-page">
+    <div className="login-card">
 
-        <h1 className="login-title">Welcome</h1>
+      <div className="login-logo-wrapper">
+        <img
+          src={ssecLogo}
+          alt="SSISM Logo"
+          className="login-logo"
+        />
+      </div>
 
-        <p className="login-subtitle">
-          Sign in to your account to continue
-        </p>
+      <h1 className="login-title">Welcome</h1>
 
-        <div className="demo-credentials-hints">
+      <p className="login-subtitle">
+        Sign in to your account to continue
+      </p>
+
+      {/* <div className="demo-credentials-hints">
 
           <button
             type="button"
@@ -113,62 +115,62 @@ function Login() {
           >
             Demo Faculty
           </button>
+        </div> */}
+
+      <form onSubmit={handleSubmit} className="login-form">
+
+        <div className="login-form-group">
+          <label htmlFor="email">Email Address</label>
+
+          <input
+            id="email"
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setError("");
+            }}
+            required
+          />
         </div>
 
-        <form onSubmit={handleSubmit} className="login-form">
+        <div className="login-form-group">
+          <label htmlFor="password">Password</label>
 
-          <div className="login-form-group">
-            <label htmlFor="email">Email Address</label>
+          <input
+            id="password"
+            type="password"
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setError("");
+            }}
+            required
+          />
+        </div>
 
-            <input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setError("");
-              }}
-              required
-            />
+        {error && (
+          <div className="login-error">
+            <span>⚠</span> {error}
           </div>
+        )}
 
-          <div className="login-form-group">
-            <label htmlFor="password">Password</label>
+        <button type="submit" className="login-button">
+          Sign In
+        </button>
 
-            <input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setError("");
-              }}
-              required
-            />
-          </div>
+      </form>
 
-          {error && (
-            <div className="login-error">
-              <span>⚠</span> {error}
-            </div>
-          )}
-
-          <button type="submit" className="login-button">
-            Sign In
-          </button>
-
-        </form>
-
-        {/* <div className="register-link">
+      {/* <div className="register-link">
           <span>Don't have an account?</span>
           <Link to="/register">Register</Link>
         </div> */}
 
-      </div>
     </div>
-  );
+  </div>
+);
 }
 
 export default Login;
