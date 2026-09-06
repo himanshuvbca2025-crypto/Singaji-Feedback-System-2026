@@ -1,65 +1,120 @@
-const bcrypt = require('bcryptjs');
-const Admin = require('../models/admin');
+const bcrypt = require("bcrypt");
 
-const adminLogin = async (req, res) => {
-    try {
-        const { gmail, password } = req.body;
+const Admin = require("../models/Admin");
+const Faculty = require("../models/Faculty");
 
+const Login = async (req, res) => {
+  try {
+    const { gmail, password } = req.body;
 
-        if (!gmail || !password) {
-            return res.status(400).json({
-                success: false,
-                message: 'Gmail and password are required'
-            });
-        }
-
-        const admin = await Admin.findOne({ gmail });
-
-        console.log(admin);
-        
-
-        if (!admin) {
-            return res.status(401).json({
-                success: false,
-                message: 'Invalid gmail or password'
-            });
-        }
-
-        const isPasswordMatch = await bcrypt.compare(
-            password,
-            admin.password
-        );
-
-        console.log(isPasswordMatch);
-        
-
-        if (!isPasswordMatch) {
-            return res.status(401).json({
-                success: false,
-                message: 'Invalid gmail or password'
-            });
-        }
-
-        return res.status(200).json({
-            success: true,
-            message: 'Admin login successful',
-            admin: {
-                id: admin._id,
-                username: admin.username,
-                gmail: admin.gmail
-            }
-        });
-
-    } catch (error) {
-        console.error('Admin login error:', error);
-
-        return res.status(500).json({
-            success: false,
-            message: 'Internal server error'
-        });
+    if (!gmail || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Gmail and password are required",
+      });
     }
+
+    const normalizedGmail = gmail.toLowerCase().trim();
+
+    // ==========================================
+    // 1. CHECK ADMIN
+    // ==========================================
+
+    const admin = await Admin.findOne({
+      gmail: normalizedGmail,
+    });
+
+    if (admin) {
+      const isPasswordValid = await bcrypt.compare(
+        password,
+        admin.password
+      );
+
+      if (!isPasswordValid) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid Gmail or password",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        role: "Admin",
+        message: "Admin login successful",
+
+        user: {
+          name: admin.username,
+          gmail: admin.gmail,
+          role: "Admin",
+        },
+      });
+    }
+
+    // ==========================================
+    // 2. CHECK FACULTY
+    // ==========================================
+
+    const faculty = await Faculty.findOne({
+      gmail: normalizedGmail,
+    });
+
+    if (faculty) {
+      if (!faculty.isActive) {
+        return res.status(403).json({
+          success: false,
+          message: "Faculty account is inactive",
+        });
+      }
+
+      const isPasswordValid = await bcrypt.compare(
+        password,
+        faculty.password
+      );
+
+      if (!isPasswordValid) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid Gmail or password",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        role: "Faculty",
+        message: "Faculty login successful",
+
+        user: {
+          name: faculty.name,
+          gmail: faculty.gmail,
+
+          // DB mein section hai
+          // frontend mein department use karenge
+          department: faculty.section,
+
+          subjects: faculty.subjects,
+          role: "Faculty",
+        },
+      });
+    }
+
+    // ==========================================
+    // 3. NEITHER ADMIN NOR FACULTY
+    // ==========================================
+
+    return res.status(401).json({
+      success: false,
+      message: "Invalid Gmail or password",
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
 };
 
 module.exports = {
-    adminLogin
+  Login,
 };

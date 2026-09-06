@@ -1,5 +1,82 @@
 const Faculty = require("../models/Faculty");
 
+const bcrypt = require("bcrypt");
+
+const facultyLogin = async (req, res) => {
+  try {
+    const { gmail, password } = req.body;
+
+    // Check required fields
+    if (!gmail || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Gmail and password are required",
+      });
+    }
+
+    // Find faculty by Gmail
+    const faculty = await Faculty.findOne({
+      gmail: gmail.toLowerCase().trim(),
+    });
+
+    // Faculty not found
+    if (!faculty) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid Gmail or password",
+      });
+    }
+
+    // Check active status
+    if (!faculty.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: "Faculty account is inactive",
+      });
+    }
+
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      faculty.password
+    );
+
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid Gmail or password",
+      });
+    }
+
+    // Login successful
+    return res.status(200).json({
+      success: true,
+      message: "Faculty login successful",
+
+      faculty: {
+        name: faculty.name,
+        gmail: faculty.gmail,
+
+        // Database mein section hai,
+        // frontend mein hum ise department bolenge
+        department: faculty.section,
+
+        subjects: faculty.subjects,
+
+        isActive: faculty.isActive,
+      },
+    });
+  } catch (error) {
+    console.error("Faculty login error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+
 
 const getAllFaculty = async (req, res) => {
   try {
@@ -232,4 +309,5 @@ module.exports = {
   createFaculty,
   updateFaculty,
   deleteFaculty,
+  facultyLogin,
 };

@@ -26,66 +26,52 @@ function Login() {
 
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      setError("");
+  try {
+    setError("");
 
-      // Demo Faculty Login
-      if (
-        email === "faculty@gmail.com" &&
-        password === "faculty123"
-      ) {
-        login({
-          email: "faculty@gmail.com",
-          role: "Faculty",
-          name: "Demo Faculty",
-        });
-
-        navigate("/faculty/dashboard");
-        return;
+    const response = await fetch(
+      "http://localhost:5000/api/auth/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          gmail: email,
+          password: password,
+        }),
       }
+    );
 
-      // Admin Login
-      const response = await fetch(
-        "http://localhost:5000/api/auth/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            gmail: email,
-            password: password,
-          }),
-        }
-      );
+    const data = await response.json();
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || "Invalid email or password");
-        return;
-      }
-
-      // Login successful
-      login({
-        email: data.admin.gmail,
-        role: "Admin",
-        name: data.admin.username || "Admin",
-      });
-
-      navigate("/admin/dashboard");
-    } catch (error) {
-      console.error("Login error:", error);
-      setError("Unable to connect to server. Please try again.");
+    if (!response.ok) {
+      setError(data.message || "Invalid email or password");
+      return;
     }
-  };
 
-const handleFillDemoFaculty = () => {
-  setEmail("faculty@gmail.com");
-  setPassword("faculty123");
-  setError("");
+    // Login successful
+    login({
+      email: data.user.gmail,
+      role: data.role,
+      name: data.user.name,
+      department: data.user.department,
+      subjects: data.user.subjects,
+      isActive: data.user.isActive,
+    });
+
+    // Role ke according dashboard
+    if (data.role === "Faculty") {
+      navigate("/faculty/dashboard");
+    } else if (data.role === "Admin") {
+      navigate("/admin/dashboard");
+    }
+  } catch (error) {
+    console.error("Login error:", error);
+    setError("Unable to connect to server. Please try again.");
+  }
 };
 
 return (

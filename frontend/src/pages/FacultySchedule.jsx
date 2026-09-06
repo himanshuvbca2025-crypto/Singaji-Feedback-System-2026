@@ -1,25 +1,156 @@
-import { useState } from "react";
-import { timetableData } from "../data/facultyData.js";
+import { useEffect, useState } from "react";
+import useAuth from "../hooks/useAuth.js";
 import "./FacultySchedule.css";
 
 function FacultySchedule() {
-  const [currentDate] = useState("03-09-2026");
-  const [currentDay] = useState("Thursday");
+  const { user } = useAuth();
+
+  const [schedules, setSchedules] = useState([]);
+  const [scheduleTiming, setScheduleTiming] = useState({
+    slot1: { startTime: "", endTime: "" },
+    lunchBreak: { startTime: "", endTime: "" },
+    slot2: { startTime: "", endTime: "" },
+    teaBreak: { startTime: "", endTime: "" },
+    slot3: { startTime: "", endTime: "" },
+  });
+
+  // Get only today's schedules for the logged-in faculty's department
+  useEffect(() => {
+    const fetchTodaySchedules = async () => {
+      try {
+        if (!user?.department) return;
+
+        const response = await fetch(
+          `http://localhost:5000/api/schedules/today?department=${encodeURIComponent(
+            user.department
+          )}`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.error(
+            "Failed to fetch today's schedules:",
+            data.message
+          );
+          return;
+        }
+
+        const dbSchedules = data.schedules || [];
+        setSchedules(dbSchedules);
+
+        // All rows of the day use the timing from the first schedule.
+        if (dbSchedules.length > 0) {
+          const firstSchedule = dbSchedules[0];
+
+          setScheduleTiming({
+            slot1: {
+              startTime: firstSchedule.slot1?.startTime || "",
+              endTime: firstSchedule.slot1?.endTime || "",
+            },
+            lunchBreak: {
+              startTime: firstSchedule.lunchBreak?.startTime || "",
+              endTime: firstSchedule.lunchBreak?.endTime || "",
+            },
+            slot2: {
+              startTime: firstSchedule.slot2?.startTime || "",
+              endTime: firstSchedule.slot2?.endTime || "",
+            },
+            teaBreak: {
+              startTime: firstSchedule.teaBreak?.startTime || "",
+              endTime: firstSchedule.teaBreak?.endTime || "",
+            },
+            slot3: {
+              startTime: firstSchedule.slot3?.startTime || "",
+              endTime: firstSchedule.slot3?.endTime || "",
+            },
+          });
+        } else {
+          setScheduleTiming({
+            slot1: { startTime: "", endTime: "" },
+            lunchBreak: { startTime: "", endTime: "" },
+            slot2: { startTime: "", endTime: "" },
+            teaBreak: { startTime: "", endTime: "" },
+            slot3: { startTime: "", endTime: "" },
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching today's schedules:", error);
+      }
+    };
+
+    fetchTodaySchedules();
+  }, [user?.department]);
+
+  const today = new Date();
+
+  const currentDate = today
+    .toLocaleDateString("en-GB")
+    .replace(/\//g, "-");
+
+  const currentDay = today.toLocaleDateString("en-US", {
+    weekday: "long",
+  });
+
+  const formatTime = (time) => {
+    if (!time) return "--:--";
+
+    const [hours, minutes] = time.split(":");
+    const hour = Number(hours);
+    const suffix = hour >= 12 ? "PM" : "AM";
+    const displayHour = hour % 12 || 12;
+
+    return `${String(displayHour).padStart(2, "0")}:${minutes} ${suffix}`;
+  };
 
   const handleShareSchedule = async () => {
-    // Generate the complete schedule text
-    let shareText = `SANT SINGAJI INSTITUTE OF SCIENCE AND MANAGEMENT, SANDALPUR\n`;
+    let shareText =
+      "SANT SINGAJI INSTITUTE OF SCIENCE AND MANAGEMENT, SANDALPUR\n";
     shareText += `Date: ${currentDate} | Day: ${currentDay}\n`;
-    shareText += `====================================\n\n`;
+    shareText += "====================================\n\n";
 
-    timetableData.forEach((row) => {
-      shareText += `Class: ${row.class} | Group: ${row.group} | Strength: ${row.strength}\n`;
-      shareText += `[10:00 AM - 11:30 AM]: ${row.slot1.subject || "Empty"} (${row.slot1.faculty || "None"})\n`;
-      shareText += `[11:30 AM - 12:10 PM]: LUNCH BREAK\n`;
-      shareText += `[12:10 PM - 01:40 PM]: ${row.slot2.subject || "Empty"} (${row.slot2.faculty || "None"})\n`;
-      shareText += `[01:40 PM - 02:00 PM]: TEA BREAK\n`;
-      shareText += `[02:00 PM - 03:30 PM]: ${row.slot3.subject || "Empty"} (${row.slot3.faculty || "None"})\n`;
-      shareText += `------------------------------------\n`;
+    schedules.forEach((row) => {
+      shareText += `Class: ${row.class} | Group: ${
+        row.groups?.join(", ") || ""
+      } | Strength: ${row.strength}\n`;
+
+      shareText += `[${formatTime(
+        scheduleTiming.slot1.startTime
+      )} - ${formatTime(
+        scheduleTiming.slot1.endTime
+      )}]: ${row.slot1?.subject || "Empty"} (${
+        row.slot1?.facultyName || "None"
+      })\n`;
+
+      shareText += `[${formatTime(
+        scheduleTiming.lunchBreak.startTime
+      )} - ${formatTime(
+        scheduleTiming.lunchBreak.endTime
+      )}]: LUNCH BREAK\n`;
+
+      shareText += `[${formatTime(
+        scheduleTiming.slot2.startTime
+      )} - ${formatTime(
+        scheduleTiming.slot2.endTime
+      )}]: ${row.slot2?.subject || "Empty"} (${
+        row.slot2?.facultyName || "None"
+      })\n`;
+
+      shareText += `[${formatTime(
+        scheduleTiming.teaBreak.startTime
+      )} - ${formatTime(
+        scheduleTiming.teaBreak.endTime
+      )}]: TEA BREAK\n`;
+
+      shareText += `[${formatTime(
+        scheduleTiming.slot3.startTime
+      )} - ${formatTime(
+        scheduleTiming.slot3.endTime
+      )}]: ${row.slot3?.subject || "Empty"} (${
+        row.slot3?.facultyName || "None"
+      })\n`;
+
+      shareText += "------------------------------------\n";
     });
 
     if (navigator.share) {
@@ -35,7 +166,7 @@ function FacultySchedule() {
       try {
         await navigator.clipboard.writeText(shareText);
         alert("Complete schedule copied to clipboard!");
-      } catch (err) {
+      } catch (error) {
         alert("Failed to copy schedule to clipboard.");
       }
     }
@@ -51,11 +182,18 @@ function FacultySchedule() {
       <div className="timetable-wrapper">
         <div className="timetable-header-top">
           <div className="institute-info">
-            <h2>Sant Singaji Institute of Science and Management, Sandalpur</h2>
-            <p>September 2026 • Date: {currentDate} • {currentDay} • Day 23</p>
+            <h2>
+              Sant Singaji Institute of Science and Management, Sandalpur
+            </h2>
+            <p>
+              Today • Date: {currentDate} • {currentDay}
+            </p>
           </div>
-          
-          <button className="btn-share-schedule" onClick={handleShareSchedule}>
+
+          <button
+            className="btn-share-schedule"
+            onClick={handleShareSchedule}
+          >
             <span>📤</span> Share Schedule
           </button>
         </div>
@@ -74,60 +212,93 @@ function FacultySchedule() {
                 <th rowSpan="2">Tea Break</th>
                 <th>Slot 3</th>
               </tr>
+
               <tr className="timing-header">
-                <th>10:00 AM to 11:30 AM</th>
-                <th>12:10 PM to 01:40 PM</th>
-                <th>02:00 PM to 03:30 PM</th>
+                <th>
+                  {formatTime(scheduleTiming.slot1.startTime)} to{" "}
+                  {formatTime(scheduleTiming.slot1.endTime)}
+                </th>
+
+                <th>
+                  {formatTime(scheduleTiming.slot2.startTime)} to{" "}
+                  {formatTime(scheduleTiming.slot2.endTime)}
+                </th>
+
+                <th>
+                  {formatTime(scheduleTiming.slot3.startTime)} to{" "}
+                  {formatTime(scheduleTiming.slot3.endTime)}
+                </th>
               </tr>
             </thead>
+
             <tbody>
-              {timetableData.map((row, index) => (
-                <tr key={row.sno}>
-                  <td>{row.sno}</td>
+              {schedules.map((row, index) => (
+                <tr key={row._id}>
+                  <td>{index + 1}</td>
+
                   <td>{row.class}</td>
-                  <td>{row.group}</td>
+
+                  <td>{row.groups?.join(", ") || "-"}</td>
+
                   <td>{row.strength}</td>
+
                   <td>
-                    {row.slot1.subject ? (
+                    {row.slot1?.subject ? (
                       <>
-                        <div className="slot-subject">{row.slot1.subject}</div>
-                        <div className="slot-faculty">{row.slot1.faculty}</div>
+                        <div className="slot-subject">
+                          {row.slot1.subject}
+                        </div>
+                        <div className="slot-faculty">
+                          {row.slot1.facultyName}
+                        </div>
                       </>
                     ) : (
                       <div className="empty-slot">-</div>
                     )}
                   </td>
 
-                  {/* Render Lunch Break ONLY ONCE and span rows */}
                   {index === 0 && (
-                    <td className="break-cell" rowSpan={timetableData.length}>
+                    <td
+                      className="break-cell"
+                      rowSpan={schedules.length}
+                    >
                       LUNCH BREAK
                     </td>
                   )}
 
                   <td>
-                    {row.slot2.subject ? (
+                    {row.slot2?.subject ? (
                       <>
-                        <div className="slot-subject">{row.slot2.subject}</div>
-                        <div className="slot-faculty">{row.slot2.faculty}</div>
+                        <div className="slot-subject">
+                          {row.slot2.subject}
+                        </div>
+                        <div className="slot-faculty">
+                          {row.slot2.facultyName}
+                        </div>
                       </>
                     ) : (
                       <div className="empty-slot">-</div>
                     )}
                   </td>
 
-                  {/* Render Tea Break ONLY ONCE and span rows */}
                   {index === 0 && (
-                    <td className="break-cell" rowSpan={timetableData.length}>
+                    <td
+                      className="break-cell"
+                      rowSpan={schedules.length}
+                    >
                       TEA BREAK
                     </td>
                   )}
 
                   <td>
-                    {row.slot3.subject ? (
+                    {row.slot3?.subject ? (
                       <>
-                        <div className="slot-subject">{row.slot3.subject}</div>
-                        <div className="slot-faculty">{row.slot3.faculty}</div>
+                        <div className="slot-subject">
+                          {row.slot3.subject}
+                        </div>
+                        <div className="slot-faculty">
+                          {row.slot3.facultyName}
+                        </div>
                       </>
                     ) : (
                       <div className="empty-slot">-</div>
@@ -135,6 +306,14 @@ function FacultySchedule() {
                   </td>
                 </tr>
               ))}
+
+              {schedules.length === 0 && (
+                <tr>
+                  <td colSpan="9" className="empty-schedule">
+                    No schedule available for today.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

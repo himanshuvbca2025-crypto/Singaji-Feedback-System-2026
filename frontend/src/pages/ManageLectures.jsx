@@ -1,60 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "../components/Modal.jsx";
 import "./ManageLectures.css";
 
 function ManageLectures() {
-  const [lectures, setLectures] = useState([
-    {
-      id: "1",
-      subject: "Programming in C++ & Java",
-      faculty: "Dr. Rahul Sharma",
-      department: "ITEG",
-      date: "2026-09-02",
-      time: "10:00 AM - 11:30 AM",
-      room: "Lab-3",
-
-    },
-    {
-      id: "2",
-      subject: "Database Management Systems",
-      faculty: "Prof. Neha Jain",
-      department: "ITEG",
-      date: "2026-09-02",
-      time: "11:45 AM - 01:15 PM",
-      room: "Hall-102",
-      status: "In Progress",
-    },
-    {
-      id: "3",
-      subject: "Fluid Mechanics",
-      faculty: "Dr. Priya Verma",
-      department: "MEG",
-      date: "2026-09-02",
-      time: "02:00 PM - 03:30 PM",
-      room: "Workshop-B",
-      status: "Scheduled",
-    },
-    {
-      id: "4",
-      subject: "Technical Communication",
-      faculty: "Prof. Pooja Sharma",
-      department: "BEG",
-      date: "2026-09-02",
-      time: "09:00 AM - 10:00 AM",
-      room: "Room-204",
-      status: "Completed",
-    },
-    {
-      id: "5",
-      subject: "Computer Networks & Security",
-      faculty: "Dr. S.K. Mehta",
-      department: "B.Tech",
-      date: "2026-09-02",
-      time: "03:30 PM - 05:00 PM",
-      room: "Auditorium",
-      status: "Scheduled",
-    },
-  ]);
+  const [lectures, setLectures] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const departments = ["ITEG", "MEG", "BEG", "B.Tech"];
 
@@ -74,29 +24,155 @@ function ManageLectures() {
 
   const [activeLecture, setActiveLecture] = useState(null);
 
-  // Add lecture
+  // ---------------------------------------
+  // GET TODAY'S SCHEDULES FROM DATABASE
+  // ---------------------------------------
+  useEffect(() => {
+    const fetchLectures = async () => {
+      try {
+        setLoading(true);
+
+        const response = await fetch(
+          "http://localhost:5000/api/schedules/today"
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to fetch schedules");
+        }
+
+        const schedules = data.schedules || data.data || [];
+
+        const lectureList = [];
+
+        schedules.forEach((schedule) => {
+          const slots = [
+            {
+              slot: schedule.slot1,
+              slotNumber: 1,
+            },
+            {
+              slot: schedule.slot2,
+              slotNumber: 2,
+            },
+            {
+              slot: schedule.slot3,
+              slotNumber: 3,
+            },
+          ];
+
+          slots.forEach(({ slot }) => {
+            if (!slot?.subject) return;
+
+            lectureList.push({
+              id: `${schedule._id}-${slot.startTime}-${slot.subject}`,
+              subject: slot.subject,
+              faculty: slot.facultyName || "Faculty not assigned",
+              department: schedule.department,
+              date: schedule.date,
+              time:
+                slot.startTime && slot.endTime
+                  ? `${slot.startTime} - ${slot.endTime}`
+                  : "Time not available",
+              room: schedule.class || "Room not assigned",
+              status: getLectureStatus(
+                schedule.date,
+                slot.startTime,
+                slot.endTime
+              ),
+            });
+          });
+        });
+
+        setLectures(lectureList);
+      } catch (error) {
+        console.error("Error fetching today's lectures:", error);
+        setLectures([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLectures();
+  }, []);
+
+  // ---------------------------------------
+  // LECTURE STATUS
+  // ---------------------------------------
+  const getLectureStatus = (date, startTime, endTime) => {
+    if (!startTime || !endTime) return "Scheduled";
+
+    const now = new Date();
+
+    const scheduleDate = new Date(date);
+
+    if (Number.isNaN(scheduleDate.getTime())) {
+      return "Scheduled";
+    }
+
+    const datePart = scheduleDate.toLocaleDateString("en-CA");
+
+    const parseTime = (timeString) => {
+      const match = timeString.match(
+        /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i
+      );
+
+      if (!match) return null;
+
+      let hours = Number(match[1]);
+      const minutes = Number(match[2]);
+      const period = match[3].toUpperCase();
+
+      if (period === "PM" && hours !== 12) hours += 12;
+      if (period === "AM" && hours === 12) hours = 0;
+
+      const result = new Date(`${datePart}T00:00:00`);
+      result.setHours(hours, minutes, 0, 0);
+
+      return result;
+    };
+
+    const start = parseTime(startTime);
+    const end = parseTime(endTime);
+
+    if (!start || !end) return "Scheduled";
+
+    if (now < start) return "Scheduled";
+    if (now >= start && now <= end) return "In Progress";
+    return "Completed";
+  };
+
+  const formatDate = (date) => {
+    if (!date) return "-";
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return date;
+    }
+
+    return parsedDate.toLocaleDateString("en-CA");
+  };
+
+  // ---------------------------------------
+  // ADD LECTURE
+  // ---------------------------------------
   const handleAddLecture = (e) => {
     e.preventDefault();
-    if (!newLecture.subject || !newLecture.faculty || !newLecture.room) return;
 
-    const created = {
-      id: Date.now().toString(),
-      ...newLecture,
-    };
-    setLectures([...lectures, created]);
-    setNewLecture({
-      subject: "",
-      faculty: "",
-      department: "ITEG",
-      date: new Date().toISOString().split("T")[0],
-      time: "10:00 AM - 11:00 AM",
-      room: "Lab-1",
-      status: "Scheduled",
-    });
+    if (!newLecture.subject || !newLecture.faculty || !newLecture.room) {
+      return;
+    }
+
+    // Schedule creation is handled from Faculty Dashboard.
+    // Admin page only displays database schedules here.
     setIsAddModalOpen(false);
   };
 
-  // Edit lecture
+  // ---------------------------------------
+  // EDIT LECTURE
+  // ---------------------------------------
   const handleOpenEdit = (lec) => {
     setActiveLecture({ ...lec });
     setIsEditModalOpen(true);
@@ -104,24 +180,23 @@ function ManageLectures() {
 
   const handleSaveEdit = (e) => {
     e.preventDefault();
-    if (!activeLecture) return;
 
-    setLectures(
-      lectures.map((l) => (l.id === activeLecture.id ? activeLecture : l))
-    );
+    // Schedule updates should be handled through the Schedule API.
     setIsEditModalOpen(false);
     setActiveLecture(null);
   };
 
-  // Delete lecture
+  // ---------------------------------------
+  // DELETE LECTURE
+  // ---------------------------------------
   const handleOpenDelete = (lec) => {
     setActiveLecture(lec);
     setIsDeleteModalOpen(true);
   };
 
   const handleConfirmDelete = () => {
-    if (!activeLecture) return;
-    setLectures(lectures.filter((l) => l.id !== activeLecture.id));
+    // Schedule deletion API can be connected here when admin
+    // delete functionality is required.
     setIsDeleteModalOpen(false);
     setActiveLecture(null);
   };
@@ -131,33 +206,43 @@ function ManageLectures() {
       <div className="lectures-header">
         <div>
           <h1>Manage Daily Lectures</h1>
-          <p>Schedule, manage classrooms, and track active lecture status.</p>
+          <p>
+            Schedule, manage classrooms, and track active lecture status.
+          </p>
         </div>
       </div>
 
       <div className="lectures-list">
-        {lectures.length > 0 ? (
+        {loading ? (
+          <div className="no-data-box">Loading lectures...</div>
+        ) : lectures.length > 0 ? (
           lectures.map((lec) => (
             <div key={lec.id} className="lecture-row-card">
               <div className="lecture-main-info">
                 <div className="lecture-time-badge">
-                  <span>📅 {lec.date}</span>
+                  <span>📅 {formatDate(lec.date)}</span>
                   <strong>⏰ {lec.time}</strong>
                 </div>
 
                 <div className="lecture-details">
                   <h3>{lec.subject}</h3>
+
                   <p>
-                    👨‍🏫 <strong>{lec.faculty}</strong> • 🏛 {lec.department} Department
+                    👨‍🏫 <strong>{lec.faculty}</strong> • 🏛{" "}
+                    {lec.department} Department
                   </p>
-                  <span className="room-tag">📍 Room / Venue: {lec.room}</span>
+
+                  <span className="room-tag">
+                    📍 Room / Venue: {lec.room}
+                  </span>
                 </div>
               </div>
-
             </div>
           ))
         ) : (
-          <div className="no-data-box">No lectures scheduled. Add one to get started.</div>
+          <div className="no-data-box">
+            No lectures scheduled for today.
+          </div>
         )}
       </div>
 
@@ -175,7 +260,10 @@ function ManageLectures() {
               placeholder="e.g. Java OOP Concepts"
               value={newLecture.subject}
               onChange={(e) =>
-                setNewLecture({ ...newLecture, subject: e.target.value })
+                setNewLecture({
+                  ...newLecture,
+                  subject: e.target.value,
+                })
               }
               required
             />
@@ -188,7 +276,10 @@ function ManageLectures() {
               placeholder="e.g. Dr. Rahul Sharma"
               value={newLecture.faculty}
               onChange={(e) =>
-                setNewLecture({ ...newLecture, faculty: e.target.value })
+                setNewLecture({
+                  ...newLecture,
+                  faculty: e.target.value,
+                })
               }
               required
             />
@@ -199,7 +290,10 @@ function ManageLectures() {
             <select
               value={newLecture.department}
               onChange={(e) =>
-                setNewLecture({ ...newLecture, department: e.target.value })
+                setNewLecture({
+                  ...newLecture,
+                  department: e.target.value,
+                })
               }
             >
               {departments.map((d) => (
@@ -216,7 +310,10 @@ function ManageLectures() {
               type="date"
               value={newLecture.date}
               onChange={(e) =>
-                setNewLecture({ ...newLecture, date: e.target.value })
+                setNewLecture({
+                  ...newLecture,
+                  date: e.target.value,
+                })
               }
               required
             />
@@ -229,7 +326,10 @@ function ManageLectures() {
               placeholder="e.g. 10:00 AM - 11:30 AM"
               value={newLecture.time}
               onChange={(e) =>
-                setNewLecture({ ...newLecture, time: e.target.value })
+                setNewLecture({
+                  ...newLecture,
+                  time: e.target.value,
+                })
               }
               required
             />
@@ -242,7 +342,10 @@ function ManageLectures() {
               placeholder="e.g. Lab-3"
               value={newLecture.room}
               onChange={(e) =>
-                setNewLecture({ ...newLecture, room: e.target.value })
+                setNewLecture({
+                  ...newLecture,
+                  room: e.target.value,
+                })
               }
               required
             />
@@ -253,7 +356,10 @@ function ManageLectures() {
             <select
               value={newLecture.status}
               onChange={(e) =>
-                setNewLecture({ ...newLecture, status: e.target.value })
+                setNewLecture({
+                  ...newLecture,
+                  status: e.target.value,
+                })
               }
             >
               <option value="Scheduled">Scheduled</option>
@@ -270,6 +376,7 @@ function ManageLectures() {
             >
               Cancel
             </button>
+
             <button type="submit" className="btn-primary">
               Schedule Lecture
             </button>
@@ -291,7 +398,10 @@ function ManageLectures() {
                 type="text"
                 value={activeLecture.subject}
                 onChange={(e) =>
-                  setActiveLecture({ ...activeLecture, subject: e.target.value })
+                  setActiveLecture({
+                    ...activeLecture,
+                    subject: e.target.value,
+                  })
                 }
                 required
               />
@@ -303,7 +413,10 @@ function ManageLectures() {
                 type="text"
                 value={activeLecture.faculty}
                 onChange={(e) =>
-                  setActiveLecture({ ...activeLecture, faculty: e.target.value })
+                  setActiveLecture({
+                    ...activeLecture,
+                    faculty: e.target.value,
+                  })
                 }
                 required
               />
@@ -314,7 +427,10 @@ function ManageLectures() {
               <select
                 value={activeLecture.department}
                 onChange={(e) =>
-                  setActiveLecture({ ...activeLecture, department: e.target.value })
+                  setActiveLecture({
+                    ...activeLecture,
+                    department: e.target.value,
+                  })
                 }
               >
                 {departments.map((d) => (
@@ -331,7 +447,10 @@ function ManageLectures() {
                 type="date"
                 value={activeLecture.date}
                 onChange={(e) =>
-                  setActiveLecture({ ...activeLecture, date: e.target.value })
+                  setActiveLecture({
+                    ...activeLecture,
+                    date: e.target.value,
+                  })
                 }
                 required
               />
@@ -343,7 +462,10 @@ function ManageLectures() {
                 type="text"
                 value={activeLecture.time}
                 onChange={(e) =>
-                  setActiveLecture({ ...activeLecture, time: e.target.value })
+                  setActiveLecture({
+                    ...activeLecture,
+                    time: e.target.value,
+                  })
                 }
                 required
               />
@@ -355,7 +477,10 @@ function ManageLectures() {
                 type="text"
                 value={activeLecture.room}
                 onChange={(e) =>
-                  setActiveLecture({ ...activeLecture, room: e.target.value })
+                  setActiveLecture({
+                    ...activeLecture,
+                    room: e.target.value,
+                  })
                 }
                 required
               />
@@ -366,7 +491,10 @@ function ManageLectures() {
               <select
                 value={activeLecture.status}
                 onChange={(e) =>
-                  setActiveLecture({ ...activeLecture, status: e.target.value })
+                  setActiveLecture({
+                    ...activeLecture,
+                    status: e.target.value,
+                  })
                 }
               >
                 <option value="Scheduled">Scheduled</option>
@@ -383,6 +511,7 @@ function ManageLectures() {
               >
                 Cancel
               </button>
+
               <button type="submit" className="btn-primary">
                 Save Changes
               </button>
@@ -399,6 +528,7 @@ function ManageLectures() {
       >
         <div className="confirm-delete-body">
           <span className="confirm-icon">🗑️</span>
+
           <p>
             Are you sure you want to cancel and delete the lecture{" "}
             <strong>{activeLecture?.subject}</strong>?
@@ -406,6 +536,7 @@ function ManageLectures() {
             This action cannot be undone.
           </p>
         </div>
+
         <div className="modal-actions">
           <button
             type="button"
@@ -414,6 +545,7 @@ function ManageLectures() {
           >
             Keep Lecture
           </button>
+
           <button
             type="button"
             className="btn-danger"
@@ -423,7 +555,6 @@ function ManageLectures() {
           </button>
         </div>
       </Modal>
-
     </div>
   );
 }

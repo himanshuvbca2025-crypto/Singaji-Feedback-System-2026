@@ -16,6 +16,8 @@ function StarRating({ value }) {
 function AdminDashboard() {
   const [recentFeedback, setRecentFeedback] = useState([]);
   const [lowScoreFeedback, setLowScoreFeedback] = useState([]);
+
+  const [todayLectures, setTodayLectures] = useState(0);
   const [campusCompletion, setCampusCompletion] = useState({
     percentage: 0,
     submitted: 0,
@@ -26,6 +28,53 @@ function AdminDashboard() {
     totalSubmissions: 0,
     lowScoreAlerts: 0,
   });
+
+  useEffect(() => {
+  const fetchTodaySchedules = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/schedules/today"
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error(data.message);
+        return;
+      }
+
+     if (data.success) {
+  const schedules = data.schedules || [];
+
+  const totalLectures = schedules.reduce((total, schedule) => {
+    let count = 0;
+
+    if (schedule.slot1?.subject) {
+      count++;
+    }
+
+    if (schedule.slot2?.subject) {
+      count++;
+    }
+
+    if (schedule.slot3?.subject) {
+      count++;
+    }
+
+    return total + count;
+  }, 0);
+
+  setTodayLectures(totalLectures);
+}
+    } catch (error) {
+      console.error("Error fetching today's schedules:", error);
+    }
+  };
+
+  fetchTodaySchedules();
+}, []);
+
+
 
   useEffect(() => {
     const fetchFeedbackReport = async () => {
@@ -116,7 +165,7 @@ function AdminDashboard() {
             <span className="stat-title">Today's Lectures Held</span>
             <span className="stat-icon">🎓</span>
           </div>
-          <div className="stat-value">12</div>
+          <div className="stat-value">{todayLectures}</div>
           <div className="stat-description">Lectures conducted today</div>
         </div>
 
