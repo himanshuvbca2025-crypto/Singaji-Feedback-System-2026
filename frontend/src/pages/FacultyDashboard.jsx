@@ -32,6 +32,8 @@ function FacultyDashboard() {
   const [activeTab, setActiveTab] = useState("schedule");
   const [schedules, setSchedules] = useState([]);
   const [isAddScheduleOpen, setIsAddScheduleOpen] = useState(false);
+  const [isEditScheduleOpen, setIsEditScheduleOpen] = useState(false);
+  const [editingScheduleId, setEditingScheduleId] = useState(null);
   const [hasTodaySchedule, setHasTodaySchedule] = useState(false);
 
   const [scheduleTiming, setScheduleTiming] = useState({
@@ -100,6 +102,7 @@ function FacultyDashboard() {
 
       setSchedules(
         fetchedSchedules.map((schedule) => ({
+          id: schedule._id,
           room: schedule.class,
           group: schedule.groups?.join(", ") || "",
           strength: schedule.strength,
@@ -309,6 +312,205 @@ function FacultyDashboard() {
     } catch (error) {
       console.error("Error adding schedule:", error);
       alert("Something went wrong while creating schedule.");
+    }
+  };
+
+
+  // ---------------------------------------
+  // EDIT SCHEDULE API
+  // ---------------------------------------
+  const handleEditSchedule = (row) => {
+    const originalSchedule = schedules.find(
+      (schedule) => schedule.id === row.id
+    );
+
+    if (!originalSchedule?.id) {
+      alert("Schedule ID not found.");
+      return;
+    }
+
+    setEditingScheduleId(originalSchedule.id);
+
+    setNewSchedule({
+      room: originalSchedule.room || "",
+      group: originalSchedule.group || "",
+      slot1Subject: originalSchedule.slot1?.subject || "",
+      slot1Faculty: originalSchedule.slot1?.faculty || "",
+      slot1StartTime: scheduleTiming.slot1.startTime || "",
+      slot1EndTime: scheduleTiming.slot1.endTime || "",
+      lunchStartTime: scheduleTiming.lunchBreak.startTime || "",
+      lunchEndTime: scheduleTiming.lunchBreak.endTime || "",
+      slot2Subject: originalSchedule.slot2?.subject || "",
+      slot2Faculty: originalSchedule.slot2?.faculty || "",
+      slot2StartTime: scheduleTiming.slot2.startTime || "",
+      slot2EndTime: scheduleTiming.slot2.endTime || "",
+      teaStartTime: scheduleTiming.teaBreak.startTime || "",
+      teaEndTime: scheduleTiming.teaBreak.endTime || "",
+      slot3Subject: originalSchedule.slot3?.subject || "",
+      slot3Faculty: originalSchedule.slot3?.faculty || "",
+      slot3StartTime: scheduleTiming.slot3.startTime || "",
+      slot3EndTime: scheduleTiming.slot3.endTime || "",
+    });
+
+    setIsEditScheduleOpen(true);
+  };
+
+  const handleEditScheduleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!editingScheduleId) {
+      alert("Schedule ID not found.");
+      return;
+    }
+
+    if (!newSchedule.room || !newSchedule.group) {
+      alert("Classroom and Group Name are required!");
+      return;
+    }
+
+    if (!user?.department) {
+      alert("Faculty department not found. Please login again.");
+      return;
+    }
+
+    const groups = newSchedule.group
+      .split(",")
+      .map((group) => group.trim())
+      .filter(Boolean);
+
+    if (groups.length === 0) {
+      alert("At least one group is required.");
+      return;
+    }
+
+    try {
+      const scheduleData = {
+        department: user.department,
+        groups,
+        class: newSchedule.room,
+
+        slot1: {
+          subject: newSchedule.slot1Subject,
+          facultyName: newSchedule.slot1Faculty || facultyName,
+          startTime: newSchedule.slot1StartTime,
+          endTime: newSchedule.slot1EndTime,
+        },
+
+        lunchBreak: {
+          startTime: newSchedule.lunchStartTime,
+          endTime: newSchedule.lunchEndTime,
+        },
+
+        slot2: {
+          subject: newSchedule.slot2Subject,
+          facultyName: newSchedule.slot2Faculty || facultyName,
+          startTime: newSchedule.slot2StartTime,
+          endTime: newSchedule.slot2EndTime,
+        },
+
+        teaBreak: {
+          startTime: newSchedule.teaStartTime,
+          endTime: newSchedule.teaEndTime,
+        },
+
+        slot3: {
+          subject: newSchedule.slot3Subject,
+          facultyName: newSchedule.slot3Faculty || facultyName,
+          startTime: newSchedule.slot3StartTime,
+          endTime: newSchedule.slot3EndTime,
+        },
+      };
+
+      const response = await fetch(
+        `http://localhost:5000/api/schedules/${editingScheduleId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(scheduleData),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message || "Failed to update schedule.");
+        return;
+      }
+
+      if (data.success) {
+        await fetchTodaySchedules();
+
+        setIsEditScheduleOpen(false);
+        setEditingScheduleId(null);
+
+        showToast("Schedule updated successfully!");
+
+        setNewSchedule({
+          room: "",
+          group: "",
+          slot1Subject: "",
+          slot1Faculty: "",
+          slot1StartTime: "",
+          slot1EndTime: "",
+          lunchStartTime: "",
+          lunchEndTime: "",
+          slot2Subject: "",
+          slot2Faculty: "",
+          slot2StartTime: "",
+          slot2EndTime: "",
+          teaStartTime: "",
+          teaEndTime: "",
+          slot3Subject: "",
+          slot3Faculty: "",
+          slot3StartTime: "",
+          slot3EndTime: "",
+        });
+      }
+    } catch (error) {
+      console.error("Error updating schedule:", error);
+      alert("Something went wrong while updating schedule.");
+    }
+  };
+
+  // ---------------------------------------
+  // DELETE SCHEDULE API
+  // ---------------------------------------
+  const handleDeleteSchedule = async (row) => {
+    if (!row?.id) {
+      alert("Schedule ID not found.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${row.room}" (${row.group}) schedule?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/schedules/${row.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message || "Failed to delete schedule.");
+        return;
+      }
+
+      if (data.success) {
+        await fetchTodaySchedules();
+        showToast("Schedule deleted successfully!");
+      }
+    } catch (error) {
+      console.error("Error deleting schedule:", error);
+      alert("Something went wrong while deleting schedule.");
     }
   };
 
@@ -528,6 +730,8 @@ function FacultyDashboard() {
                           {scheduleTiming.slot3.endTime || "--:--"}
                         </div>
                       </th>
+
+                      <th className="th-action">Action</th>
                     </tr>
                   </thead>
 
@@ -578,6 +782,47 @@ function FacultyDashboard() {
                         )}
 
                         <LectureCell data={row.slot3} />
+
+                        <td className="td-action">
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "10px",
+                            }}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => handleEditSchedule(row)}
+                              title="Edit Schedule"
+                              style={{
+                                border: "none",
+                                background: "transparent",
+                                cursor: "pointer",
+                                fontSize: "18px",
+                                padding: "4px",
+                              }}
+                            >
+                              ✏️
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteSchedule(row)}
+                              title="Delete Schedule"
+                              style={{
+                                border: "none",
+                                background: "transparent",
+                                cursor: "pointer",
+                                fontSize: "18px",
+                                padding: "4px",
+                              }}
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        </td>
 
                       </tr>
                     ))}
@@ -968,6 +1213,220 @@ function FacultyDashboard() {
 
               </div>
 
+            </form>
+          </Modal>
+
+
+          {/* EDIT SCHEDULE MODAL */}
+
+          <Modal
+            isOpen={isEditScheduleOpen}
+            onClose={() => {
+              setIsEditScheduleOpen(false);
+              setEditingScheduleId(null);
+            }}
+            title="Edit Timetable Schedule"
+          >
+            <form onSubmit={handleEditScheduleSubmit} className="modal-form">
+              <div className="modal-form-group">
+                <label>Classroom / Venue</label>
+                <input
+                  type="text"
+                  placeholder="e.g. ITEG Lab 2 / F01"
+                  value={newSchedule.room}
+                  onChange={(e) =>
+                    setNewSchedule({ ...newSchedule, room: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
+              <div className="modal-form-group">
+                <label>Group Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 1A or 1A, 1B"
+                  value={newSchedule.group}
+                  onChange={(e) =>
+                    setNewSchedule({ ...newSchedule, group: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
+              <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "12px", marginTop: "12px" }}>
+                <strong>Slot 1</strong>
+                <div className="modal-form-group" style={{ marginTop: "6px" }}>
+                  <input
+                    type="text"
+                    placeholder="Subject Name"
+                    value={newSchedule.slot1Subject}
+                    onChange={(e) =>
+                      setNewSchedule({ ...newSchedule, slot1Subject: e.target.value })
+                    }
+                  />
+                  <input
+                    type="text"
+                    placeholder="Faculty Name"
+                    value={newSchedule.slot1Faculty}
+                    onChange={(e) =>
+                      setNewSchedule({ ...newSchedule, slot1Faculty: e.target.value })
+                    }
+                  />
+                  <label>Start Time</label>
+                  <input
+                    type="time"
+                    value={newSchedule.slot1StartTime}
+                    onChange={(e) =>
+                      setNewSchedule({ ...newSchedule, slot1StartTime: e.target.value })
+                    }
+                  />
+                  <label>End Time</label>
+                  <input
+                    type="time"
+                    value={newSchedule.slot1EndTime}
+                    onChange={(e) =>
+                      setNewSchedule({ ...newSchedule, slot1EndTime: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "12px", marginTop: "12px" }}>
+                <strong>Lunch Break</strong>
+                <div className="modal-form-group" style={{ marginTop: "6px" }}>
+                  <label>Start Time</label>
+                  <input
+                    type="time"
+                    value={newSchedule.lunchStartTime}
+                    onChange={(e) =>
+                      setNewSchedule({ ...newSchedule, lunchStartTime: e.target.value })
+                    }
+                  />
+                  <label>End Time</label>
+                  <input
+                    type="time"
+                    value={newSchedule.lunchEndTime}
+                    onChange={(e) =>
+                      setNewSchedule({ ...newSchedule, lunchEndTime: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "12px", marginTop: "12px" }}>
+                <strong>Slot 2</strong>
+                <div className="modal-form-group" style={{ marginTop: "6px" }}>
+                  <input
+                    type="text"
+                    placeholder="Subject Name"
+                    value={newSchedule.slot2Subject}
+                    onChange={(e) =>
+                      setNewSchedule({ ...newSchedule, slot2Subject: e.target.value })
+                    }
+                  />
+                  <input
+                    type="text"
+                    placeholder="Faculty Name"
+                    value={newSchedule.slot2Faculty}
+                    onChange={(e) =>
+                      setNewSchedule({ ...newSchedule, slot2Faculty: e.target.value })
+                    }
+                  />
+                  <label>Start Time</label>
+                  <input
+                    type="time"
+                    value={newSchedule.slot2StartTime}
+                    onChange={(e) =>
+                      setNewSchedule({ ...newSchedule, slot2StartTime: e.target.value })
+                    }
+                  />
+                  <label>End Time</label>
+                  <input
+                    type="time"
+                    value={newSchedule.slot2EndTime}
+                    onChange={(e) =>
+                      setNewSchedule({ ...newSchedule, slot2EndTime: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "12px", marginTop: "12px" }}>
+                <strong>Tea Break</strong>
+                <div className="modal-form-group" style={{ marginTop: "6px" }}>
+                  <label>Start Time</label>
+                  <input
+                    type="time"
+                    value={newSchedule.teaStartTime}
+                    onChange={(e) =>
+                      setNewSchedule({ ...newSchedule, teaStartTime: e.target.value })
+                    }
+                  />
+                  <label>End Time</label>
+                  <input
+                    type="time"
+                    value={newSchedule.teaEndTime}
+                    onChange={(e) =>
+                      setNewSchedule({ ...newSchedule, teaEndTime: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "12px", marginTop: "12px" }}>
+                <strong>Slot 3</strong>
+                <div className="modal-form-group" style={{ marginTop: "6px" }}>
+                  <input
+                    type="text"
+                    placeholder="Subject Name"
+                    value={newSchedule.slot3Subject}
+                    onChange={(e) =>
+                      setNewSchedule({ ...newSchedule, slot3Subject: e.target.value })
+                    }
+                  />
+                  <input
+                    type="text"
+                    placeholder="Faculty Name"
+                    value={newSchedule.slot3Faculty}
+                    onChange={(e) =>
+                      setNewSchedule({ ...newSchedule, slot3Faculty: e.target.value })
+                    }
+                  />
+                  <label>Start Time</label>
+                  <input
+                    type="time"
+                    value={newSchedule.slot3StartTime}
+                    onChange={(e) =>
+                      setNewSchedule({ ...newSchedule, slot3StartTime: e.target.value })
+                    }
+                  />
+                  <label>End Time</label>
+                  <input
+                    type="time"
+                    value={newSchedule.slot3EndTime}
+                    onChange={(e) =>
+                      setNewSchedule({ ...newSchedule, slot3EndTime: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => {
+                    setIsEditScheduleOpen(false);
+                    setEditingScheduleId(null);
+                  }}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary">
+                  Update Schedule
+                </button>
+              </div>
             </form>
           </Modal>
 

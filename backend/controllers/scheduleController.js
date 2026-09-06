@@ -269,7 +269,127 @@ const getTodaySchedules = async (req, res) => {
   }
 };
 
+
+// =====================================================
+// Update Schedule
+// =====================================================
+const updateSchedule = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const {
+      department,
+      groups,
+      class: className,
+      slot1,
+      lunchBreak,
+      slot2,
+      teaBreak,
+      slot3,
+    } = req.body;
+
+  
+    const existingSchedule = await Schedule.findById(id);
+
+    if (!existingSchedule) {
+      return res.status(404).json({
+        success: false,
+        message: "Schedule not found",
+      });
+    }
+
+    if (!department || !groups || !className) {
+      return res.status(400).json({
+        success: false,
+        message: "Department, groups and class are required",
+      });
+    }
+
+    if (!Array.isArray(groups) || groups.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one group is required",
+      });
+    }
+
+    const students = await Students.find({
+      section: department,
+      level: { $in: groups },
+    });
+
+    const strength = students.length;
+
+    const updatedSchedule = await Schedule.findByIdAndUpdate(
+      id,
+      {
+        department,
+        groups,
+        class: className,
+        strength,
+        slot1,
+        lunchBreak,
+        slot2,
+        teaBreak,
+        slot3,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Schedule updated successfully",
+      schedule: updatedSchedule,
+    });
+  } catch (error) {
+    console.error("Update schedule error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+// =====================================================
+// Delete Schedule
+// =====================================================
+const deleteSchedule = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const schedule = await Schedule.findById(id);
+
+    if (!schedule) {
+      return res.status(404).json({
+        success: false,
+        message: "Schedule not found",
+      });
+    }
+
+    await Schedule.findByIdAndDelete(id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Schedule deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete schedule error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
 module.exports = {
   createSchedule,
   getTodaySchedules,
+  updateSchedule,
+  deleteSchedule,
 };
