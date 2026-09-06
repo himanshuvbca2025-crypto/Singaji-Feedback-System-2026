@@ -6,9 +6,10 @@ const scheduleSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
       index: {
-    expires: "24h",
-  },
-},
+        expires: "24h",
+      },
+    },
+
     department: {
       type: String,
       required: true,
@@ -32,75 +33,117 @@ const scheduleSchema = new mongoose.Schema(
       min: 0,
     },
 
+    // ==========================================
+    // SLOT 1
+    // ==========================================
     slot1: {
       subject: {
         type: String,
         trim: true,
       },
+
       facultyName: {
         type: String,
         trim: true,
       },
+
       startTime: {
         type: String,
       },
+
       endTime: {
         type: String,
       },
+
+      feedbackEmailSent: {
+        type: Boolean,
+        default: false,
+      },
     },
 
+    // ==========================================
+    // LUNCH BREAK
+    // ==========================================
     lunchBreak: {
       startTime: {
         type: String,
       },
+
       endTime: {
         type: String,
       },
     },
 
+    // ==========================================
+    // SLOT 2
+    // ==========================================
     slot2: {
       subject: {
         type: String,
         trim: true,
       },
+
       facultyName: {
         type: String,
         trim: true,
       },
+
       startTime: {
         type: String,
       },
+
       endTime: {
         type: String,
       },
+
+      feedbackEmailSent: {
+        type: Boolean,
+        default: false,
+      },
     },
 
+    // ==========================================
+    // TEA BREAK
+    // ==========================================
     teaBreak: {
       startTime: {
         type: String,
       },
+
       endTime: {
         type: String,
       },
     },
 
+    // ==========================================
+    // SLOT 3
+    // ==========================================
     slot3: {
       subject: {
         type: String,
         trim: true,
       },
+
       facultyName: {
         type: String,
         trim: true,
       },
+
       startTime: {
         type: String,
       },
+
       endTime: {
         type: String,
       },
+
+      feedbackEmailSent: {
+        type: Boolean,
+        default: false,
+      },
     },
   },
+
   {
     timestamps: true,
     collection: "Schedules",
