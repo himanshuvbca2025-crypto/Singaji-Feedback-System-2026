@@ -17,17 +17,17 @@ function AdminDashboard() {
   const [recentFeedback, setRecentFeedback] = useState([]);
   const [lowScoreFeedback, setLowScoreFeedback] = useState([]);
   const [campusCompletion, setCampusCompletion] = useState({
-  percentage: 0,
-  submitted: 0,
-  designated: 0,
-});
-const [overallReport, setOverallReport] = useState({
-  overallRating: 0,
-  totalSubmissions: 0,
-  lowScoreAlerts: 0,
-});
+    percentage: 0,
+    submitted: 0,
+    designated: 0,
+  });
+  const [overallReport, setOverallReport] = useState({
+    overallRating: 0,
+    totalSubmissions: 0,
+    lowScoreAlerts: 0,
+  });
 
-    useEffect(() => {
+  useEffect(() => {
     const fetchFeedbackReport = async () => {
       try {
         const response = await fetch(
@@ -42,44 +42,44 @@ const [overallReport, setOverallReport] = useState({
         }
 
         if (data.success) {
-           setCampusCompletion(
-           data.campusFeedbackCompletion || {
-           percentage: 0,
-           submitted: 0,
-           designated: 0,
-  }
-);
+          setCampusCompletion(
+            data.campusFeedbackCompletion || {
+              percentage: 0,
+              submitted: 0,
+              designated: 0,
+            }
+          );
 
-setOverallReport(
-  data.overall || {
-    overallRating: 0,
-    totalSubmissions: 0,
-    lowScoreAlerts: 0,
-  }
-);
-        const topRated = data.topRatedFaculty.map(
-         (faculty, index) => ({
-          id: index + 1,
-          student: faculty.department,
-          faculty: faculty.facultyName,
-          rating: faculty.rating,
-          date: "",
-          subject: faculty.subject || "Subject not available",
-     })
-   );
+          setOverallReport(
+            data.overall || {
+              overallRating: 0,
+              totalSubmissions: 0,
+              lowScoreAlerts: 0,
+            }
+          );
+          const topRated = data.topRatedFaculty.map(
+            (faculty, index) => ({
+              id: index + 1,
+              student: faculty.department,
+              faculty: faculty.facultyName,
+              rating: faculty.rating,
+              date: "",
+              subject: faculty.subject || "Subject not available",
+            })
+          );
 
           const lowRated = data.lowScoreDetails.map(
-           (faculty, index) => ({
-           id: index + 1,
-           faculty: faculty.facultyName,
-           department: faculty.department,
-            rating: faculty.rating,
-           date: faculty.date
-          ? new Date(faculty.date).toLocaleDateString()
-           : "",
-           course: faculty.subject || "Subject not available",
-       })
-    );
+            (faculty, index) => ({
+              id: index + 1,
+              faculty: faculty.facultyName,
+              department: faculty.department,
+              rating: faculty.rating,
+              date: faculty.date
+                ? new Date(faculty.date).toLocaleDateString()
+                : "",
+              course: faculty.subject || "Subject not available",
+            })
+          );
 
           setRecentFeedback(topRated);
           setLowScoreFeedback(lowRated);
@@ -127,9 +127,9 @@ setOverallReport(
             <span className="stat-title">Low Score Alerts</span>
             <span className="stat-icon">⚠️</span>
           </div>
-              <div className="stat-value stat-value-alert">
-               {overallReport.lowScoreAlerts}
-             </div>
+          <div className="stat-value stat-value-alert">
+            {overallReport.lowScoreAlerts}
+          </div>
           <div className="stat-description">Classes require administrative review</div>
         </div>
 
@@ -140,10 +140,10 @@ setOverallReport(
             <span className="stat-title">Today's Campus Avg</span>
             <span className="stat-icon">⭐</span>
           </div>
-               <div className="stat-value">
-               {overallReport.overallRating}
-             <span className="stat-max"> / 5</span>
-           </div>
+          <div className="stat-value">
+            {overallReport.overallRating}
+            <span className="stat-max"> / 5</span>
+          </div>
           <div className="stat-description">Overall feedback rating</div>
         </div>
 
@@ -154,25 +154,25 @@ setOverallReport(
             <span className="stat-title">Feedback Completion</span>
             <span className="stat-icon">✅</span>
           </div>
-         <div className="stat-value">
-         {campusCompletion.percentage}%
-     </div>
+          <div className="stat-value">
+            {campusCompletion.percentage}%
+          </div>
 
-        <div className="stat-description">
-         {campusCompletion.submitted} / {campusCompletion.designated} students completed feedback
-      </div>
+          <div className="stat-description">
+            {campusCompletion.submitted} / {campusCompletion.designated} students completed feedback
+          </div>
 
-       <div className="completion-bar-bg">
-      <div
-        className="completion-bar-fill"
-        style={{
-         width: `${campusCompletion.percentage}%`,
-        }}
-      />
+          <div className="completion-bar-bg">
+            <div
+              className="completion-bar-fill"
+              style={{
+                width: `${campusCompletion.percentage}%`,
+              }}
+            />
+          </div>
         </div>
-     </div>
 
-   </div>
+      </div>
 
 
       {/* ========================
@@ -230,10 +230,10 @@ setOverallReport(
                 </div>
                 <p className="feedback-subject">{fb.course}</p>
 
-                <div className="alert-footer">
+                {/* <div className="alert-footer">
                   <span className="feedback-date">{fb.date}</span>
                   <button className="review-btn">view</button>
-                </div>
+                </div> */}
               </div>
             ))}
           </div>

@@ -12,7 +12,7 @@ function ManageLectures() {
       date: "2026-09-02",
       time: "10:00 AM - 11:30 AM",
       room: "Lab-3",
-      status: "Scheduled",
+
     },
     {
       id: "2",
@@ -133,10 +133,6 @@ function ManageLectures() {
           <h1>Manage Daily Lectures</h1>
           <p>Schedule, manage classrooms, and track active lecture status.</p>
         </div>
-
-        <button className="add-btn" onClick={() => setIsAddModalOpen(true)}>
-          + Add Lecture
-        </button>
       </div>
 
       <div className="lectures-list">
@@ -158,52 +154,6 @@ function ManageLectures() {
                 </div>
               </div>
 
-              <div className="lecture-status-actions">
-                <span
-                  className={`status-badge ${lec.status.toLowerCase().replace(" ", "-")}`}
-                >
-                  {lec.status}
-                </span>
-
-                <div className="lecture-buttons">
-                  <button
-                    className="btn-edit"
-                    style={{ background: "#ea580c", color: "#ffffff", borderColor: "#ea580c" }}
-                    onClick={async () => {
-                      const studentMail = prompt("Enter Student Email to send feedback link:", "student@singaji.edu.in");
-                      if (studentMail) {
-                        try {
-                          const res = await fetch("http://localhost:5000/api/feedback/send-invite", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                              studentEmail: studentMail,
-                              facultyName: lec.faculty,
-                              subject: lec.subject,
-                              time: lec.time,
-                            })
-                          });
-                          const d = await res.json();
-                          alert(d.message || `Feedback link email dispatched to ${studentMail}!`);
-                        } catch (err) {
-                          alert(`Feedback invite link simulated for ${studentMail}`);
-                        }
-                      }
-                    }}
-                  >
-                    ✉ Send Email
-                  </button>
-                  <button className="btn-edit" onClick={() => handleOpenEdit(lec)}>
-                    Edit
-                  </button>
-                  <button
-                    className="btn-delete"
-                    onClick={() => handleOpenDelete(lec)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
             </div>
           ))
         ) : (
