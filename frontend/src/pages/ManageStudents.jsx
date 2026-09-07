@@ -20,70 +20,66 @@ function ManageStudents() {
   const [saveSuccessMessage, setSaveSuccessMessage] = useState("");
 
   const [studentData, setStudentData] = useState({
-  ITEG: {},
-  MEG: {},
-  BEG: {},
-  "B.Tech": {},
-});
+    ITEG: {},
+    MEG: {},
+    BEG: {},
+    "B.Tech": {},
+  });
 
 
   const departments = [
     {
       name: "ITEG",
-      title: "Information Technology & Engg.",
       image: itegImage,
     },
     {
       name: "MEG",
-      title: "Mechanical Engg. Group",
       image: megImage,
     },
     {
       name: "BEG",
-      title: "Basic Engineering Group",
       image: begImage,
     },
     {
       name: "B.Tech",
-      title: "Bachelor of Technology",
       image: ssecImage,
     },
   ];
 
   const levels = ["1A", "1B", "1C", "2A", "2B", "2C"];
 
-useEffect(() => {
-  const fetchStudents = async () => {
-    try {
-      const response = await fetch(
-        "http://localhost:5000/api/students"
-      );
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/students"
+        );
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (!response.ok) {
-        console.error(data.message);
-        return;
+        if (!response.ok) {
+          console.error(data.message);
+          return;
+        }
+
+        if (data.success) {
+          setStudentData(data.sections);
+        }
+      } catch (error) {
+        console.error("Error fetching students:", error);
       }
+    };
 
-      if (data.success) {
-        setStudentData(data.sections);
-      }
-    } catch (error) {
-      console.error("Error fetching students:", error);
-    }
-  };
-
-  fetchStudents();
-}, []);
+    fetchStudents();
+  }, []);
 
   /* ========================================
      DEPARTMENTS
   ======================================== */
 
-const currentStudentsList =
-  selectedDepartment && selectedLevel
-    ? (studentData[selectedDepartment]?.[selectedLevel] || []).map(
+  const currentStudentsList =
+    selectedDepartment && selectedLevel
+      ? (studentData[selectedDepartment]?.[selectedLevel] || []).map(
         (student) => ({
           id: student.studentId,
           name: student.name,
@@ -92,7 +88,7 @@ const currentStudentsList =
           level: student.level,
         })
       )
-    : [];
+      : [];
   /* ========================================
      FILTER STUDENTS
   ======================================== */
@@ -140,62 +136,62 @@ const currentStudentsList =
   };
 
   const handleSave = async () => {
-  if (selectedStudents.length !== 10) {
-    alert("Please select exactly 10 students before saving.");
-    return;
-  }
+    if (selectedStudents.length !== 10) {
+      alert("Please select exactly 10 students before saving.");
+      return;
+    }
 
-  try {
-    const selectedStudentData = currentStudentsList
-      .filter((student) => selectedStudents.includes(student.id))
-      .map((student) => ({
-        name: student.name,
-        gmail: student.email,
-      }));
+    try {
+      const selectedStudentData = currentStudentsList
+        .filter((student) => selectedStudents.includes(student.id))
+        .map((student) => ({
+          name: student.name,
+          gmail: student.email,
+        }));
 
-    console.log("Selected students:", selectedStudentData);
+      console.log("Selected students:", selectedStudentData);
 
-    const response = await fetch(
-      "http://localhost:5000/api/selected-students",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          department: selectedDepartment,
-          level: selectedLevel,
-          students: selectedStudentData,
-        }),
+      const response = await fetch(
+        "http://localhost:5000/api/selected-students",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            department: selectedDepartment,
+            level: selectedLevel,
+            students: selectedStudentData,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      console.log("API Response:", data);
+
+      if (!response.ok) {
+        alert(data.message || "Failed to save students.");
+        return;
       }
-    );
 
-    const data = await response.json();
+      if (data.success) {
+        setSaveSuccessMessage(
+          `Selection saved successfully! 10 students have been assigned for ${selectedDepartment} — Level ${selectedLevel}.`
+        );
 
-    console.log("API Response:", data);
+        setSelectedStudents([]);
 
-   if (!response.ok) {
-  alert(data.message || "Failed to save students.");
-  return;
-}
+        setTimeout(() => {
+          setSaveSuccessMessage("");
+        }, 3000);
 
-if (data.success) {
-  setSaveSuccessMessage(
-    `Selection saved successfully! 10 students have been assigned for ${selectedDepartment} — Level ${selectedLevel}.`
-  );
-
-  setSelectedStudents([]);
-
-  setTimeout(() => {
-    setSaveSuccessMessage("");
-  }, 3000);
-
-}
-  } catch (error) {
-    console.error("Error saving selected students:", error);
-    alert("Something went wrong while saving students.");
-  }
-};
+      }
+    } catch (error) {
+      console.error("Error saving selected students:", error);
+      alert("Something went wrong while saving students.");
+    }
+  };
   const handleBackToDepartments = () => {
     setSelectedDepartment(null);
     setSelectedLevel(null);
@@ -298,12 +294,12 @@ if (data.success) {
             </div>
           </div>
 
-         {saveSuccessMessage && (
-           <div className="save-success-toast">
-           <span className="toast-icon">✓</span>
-           <span>{saveSuccessMessage}</span>
-         </div>
-       )}
+          {saveSuccessMessage && (
+            <div className="save-success-toast">
+              <span className="toast-icon">✓</span>
+              <span>{saveSuccessMessage}</span>
+            </div>
+          )}
 
           {/* SEARCH */}
           <div className="student-search">
