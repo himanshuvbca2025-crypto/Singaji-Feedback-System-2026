@@ -342,6 +342,24 @@
   background: #1e293b;
 }
 
+.gmail-error-input {
+  border: 2px solid red !important;
+  outline: none;
+}
+
+.gmail-error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+.gmail-help-text {
+  color: #777;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
 @media (max-width: 600px) {
   .rating-options-row {
     grid-template-columns: repeat(5, 1fr);

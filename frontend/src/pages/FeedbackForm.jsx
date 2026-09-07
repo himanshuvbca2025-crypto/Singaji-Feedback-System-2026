@@ -7,10 +7,16 @@ function FeedbackForm() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
+  // ==========================================
+  // DATA FROM FEEDBACK LINK
+  // ==========================================
   const facultyName = searchParams.get("faculty") || "Dr. Rahul Sharma";
+
   const subjectName = searchParams.get("subject") || "Web Development";
+
   const classNameParam =
     searchParams.get("class") || "BCA ITEG (Group A)";
+
   const timeParam =
     searchParams.get("time") || "10:00 AM - 11:30 AM";
 
@@ -20,16 +26,34 @@ function FeedbackForm() {
     year: "numeric",
   });
 
+  // ==========================================
+  // FORM STATES
+  // ==========================================
   const [step, setStep] = useState("form");
 
   // Questions from database
   const [questions, setQuestions] = useState([]);
   const [loadingQuestions, setLoadingQuestions] = useState(true);
 
+  // Student Gmail
+  const [studentGmail, setStudentGmail] = useState("");
+  const [gmailError, setGmailError] = useState("");
+
+  // Ratings
   const [ratings, setRatings] = useState({});
+
+  // Comment
   const [comment, setComment] = useState("");
+
+  // General validation
   const [validationError, setValidationError] = useState("");
 
+  // Submit loading
+  const [submitting, setSubmitting] = useState(false);
+
+  // ==========================================
+  // FETCH QUESTIONS
+  // ==========================================
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
@@ -42,10 +66,21 @@ function FeedbackForm() {
         if (response.ok && data.success) {
           setQuestions(data.questions || []);
         } else {
-          console.error("Failed to fetch questions:", data.message);
+          console.error(
+            "Failed to fetch questions:",
+            data.message
+          );
+
+          setValidationError(
+            data.message || "Failed to load questions."
+          );
         }
       } catch (error) {
         console.error("Error fetching questions:", error);
+
+        setValidationError(
+          "Unable to load feedback questions."
+        );
       } finally {
         setLoadingQuestions(false);
       }
@@ -54,7 +89,9 @@ function FeedbackForm() {
     fetchQuestions();
   }, []);
 
-
+  // ==========================================
+  // RATING CHANGE
+  // ==========================================
   const handleRatingChange = (qIndex, value) => {
     setRatings((prev) => ({
       ...prev,
@@ -70,13 +107,41 @@ function FeedbackForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Check if questions are available
+    // Clear old errors
+    setValidationError("");
+    setGmailError("");
+
+    // ==========================================
+    // 1. VALIDATE GMAIL
+    // ==========================================
+    const email = studentGmail.trim().toLowerCase();
+
+    if (!email) {
+      setGmailError(
+        "Please enter your registered college Gmail."
+      );
+      return;
+    }
+
+    // Basic email format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      setGmailError("Please enter a valid Gmail address.");
+      return;
+    }
+
+    // ==========================================
+    // 2. QUESTIONS CHECK
+    // ==========================================
     if (questions.length === 0) {
       setValidationError("No questions are available.");
       return;
     }
 
-    // Validate all questions
+    // ==========================================
+    // 3. CHECK ALL QUESTIONS ANSWERED
+    // ==========================================
     const unanswered = [];
 
     questions.forEach((_, idx) => {
@@ -87,58 +152,156 @@ function FeedbackForm() {
 
     if (unanswered.length > 0) {
       setValidationError(
-        `Please provide ratings for all ${questions.length} questions before submitting. Unanswered: ${unanswered.join(
+        `Please provide ratings for all questions. Unanswered: ${unanswered.join(
           ", "
         )}`
       );
       return;
     }
 
-    try {
-      // Calculate average rating dynamically
-      const avgOverall = Math.round(
-        Object.values(ratings).reduce((a, b) => a + b, 0) /
-          questions.length
+    // ==========================================
+    // 4. CHECK EXPECTED 5 QUESTIONS
+    // ==========================================
+    if (questions.length < 5) {
+      setValidationError(
+        "Feedback questions are not configured correctly. Please contact administrator."
       );
+      return;
+    }
 
+    // ==========================================
+    // 5. PREPARE METRICS
+    // ==========================================
+    const metrics = {
+      Explanation: Number(ratings[0]),
+      Punctuality: Number(ratings[1]),
+      Engagement: Number(ratings[2]),
+      Resolution: Number(ratings[3]),
+      Overall: Number(ratings[4]),
+    };
+
+    // ==========================================
+    // 6. EXTRA VALIDATION
+    // ==========================================
+    const invalidMetric = Object.entries(metrics).some(
+      ([, value]) => value < 1 || value > 5 || Number.isNaN(value)
+    );
+
+    if (invalidMetric) {
+      setValidationError(
+        "Please select a valid rating for every question."
+      );
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      console.log("=================================");
+      console.log("SUBMITTING FEEDBACK");
+      console.log("Student Gmail:", email);
+      console.log("Faculty:", facultyName);
+      console.log("Subject:", subjectName);
+      console.log("Class:", classNameParam);
+      console.log("Metrics:", metrics);
+      console.log("Comment:", comment);
+      console.log("=================================");
+
+      // ==========================================
+      // 7. SEND TO BACKEND
+      // ==========================================
       const response = await fetch(
         "http://localhost:5000/api/feedback/submit",
         {
           method: "POST",
+
           headers: {
             "Content-Type": "application/json",
           },
+
           body: JSON.stringify({
-            studentGmail: `student_${Date.now()}@singaji.edu.in`,
+            studentGmail: email,
+
+            // Backend will get actual level/section
+            // from Students collection.
+            // These are only fallback values.
             level: classNameParam,
             section: "ITEG",
+
             facultyName,
             subject: subjectName,
 
-            metrics: {
-              Overall: avgOverall,
-              ...ratings,
-            },
+            metrics,
 
-            remarks: comment || "Great lecture session.",
+            remarks: comment.trim(),
           }),
         }
       );
 
       const data = await response.json();
 
-      if (!response.ok || !data.success) {
-        console.error("Feedback submission failed:", data.message);
-      }
-    } catch (err) {
-      console.log("Submitting feedback in local offline mode");
-    }
+      console.log("BACKEND RESPONSE:", data);
 
-    setStep("success");
+      // ==========================================
+      // 8. HANDLE BACKEND ERROR
+      // ==========================================
+      if (!response.ok || !data.success) {
+        const message =
+          data.message ||
+          "Feedback submission failed.";
+
+        console.error(
+          "Feedback submission failed:",
+          message
+        );
+
+        // Gmail related error
+        if (
+          message.toLowerCase().includes("college gmail") ||
+          message.toLowerCase().includes("registered gmail") ||
+          message.toLowerCase().includes("registered")
+        ) {
+          setGmailError(message);
+        } else {
+          setValidationError(message);
+        }
+
+        // IMPORTANT:
+        // Do not show success screen
+        return;
+      }
+
+      // ==========================================
+      // 9. SUCCESS
+      // ==========================================
+      console.log(
+        "Feedback successfully saved in database."
+      );
+
+      setStep("success");
+    } catch (error) {
+      console.error(
+        "Feedback submission error:",
+        error
+      );
+
+      setValidationError(
+        "Unable to submit feedback. Please check your internet connection and try again."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
+  // ==========================================
+  // UI
+  // ==========================================
   return (
     <div className="feedback-form-container">
+      {/* ==========================================
+          HEADER
+      ========================================== */}
+
       <header className="student-header">
         <div className="header-brand">
           <img
@@ -155,14 +318,12 @@ function FeedbackForm() {
       </header>
 
       <main className="feedback-form-main">
-
         {/* ==========================================
             STEP 1: INVITATION
         ========================================== */}
 
         {step === "invite" && (
           <div className="feedback-card-wrapper invite-card">
-
             <div className="email-invitation-banner">
               <span className="email-badge">
                 📩 Lecture Completed Notification
@@ -171,14 +332,13 @@ function FeedbackForm() {
               <h2>Your Feedback Matters!</h2>
 
               <p>
-                You recently attended the lecture session. Please
-                share your honest feedback to help us continuously
-                improve teaching quality.
+                You recently attended the lecture session.
+                Please share your honest feedback to help us
+                continuously improve teaching quality.
               </p>
             </div>
 
             <div className="lecture-meta-card">
-
               <div className="meta-row">
                 <span className="meta-label">
                   Faculty Name:
@@ -218,14 +378,12 @@ function FeedbackForm() {
                   ⏰ {timeParam} ({dateParam})
                 </strong>
               </div>
-
             </div>
 
             <div className="invite-footer">
-
               <p className="anon-note">
-                🔒 Your feedback is 100% anonymous. Student identity
-                is never shared.
+                🔒 Your feedback is 100% anonymous. Student
+                identity is never shared.
               </p>
 
               <button
@@ -234,7 +392,6 @@ function FeedbackForm() {
               >
                 Give Feedback →
               </button>
-
             </div>
           </div>
         )}
@@ -245,16 +402,16 @@ function FeedbackForm() {
 
         {step === "form" && (
           <div className="feedback-card-wrapper">
-
             <div className="lecture-info-header">
               <h2>Student Feedback Questionnaire</h2>
 
               <p>
-                Faculty: <strong>{facultyName}</strong> | Subject:{" "}
-                <strong>{subjectName}</strong>
+                Faculty: <strong>{facultyName}</strong> |
+                Subject: <strong>{subjectName}</strong>
               </p>
             </div>
 
+            {/* GENERAL ERROR */}
             {validationError && (
               <div className="feedback-error-banner">
                 ⚠️ {validationError}
@@ -274,14 +431,57 @@ function FeedbackForm() {
                 onSubmit={handleSubmit}
                 className="questions-form"
               >
+                {/* ==========================================
+                    COLLEGE GMAIL
+                ========================================== */}
 
-                {/* DB QUESTIONS */}
+                <div className="form-q-block">
+                  <label className="q-text">
+                    <strong>
+                      College Gmail
+                    </strong>
+                  </label>
+
+                  <input
+                    type="email"
+                    value={studentGmail}
+                    onChange={(e) => {
+                      setStudentGmail(e.target.value);
+                      setGmailError("");
+                    }}
+                    placeholder="Enter your registered college Gmail"
+                    className={`remarks-textarea ${
+                      gmailError
+                        ? "gmail-error-input"
+                        : ""
+                    }`}
+                    autoComplete="email"
+                    disabled={submitting}
+                  />
+
+                  {!gmailError && (
+                    <p className="gmail-help-text">
+                      Please enter the Gmail registered
+                      with the college.
+                    </p>
+                  )}
+
+                  {gmailError && (
+                    <p className="gmail-error-message">
+                      ❌ {gmailError}
+                    </p>
+                  )}
+                </div>
+
+                {/* ==========================================
+                    DB QUESTIONS
+                ========================================== */}
+
                 {questions.map((question, index) => (
                   <div
                     key={question._id}
                     className="form-q-block"
                   >
-
                     <p className="q-text">
                       <strong>
                         {index + 1}. {question.text}
@@ -289,18 +489,21 @@ function FeedbackForm() {
                     </p>
 
                     <div className="star-rating-row">
-
                       {[1, 2, 3, 4, 5].map((val) => (
                         <button
                           key={val}
                           type="button"
+                          disabled={submitting}
                           className={`star-option-btn ${
                             ratings[index] >= val
                               ? "active-star"
                               : ""
                           }`}
                           onClick={() =>
-                            handleRatingChange(index, val)
+                            handleRatingChange(
+                              index,
+                              val
+                            )
                           }
                           title={`${val} - ${
                             val === 1
@@ -333,18 +536,19 @@ function FeedbackForm() {
                             })`
                           : "Select Rating"}
                       </span>
-
                     </div>
                   </div>
                 ))}
 
-                {/* COMMENTS */}
+                {/* ==========================================
+                    COMMENTS
+                ========================================== */}
 
                 <div className="form-q-block">
-
                   <label className="q-text">
                     <strong>
-                      Additional Comments / Suggestions (Optional)
+                      Additional Comments / Suggestions
+                      (Optional)
                     </strong>
                   </label>
 
@@ -356,20 +560,25 @@ function FeedbackForm() {
                     onChange={(e) =>
                       setComment(e.target.value)
                     }
+                    disabled={submitting}
                   />
-
                 </div>
+
+                {/* ==========================================
+                    SUBMIT BUTTON
+                ========================================== */}
 
                 <button
                   type="submit"
                   className="student-card-btn submit-feedback-btn"
+                  disabled={submitting}
                 >
-                  Submit Feedback
+                  {submitting
+                    ? "Submitting Feedback..."
+                    : "Submit Feedback"}
                 </button>
-
               </form>
             )}
-
           </div>
         )}
 
@@ -379,18 +588,15 @@ function FeedbackForm() {
 
         {step === "success" && (
           <div className="submission-success-card">
-
-            <div className="success-icon">
-              ✓
-            </div>
+            <div className="success-icon">✓</div>
 
             <h2>
               Feedback Submitted Successfully!
             </h2>
 
             <p>
-              Thank you for helping us improve teaching quality
-              at SSISM.
+              Thank you for helping us improve teaching
+              quality at SSISM.
             </p>
 
             <p className="anon-sub">
@@ -403,10 +609,8 @@ function FeedbackForm() {
             >
               Back to Home
             </button>
-
           </div>
         )}
-
       </main>
     </div>
   );
