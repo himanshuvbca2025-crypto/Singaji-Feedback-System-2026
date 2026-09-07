@@ -94,8 +94,8 @@ function FeedbackForm() {
         <div className="header-brand">
           <img src={ssecLogo} alt="SSISM Logo" className="student-logo" />
           <div>
-            <h1>Sant Singaji Institute of Science and Management</h1>
-            <p>Official Student Lecture Feedback Portal</p>
+            <h1>Singaji Educational Society</h1>
+            <p>Student Lecture Feedback Portal</p>
           </div>
         </div>
       </header>
@@ -171,30 +171,27 @@ function FeedbackForm() {
                       <button
                         key={val}
                         type="button"
-                        className={`star-option-btn ${
-                          ratings[index] >= val ? "active-star" : ""
-                        }`}
+                        className={`star-option-btn ${ratings[index] >= val ? "active-star" : ""
+                          }`}
                         onClick={() => handleRatingChange(index, val)}
-                        title={`${val} - ${
-                          val === 1 ? "Poor" : val === 2 ? "Fair" : val === 3 ? "Average" : val === 4 ? "Good" : "Excellent"
-                        }`}
+                        title={`${val} - ${val === 1 ? "Poor" : val === 2 ? "Fair" : val === 3 ? "Average" : val === 4 ? "Good" : "Excellent"
+                          }`}
                       >
                         ★
                       </button>
                     ))}
                     <span className="star-rating-label">
                       {ratings[index]
-                        ? `${ratings[index]} / 5 (${
-                            ratings[index] === 1
-                              ? "Poor"
-                              : ratings[index] === 2
-                              ? "Fair"
-                              : ratings[index] === 3
+                        ? `${ratings[index]} / 5 (${ratings[index] === 1
+                          ? "Poor"
+                          : ratings[index] === 2
+                            ? "Fair"
+                            : ratings[index] === 3
                               ? "Average"
                               : ratings[index] === 4
-                              ? "Good"
-                              : "Excellent"
-                          })`
+                                ? "Good"
+                                : "Excellent"
+                        })`
                         : "Select Rating"}
                     </span>
                   </div>
