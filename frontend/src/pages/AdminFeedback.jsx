@@ -24,32 +24,49 @@ function AdminFeedback() {
   const [feedbacks, setFeedbacks] = useState(mockFaculties);
   const [deptFilter, setDeptFilter] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
   const [selectedFacultyModal, setSelectedFacultyModal] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchFeedbacks = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/feedback/all");
+        const url = dateFilter
+          ? `http://localhost:5000/api/feedback/all?date=${dateFilter}`
+          : "http://localhost:5000/api/feedback/all";
+
+        const response = await fetch(url);
         const data = await response.json();
+
         if (response.ok && data.success && data.feedbacks?.length > 0) {
           // Normalize backend data to include mock structure if necessary
           const mapped = data.feedbacks.map((item, idx) => ({
             id: item._id || item.id || `fb-api-${idx}`,
-            name: item.facultyName || item.faculty || item.name || "Faculty Member",
+            name:
+              item.facultyName ||
+              item.faculty ||
+              item.name ||
+              "Faculty Member",
             department: item.department || "ITEG",
             overallRating: item.overallRating || item.rating || 4.2,
             totalFeedbacks: item.totalFeedbacks || 40,
-            lecturesToday: item.lecturesToday || mockFaculties[idx % mockFaculties.length].lecturesToday
+            lecturesToday:
+              item.lecturesToday ||
+              mockFaculties[idx % mockFaculties.length].lecturesToday,
+            date: item.date || null,
           }));
+
           setFeedbacks(mapped);
+        } else if (response.ok && data.success) {
+          setFeedbacks([]);
         }
       } catch (err) {
         console.log("Backend offline, using default mock feedback data.");
       }
     };
+
     fetchFeedbacks();
-  }, []);
+  }, [dateFilter]);
 
   const filtered = feedbacks.filter((fb) => {
     const matchDept =
@@ -77,7 +94,9 @@ function AdminFeedback() {
 
   const totalRatingPoints = feedbacks.reduce(
     (total, fb) =>
-      total + Number(fb.overallRating || 0) * Number(fb.totalFeedbacks || 0),
+      total +
+      Number(fb.overallRating || 0) *
+        Number(fb.totalFeedbacks || 0),
     0
   );
 
@@ -158,6 +177,14 @@ function AdminFeedback() {
           <option value="BEG">BEG</option>
           <option value="B.Tech">B.Tech</option>
         </select>
+
+        {/* Date Filter */}
+        <input
+          type="date"
+          className="af-select"
+          value={dateFilter}
+          onChange={(e) => setDateFilter(e.target.value)}
+        />
       </div>
 
       {/* Table */}
@@ -186,22 +213,30 @@ function AdminFeedback() {
                     <td>
                       <div className="af-faculty-name">{fb.name}</div>
                       <div className="af-course-name">
-                        {fb.lecturesToday?.map((l) => l.subject).join(", ")}
+                        {fb.lecturesToday
+                          ?.map((l) => l.subject)
+                          .join(", ")}
                       </div>
                     </td>
 
                     <td>
-                      <span className="af-dept-tag">{fb.department}</span>
+                      <span className="af-dept-tag">
+                        {fb.department}
+                      </span>
                     </td>
 
                     <td>
-                      <div className="af-rating-value">{fb.overallRating}</div>
+                      <div className="af-rating-value">
+                        {fb.overallRating}
+                      </div>
                       <StarDisplay value={fb.overallRating} />
                     </td>
 
                     <td>
                       <span className="af-date">
-                        {new Date().toLocaleDateString("en-GB")}
+                        {fb.date
+                          ? new Date(fb.date).toLocaleDateString("en-GB")
+                          : new Date().toLocaleDateString("en-GB")}
                       </span>
                     </td>
 

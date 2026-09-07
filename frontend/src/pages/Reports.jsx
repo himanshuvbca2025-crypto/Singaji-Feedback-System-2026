@@ -3,69 +3,107 @@ import "./Reports.css";
 
 function Reports() {
   const allDepartments = ["ITEG", "MEG", "BEG", "B.Tech"];
+
   const [selectedDeptFilter, setSelectedDeptFilter] = useState("All");
 
+  // Today's date in YYYY-MM-DD format
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date();
+
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  });
+
   const [overallReport, setOverallReport] = useState({
-  overallRating: 0,
-  totalSubmissions: 0,
-  lowScoreAlerts: 0,
-});
+    overallRating: 0,
+    totalSubmissions: 0,
+    lowScoreAlerts: 0,
+  });
 
-const [campusCompletion, setCampusCompletion] = useState({
-  percentage: 0,
-  submitted: 0,
-  designated: 0,
-});
+  const [campusCompletion, setCampusCompletion] = useState({
+    percentage: 0,
+    submitted: 0,
+    designated: 0,
+  });
 
-const [departmentReports, setDepartmentReports] = useState([]);
-const [topFaculty, setTopFaculty] = useState([]);
-const [lowScoreAlerts, setLowScoreAlerts] = useState([]);
+  const [departmentReports, setDepartmentReports] = useState([]);
+  const [topFaculty, setTopFaculty] = useState([]);
+  const [lowScoreAlerts, setLowScoreAlerts] = useState([]);
 
-useEffect(() => {
-  const fetchReport = async () => {
-    try {
-      const response = await fetch(
-        "http://localhost:5000/api/reports"
-      );
+  // =========================================================
+  // FETCH REPORT WHEN DATE CHANGES
+  // =========================================================
 
-      const data = await response.json();
+  useEffect(() => {
+    const fetchReport = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/reports?date=${selectedDate}`
+        );
 
- if (data.success) {
-  setOverallReport(data.overall);
-  setDepartmentReports(data.departments);
-  setTopFaculty(data.topRatedFaculty);
-  setLowScoreAlerts(data.lowScoreDetails);
+        const data = await response.json();
 
-  setCampusCompletion(
-    data.campusFeedbackCompletion || {
-      percentage: 0,
-      submitted: 0,
-      designated: 0,
-    }
-  );
-}
-    } catch (error) {
-      console.error("Error fetching report:", error);
-    }
-  };
+        if (data.success) {
+          setOverallReport(
+            data.overall || {
+              overallRating: 0,
+              totalSubmissions: 0,
+              lowScoreAlerts: 0,
+            }
+          );
 
-  fetchReport();
-}, []);
+          setDepartmentReports(data.departments || []);
 
+          setTopFaculty(data.topRatedFaculty || []);
+
+          setLowScoreAlerts(data.lowScoreDetails || []);
+
+          setCampusCompletion(
+            data.campusFeedbackCompletion || {
+              percentage: 0,
+              submitted: 0,
+              designated: 0,
+            }
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching report:", error);
+      }
+    };
+
+    fetchReport();
+  }, [selectedDate]);
 
   return (
     <div className="reports-page">
+
+      {/* =====================================================
+          HEADER + FILTERS
+      ===================================================== */}
+
       <div className="reports-header">
         <div>
           <h1>Analytics & Reports</h1>
-          <p>Comprehensive overview of campus feedback metrics, department ratings, and faculty trends.</p>
+
+          <p>
+            Comprehensive overview of campus feedback metrics,
+            department ratings, and faculty trends.
+          </p>
         </div>
 
         <div className="filter-group">
+
+          {/* Department Filter */}
           <label>Department:</label>
+
           <select
             value={selectedDeptFilter}
-            onChange={(e) => setSelectedDeptFilter(e.target.value)}
+            onChange={(e) =>
+              setSelectedDeptFilter(e.target.value)
+            }
           >
             <option value="All">All Departments</option>
             <option value="ITEG">ITEG</option>
@@ -73,153 +111,251 @@ useEffect(() => {
             <option value="BEG">BEG</option>
             <option value="B.Tech">B.Tech</option>
           </select>
+
+          {/* Date Filter */}
+          <label>Report Date:</label>
+
+          <input
+  type="date"
+  className="af-select"
+  value={selectedDate}
+  onChange={(e) => setSelectedDate(e.target.value)}
+/>
+
         </div>
       </div>
 
-      {/* Top KPI Cards */}
+      {/* =====================================================
+          TOP KPI CARDS
+      ===================================================== */}
+
       <div className="reports-kpi-grid">
-        <div className="kpi-report-card">
-          <span className="kpi-title">Overall Feedback Score</span>
-
-            <div className="kpi-main-val">
-            ⭐ {overallReport.overallRating} <small>/ 5.0</small>
-           </div>
-
-              <p>
-                 Based on {overallReport.totalSubmissions} response submissions
-              </p>
-        </div>
-
-       <div className="kpi-report-card">
-        <span className="kpi-title">Campus Feedback Completion</span>
-
-        <div className="kpi-main-val">
-          {campusCompletion?.percentage || 0}%
-         </div>
-
-            <p>
-             {campusCompletion?.submitted || 0} /{" "}
-             {campusCompletion?.designated || 0} designated students submitted
-          </p>
-       </div>
 
         <div className="kpi-report-card">
-          <span className="kpi-title">Active Low Score Alerts</span>
-         <div className="kpi-main-val alert-text">
-          {overallReport.lowScoreAlerts} Alerts
-         </div>
-          <p>Ratings under 3.5 needing review</p>
-        </div>
-      </div>
-
-      {/* Department Performance */}
-      <div className="reports-section-card">
-        <h2>Department Ratings & Completion</h2>
-      <div className="dept-perf-grid">
-  {allDepartments
-    .filter(
-      (deptName) =>
-        selectedDeptFilter === "All" ||
-        deptName === selectedDeptFilter
-    )
-    .map((deptName) => {
-      const dept = departmentReports.find(
-        (item) => item.department === deptName
-      );
-
-      const rating = dept?.overallRating || 0;
-      const submissions = dept?.totalSubmissions || 0;
-      const alerts = dept?.lowScoreAlerts || 0;
-
-      return (
-        <div
-          key={deptName}
-          className="dept-perf-card"
-        >
-          <h3>{deptName}</h3>
-
-          <div className="perf-score">
-            ⭐ {rating} / 5
-          </div>
-
-          <div className="perf-bar-bg">
-            <div
-              className="perf-bar-fill"
-              style={{
-                width: `${(rating / 5) * 100}%`,
-              }}
-            ></div>
-          </div>
-
-          <div className="perf-footer">
-            <span>
-              Submissions: {submissions}
-            </span>
-
-            <span>
-              Low Score Alerts: {alerts}
-            </span>
-          </div>
-        </div>
-      );
-    })}
-</div>
-      </div>
-
-      {/* Faculty Leaderboard & Low Score Alerts */}
-      <div className="reports-two-col">
-       <div className="reports-section-card">
-        <h2>Top Rated Faculty</h2>
-
-         <div className="leaderboard-list">
-          {topFaculty.map((f, i) => (
-          <div key={i} className="leaderboard-item">
-
-          <span className="rank-num">
-            #{i + 1}
+          <span className="kpi-title">
+            Overall Feedback Score
           </span>
 
-         <div className="leader-info">
-          <strong>{f.facultyName}</strong>
-          <p>{f.department} • {f.subject}</p>
-         </div>
+          <div className="kpi-main-val">
+            ⭐ {overallReport.overallRating}{" "}
+            <small>/ 5.0</small>
+          </div>
 
-         <span className="leader-score">
-          ⭐ {f.rating}
-         </span>
+          <p>
+            Based on {overallReport.totalSubmissions}{" "}
+            response submissions
+          </p>
+        </div>
+
+        <div className="kpi-report-card">
+          <span className="kpi-title">
+            Campus Feedback Completion
+          </span>
+
+          <div className="kpi-main-val">
+            {campusCompletion.percentage}%
+          </div>
+
+          <p>
+            {campusCompletion.submitted} /{" "}
+            {campusCompletion.designated} designated students
+            submitted
+          </p>
+        </div>
+
+        <div className="kpi-report-card">
+          <span className="kpi-title">
+            Active Low Score Alerts
+          </span>
+
+          <div className="kpi-main-val alert-text">
+            {overallReport.lowScoreAlerts} Alerts
+          </div>
+
+          <p>
+            Ratings under 3.5 needing review
+          </p>
+        </div>
 
       </div>
-    ))}
-  </div>
-</div>
-            <div className="reports-section-card">
-            <h2>Low Score Alerts & Reviews</h2>
 
-              <div className="alerts-list">
-                {lowScoreAlerts.map((a, idx) => (
-              <div key={idx} className="alert-item">
+      {/* =====================================================
+          DEPARTMENT PERFORMANCE
+      ===================================================== */}
 
-             <div className="alert-item-header">
-              <strong>⚠️ {a.facultyName}</strong>
+      <div className="reports-section-card">
 
-              <span className="alert-score-badge">
-                 {a.rating} / 5
-              </span>
+        <h2>
+          Department Ratings & Completion
+        </h2>
 
-            </div>
+        <div className="dept-perf-grid">
 
-               <p className="alert-dept">
-                 {a.department} • {a.subject}
-                </p>
+          {allDepartments
+            .filter(
+              (deptName) =>
+                selectedDeptFilter === "All" ||
+                deptName === selectedDeptFilter
+            )
+            .map((deptName) => {
 
-               <div className="alert-note">
-                 Reason: {a.reason}
-              </div>
+              const dept = departmentReports.find(
+                (item) =>
+                  item.department === deptName
+              );
+
+              const rating =
+                dept?.overallRating || 0;
+
+              const submissions =
+                dept?.totalSubmissions || 0;
+
+              const alerts =
+                dept?.lowScoreAlerts || 0;
+
+              return (
+                <div
+                  key={deptName}
+                  className="dept-perf-card"
+                >
+
+                  <h3>{deptName}</h3>
+
+                  <div className="perf-score">
+                    ⭐ {rating} / 5
+                  </div>
+
+                  <div className="perf-bar-bg">
+
+                    <div
+                      className="perf-bar-fill"
+                      style={{
+                        width: `${(rating / 5) * 100}%`,
+                      }}
+                    />
+
+                  </div>
+
+                  <div className="perf-footer">
+
+                    <span>
+                      Submissions: {submissions}
+                    </span>
+
+                    <span>
+                      Low Score Alerts: {alerts}
+                    </span>
+
+                  </div>
+
+                </div>
+              );
+            })}
+
+        </div>
+      </div>
+
+      {/* =====================================================
+          FACULTY + LOW SCORE
+      ===================================================== */}
+
+      <div className="reports-two-col">
+
+        {/* TOP FACULTY */}
+
+        <div className="reports-section-card">
+
+          <h2>Top Rated Faculty</h2>
+
+          <div className="leaderboard-list">
+
+            {topFaculty.length > 0 ? (
+              topFaculty.map((f, i) => (
+
+                <div
+                  key={i}
+                  className="leaderboard-item"
+                >
+
+                  <span className="rank-num">
+                    #{i + 1}
+                  </span>
+
+                  <div className="leader-info">
+
+                    <strong>
+                      {f.facultyName}
+                    </strong>
+
+                    <p>
+                      {f.department} • {f.subject}
+                    </p>
+
+                  </div>
+
+                  <span className="leader-score">
+                    ⭐ {f.rating}
+                  </span>
+
+                </div>
+
+              ))
+            ) : (
+              <p>No faculty feedback for this date.</p>
+            )}
 
           </div>
-          ))}
-      </div>
-    </div>
+        </div>
+
+        {/* LOW SCORE ALERTS */}
+
+        <div className="reports-section-card">
+
+          <h2>
+            Low Score Alerts & Reviews
+          </h2>
+
+          <div className="alerts-list">
+
+            {lowScoreAlerts.length > 0 ? (
+              lowScoreAlerts.map((a, idx) => (
+
+                <div
+                  key={idx}
+                  className="alert-item"
+                >
+
+                  <div className="alert-item-header">
+
+                    <strong>
+                      ⚠️ {a.facultyName}
+                    </strong>
+
+                    <span className="alert-score-badge">
+                      {a.rating} / 5
+                    </span>
+
+                  </div>
+
+                  <p className="alert-dept">
+                    {a.department} • {a.subject}
+                  </p>
+
+                  <div className="alert-note">
+                    Reason: {a.reason || "No remarks"}
+                  </div>
+
+                </div>
+
+              ))
+            ) : (
+              <p>
+                No low score alerts for this date.
+              </p>
+            )}
+
+          </div>
+        </div>
 
       </div>
     </div>

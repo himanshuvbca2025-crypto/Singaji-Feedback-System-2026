@@ -54,7 +54,34 @@ const submitFeedback = async (req, res) => {
 
 const getAllFeedback = async (req, res) => {
   try {
-    const feedbacks = await Feedback.aggregate([
+
+    // Date filter is optional
+    const { date } = req.query;
+
+    let matchStage = null;
+
+    if (date) {
+      const startDate = new Date(`${date}T00:00:00+05:30`);
+      const endDate = new Date(`${date}T23:59:59.999+05:30`);
+
+      matchStage = {
+        timestamp: {
+          $gte: startDate,
+          $lte: endDate,
+        },
+      };
+    }
+
+    const pipeline = [];
+
+    // Only apply date filter when date is selected
+    if (matchStage) {
+      pipeline.push({
+        $match: matchStage,
+      });
+    }
+
+    pipeline.push(
       {
         $group: {
           _id: {
@@ -102,7 +129,6 @@ const getAllFeedback = async (req, res) => {
           comment: "$latestRemarks",
 
           date: "$latestDate",
-
         },
       },
 
@@ -110,8 +136,10 @@ const getAllFeedback = async (req, res) => {
         $sort: {
           overallRating: -1,
         },
-      },
-    ]);
+      }
+    );
+
+    const feedbacks = await Feedback.aggregate(pipeline);
 
     return res.status(200).json({
       success: true,

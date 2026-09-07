@@ -6,28 +6,52 @@ const SelectedStudents = require('../models/SeletedStudents');
 const getOverallReport = async (req, res) => {
   try {
     // =========================================================
+    // DATE FILTER
+    // =========================================================
+    const { date } = req.query;
+
+    let dateFilter = {};
+
+    if (date) {
+      const startDate = new Date(`${date}T00:00:00+05:30`);
+      const endDate = new Date(`${date}T23:59:59.999+05:30`);
+
+      dateFilter = {
+        timestamp: {
+          $gte: startDate,
+          $lte: endDate,
+        },
+      };
+    }
+
+    // =========================================================
     // 1. OVERALL CAMPUS REPORT
     // =========================================================
     const designatedStudents = await SelectedStudents.distinct('gmail');
 
-     const submittedStudents = await Feedback.distinct('studentGmail');
+    const submittedStudents = await Feedback.distinct(
+      'studentGmail',
+      dateFilter
+    );
 
-         const submittedDesignatedStudents = submittedStudents.filter((gmail) =>
-          designatedStudents.includes(gmail)
-  );
+    const submittedDesignatedStudents = submittedStudents.filter((gmail) =>
+      designatedStudents.includes(gmail)
+    );
 
-       const totalDesignatedStudents = designatedStudents.length;
-       const totalSubmittedStudents = submittedDesignatedStudents.length;
+    const totalDesignatedStudents = designatedStudents.length;
+    const totalSubmittedStudents = submittedDesignatedStudents.length;
 
-        const feedbackCompletion =
-         totalDesignatedStudents > 0
-           ? Math.round(
-           (totalSubmittedStudents / totalDesignatedStudents) * 100
-         )
-        : 0;   
-
+    const feedbackCompletion =
+      totalDesignatedStudents > 0
+        ? Math.round(
+            (totalSubmittedStudents / totalDesignatedStudents) * 100
+          )
+        : 0;
 
     const overallResult = await Feedback.aggregate([
+      // Date filter only when date is selected
+      ...(date ? [{ $match: dateFilter }] : []),
+
       {
         $group: {
           _id: null,
@@ -58,6 +82,9 @@ const getOverallReport = async (req, res) => {
     // =========================================================
 
     const departmentResult = await Feedback.aggregate([
+      // Date filter only when date is selected
+      ...(date ? [{ $match: dateFilter }] : []),
+
       {
         $group: {
           _id: '$section',
@@ -93,6 +120,9 @@ const getOverallReport = async (req, res) => {
     // =========================================================
 
     const topRatedFaculty = await Feedback.aggregate([
+      // Date filter only when date is selected
+      ...(date ? [{ $match: dateFilter }] : []),
+
       {
         $group: {
           _id: {
@@ -127,6 +157,8 @@ const getOverallReport = async (req, res) => {
     // =========================================================
 
     const lowScoreAlerts = await Feedback.find({
+      ...dateFilter,
+
       'metrics.Overall': {
         $lt: 3.5,
       },
@@ -141,23 +173,24 @@ const getOverallReport = async (req, res) => {
     // 5. FINAL RESPONSE
     // =========================================================
 
-    const overall = overallResult.length > 0
-      ? {
-          overallRating: Number(
-            overallResult[0].overallRating.toFixed(1)
-          ),
+    const overall =
+      overallResult.length > 0
+        ? {
+            overallRating: Number(
+              overallResult[0].overallRating.toFixed(1)
+            ),
 
-          totalSubmissions:
-            overallResult[0].totalSubmissions,
+            totalSubmissions:
+              overallResult[0].totalSubmissions,
 
-          lowScoreAlerts:
-            overallResult[0].lowScoreAlerts,
-        }
-      : {
-          overallRating: 0,
-          totalSubmissions: 0,
-          lowScoreAlerts: 0,
-        };
+            lowScoreAlerts:
+              overallResult[0].lowScoreAlerts,
+          }
+        : {
+            overallRating: 0,
+            totalSubmissions: 0,
+            lowScoreAlerts: 0,
+          };
 
     return res.status(200).json({
       success: true,
@@ -165,10 +198,10 @@ const getOverallReport = async (req, res) => {
       overall,
 
       campusFeedbackCompletion: {
-      percentage: feedbackCompletion,
-      submitted: totalSubmittedStudents,
-      designated: totalDesignatedStudents,
-},
+        percentage: feedbackCompletion,
+        submitted: totalSubmittedStudents,
+        designated: totalDesignatedStudents,
+      },
 
       /// Department Wise
 
