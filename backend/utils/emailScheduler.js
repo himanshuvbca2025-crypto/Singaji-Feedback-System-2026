@@ -1,7 +1,7 @@
 const cron = require("node-cron");
 const Schedule = require("../models/Schedule");
-const Students = require("../models/Students");
 const { sendFeedbackLinkEmail } = require("./sendEmail");
+const SelectedStudents = require("../models/SeletedStudents");
 
 // ==========================================
 // TIME -> MINUTES
@@ -83,7 +83,9 @@ const processSlot = async (schedule, slotName) => {
         // LECTURE END TIME REACHED
         // ==========================================
 
-        if (currentMinutes < endMinutes) {
+        const timeDifference = currentMinutes - endMinutes;
+
+        if (timeDifference < 0 || timeDifference > 2) {
             return;
         }
 
@@ -105,8 +107,8 @@ const processSlot = async (schedule, slotName) => {
         // FIND STUDENTS
         // ==========================================
 
-        const students = await Students.find({
-            section: schedule.department,
+        const students = await SelectedStudents.find({
+            department: schedule.department,
             level: { $in: schedule.groups },
         });
 
