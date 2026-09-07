@@ -59,6 +59,40 @@ const saveSelectedStudents = async (req, res) => {
   }
 };
 
+
+const getSelectedStudents = async (req, res) => {
+  try {
+    const { department, level } = req.query;
+
+    if (!department || !level) {
+      return res.status(400).json({
+        success: false,
+        message: "Department and level are required",
+      });
+    }
+
+    const students = await SelectedStudents.find({
+      department,
+      level,
+    }).sort({ name: 1 });
+
+    res.status(200).json({
+      success: true,
+      count: students.length,
+      data: students,
+    });
+  } catch (error) {
+    console.error("Error fetching selected students:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   saveSelectedStudents,
+  getSelectedStudents,
 };

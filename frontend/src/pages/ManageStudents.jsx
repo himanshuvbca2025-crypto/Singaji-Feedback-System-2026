@@ -19,6 +19,10 @@ function ManageStudents() {
   const [searchTerm, setSearchTerm] = useState("");
   const [saveSuccessMessage, setSaveSuccessMessage] = useState("");
 
+  const [showSelectedStudents, setShowSelectedStudents] = useState(false);
+  const [savedStudents, setSavedStudents] = useState([]);
+  const [loadingSelectedStudents, setLoadingSelectedStudents] = useState(false);
+
   const [studentData, setStudentData] = useState({
     ITEG: {},
     MEG: {},
@@ -112,6 +116,8 @@ function ManageStudents() {
     setSelectedStudents([]);
     setSearchTerm("");
     setSaveSuccessMessage("");
+    setShowSelectedStudents(false);
+    setSavedStudents([]);
   };
 
   const handleLevelClick = (levelName) => {
@@ -119,6 +125,8 @@ function ManageStudents() {
     setSelectedStudents([]);
     setSearchTerm("");
     setSaveSuccessMessage("");
+    setShowSelectedStudents(false);
+    setSavedStudents([]);
   };
 
   const handleStudentSelect = (studentId) => {
@@ -192,12 +200,50 @@ function ManageStudents() {
       alert("Something went wrong while saving students.");
     }
   };
+
+
+  const handleViewSelectedStudents = async () => {
+    if (!selectedDepartment || !selectedLevel) {
+      return;
+    }
+
+    setLoadingSelectedStudents(true);
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/selected-students?department=${encodeURIComponent(
+          selectedDepartment
+        )}&level=${encodeURIComponent(selectedLevel)}`
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message || "Failed to fetch selected students.");
+        return;
+      }
+
+      if (data.success) {
+        setSavedStudents(data.data);
+        setShowSelectedStudents(true);
+      }
+    } catch (error) {
+      console.error("Error fetching selected students:", error);
+      alert("Something went wrong while fetching selected students.");
+    } finally {
+      setLoadingSelectedStudents(false);
+    }
+  };
+
+
   const handleBackToDepartments = () => {
     setSelectedDepartment(null);
     setSelectedLevel(null);
     setSelectedStudents([]);
     setSearchTerm("");
     setSaveSuccessMessage("");
+    setShowSelectedStudents(false);
+    setSavedStudents([]);
   };
 
   const handleBackToLevels = () => {
@@ -205,6 +251,8 @@ function ManageStudents() {
     setSelectedStudents([]);
     setSearchTerm("");
     setSaveSuccessMessage("");
+    setShowSelectedStudents(false);
+    setSavedStudents([]);
   };
 
 
@@ -345,6 +393,64 @@ function ManageStudents() {
               <div className="no-students">No students found matching search.</div>
             )}
           </div>
+
+          {/* VIEW SELECTED STUDENTS */}
+          <div className="view-selected-section">
+            <button
+              className="view-selected-button"
+              onClick={handleViewSelectedStudents}
+              disabled={loadingSelectedStudents}
+            >
+              {loadingSelectedStudents
+                ? "Loading..."
+                : "View Selected Students"}
+            </button>
+          </div>
+
+          {showSelectedStudents && (
+            <div className="selected-students-container">
+              <div className="selected-students-header">
+                <div>
+                  <h2>Selected Students</h2>
+                  <p>
+                    {selectedDepartment} — Level {selectedLevel}
+                  </p>
+                </div>
+
+                <span className="selected-total">
+                  {savedStudents.length} / 10
+                </span>
+              </div>
+
+              {savedStudents.length > 0 ? (
+                <div className="selected-students-list">
+                  {savedStudents.map((student, index) => (
+                    <div
+                      key={student._id}
+                      className="selected-student-row"
+                    >
+                      <span className="student-number">
+                        {index + 1}
+                      </span>
+
+                      <div className="student-info">
+                        <h3>{student.name}</h3>
+                        <p>{student.gmail}</p>
+                      </div>
+
+                      <span className="status-pill pill-active">
+                        Selected
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="no-selected-students">
+                  No students have been selected for this department and level.
+                </div>
+              )}
+            </div>
+          )}
 
           {/* SAVE BAR */}
           <div className="save-section">
