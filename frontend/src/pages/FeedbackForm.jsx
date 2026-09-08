@@ -14,11 +14,16 @@ function FeedbackForm() {
 
   const subjectName = searchParams.get("subject") || "Web Development";
 
+  const facultyIdParam = searchParams.get("facultyId") || "";
+
   const classNameParam =
     searchParams.get("class") || "BCA ITEG (Group A)";
 
   const timeParam =
     searchParams.get("time") || "10:00 AM - 11:30 AM";
+
+    const lectureEndTimeParam =
+       searchParams.get("endTime") || "";
 
   const dateParam = new Date().toLocaleDateString("en-GB", {
     day: "2-digit",
@@ -227,9 +232,11 @@ function FeedbackForm() {
             // These are only fallback values.
             level: classNameParam,
             section: "ITEG",
-
+            facultyId: facultyIdParam,
             facultyName,
             subject: subjectName,
+            lectureTime: timeParam,
+            lectureEndTime: lectureEndTimeParam,
 
             metrics,
 

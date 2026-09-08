@@ -19,6 +19,12 @@ const feedbackSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+ 
+    facultyId: {
+    type: String,
+    required: true,
+    trim: true,
+   }, 
 
     facultyName: {
       type: String,
@@ -30,6 +36,17 @@ const feedbackSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+    },
+  
+    lectureEndTime: {
+    type: String,
+    required: true,
+    trim: true,
+},
+    
+    timestamp: {
+      type: Date,
+      default: Date.now,
     },
 
     metrics: {
@@ -75,10 +92,6 @@ const feedbackSchema = new mongoose.Schema(
       trim: true,
     },
 
-    timestamp: {
-      type: Date,
-      default: Date.now,
-    },
   },
   {
     collection: 'Feedbacks',

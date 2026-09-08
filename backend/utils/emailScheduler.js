@@ -138,9 +138,11 @@ const processSlot = async (schedule, slotName) => {
 
             const result = await sendFeedbackLinkEmail(
                 student.gmail,
+                slot.facultyId,
                 slot.facultyName,
                 slot.subject,
-                time
+                time,
+                slot.endTime
             );
 
             if (result.success) {

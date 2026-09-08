@@ -44,23 +44,28 @@ function FacultyDashboard() {
     slot3: { startTime: "", endTime: "" },
   });
 
+  const [facultyList, setFacultyList] = useState([]);
+
   const [newSchedule, setNewSchedule] = useState({
     room: "",
     group: "",
     slot1Subject: "",
     slot1Faculty: "",
+    slot1FacultyId: "",
     slot1StartTime: "",
     slot1EndTime: "",
     lunchStartTime: "",
     lunchEndTime: "",
     slot2Subject: "",
     slot2Faculty: "",
+    slot2FacultyId: "",
     slot2StartTime: "",
     slot2EndTime: "",
     teaStartTime: "",
     teaEndTime: "",
     slot3Subject: "",
     slot3Faculty: "",
+    slot3FacultyId: "",
     slot3StartTime: "",
     slot3EndTime: "",
   });
@@ -72,6 +77,30 @@ function FacultyDashboard() {
       navigate("/login", { replace: true });
     }
   }, [isAuthenticated, navigate]);
+
+  useEffect(() => {
+  const fetchFaculty = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/faculty");
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        console.error("Failed to fetch faculty:", data.message);
+        return;
+      }
+
+      const allFaculty = Object.values(data.sections || {}).flat();
+
+      setFacultyList(allFaculty);
+    } catch (error) {
+      console.error("Error fetching faculty:", error);
+    }
+  };
+
+  if (isAuthenticated) {
+    fetchFaculty();
+  }
+}, [isAuthenticated]);
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -109,14 +138,17 @@ function FacultyDashboard() {
           slot1: {
             subject: schedule.slot1?.subject || "",
             faculty: schedule.slot1?.facultyName || "",
+            facultyId: schedule.slot1?.facultyId || "",
           },
           slot2: {
             subject: schedule.slot2?.subject || "",
             faculty: schedule.slot2?.facultyName || "",
+            facultyId: schedule.slot2?.facultyId || "",
           },
           slot3: {
             subject: schedule.slot3?.subject || "",
             faculty: schedule.slot3?.facultyName || "",
+            facultyId: schedule.slot3?.facultyId || "",
           },
         }))
       );
@@ -214,6 +246,7 @@ function FacultyDashboard() {
 
         slot1: {
           subject: newSchedule.slot1Subject,
+          facultyId: newSchedule.slot1FacultyId,
           facultyName: newSchedule.slot1Faculty || facultyName,
           ...(hasTodaySchedule
             ? {}
@@ -234,6 +267,7 @@ function FacultyDashboard() {
 
         slot2: {
           subject: newSchedule.slot2Subject,
+          facultyId: newSchedule.slot2FacultyId,
           facultyName: newSchedule.slot2Faculty || facultyName,
           ...(hasTodaySchedule
             ? {}
@@ -254,6 +288,7 @@ function FacultyDashboard() {
 
         slot3: {
           subject: newSchedule.slot3Subject,
+          facultyId: newSchedule.slot3FacultyId,
           facultyName: newSchedule.slot3Faculty || facultyName,
           ...(hasTodaySchedule
             ? {}
@@ -291,18 +326,21 @@ function FacultyDashboard() {
           group: "",
           slot1Subject: "",
           slot1Faculty: "",
+          slot1FacultyId: "",
           slot1StartTime: "",
           slot1EndTime: "",
           lunchStartTime: "",
           lunchEndTime: "",
           slot2Subject: "",
           slot2Faculty: "",
+          slot2FacultyId: "",
           slot2StartTime: "",
           slot2EndTime: "",
           teaStartTime: "",
           teaEndTime: "",
           slot3Subject: "",
           slot3Faculty: "",
+          slot3FacultyId: "",
           slot3StartTime: "",
           slot3EndTime: "",
         });
@@ -336,18 +374,21 @@ function FacultyDashboard() {
       group: originalSchedule.group || "",
       slot1Subject: originalSchedule.slot1?.subject || "",
       slot1Faculty: originalSchedule.slot1?.faculty || "",
+      slot1FacultyId: originalSchedule.slot1?.facultyId || "",
       slot1StartTime: scheduleTiming.slot1.startTime || "",
       slot1EndTime: scheduleTiming.slot1.endTime || "",
       lunchStartTime: scheduleTiming.lunchBreak.startTime || "",
       lunchEndTime: scheduleTiming.lunchBreak.endTime || "",
       slot2Subject: originalSchedule.slot2?.subject || "",
       slot2Faculty: originalSchedule.slot2?.faculty || "",
+      slot2FacultyId: originalSchedule.slot2?.facultyId || "",
       slot2StartTime: scheduleTiming.slot2.startTime || "",
       slot2EndTime: scheduleTiming.slot2.endTime || "",
       teaStartTime: scheduleTiming.teaBreak.startTime || "",
       teaEndTime: scheduleTiming.teaBreak.endTime || "",
       slot3Subject: originalSchedule.slot3?.subject || "",
       slot3Faculty: originalSchedule.slot3?.faculty || "",
+      slot3FacultyId: originalSchedule.slot3?.facultyId || "",
       slot3StartTime: scheduleTiming.slot3.startTime || "",
       slot3EndTime: scheduleTiming.slot3.endTime || "",
     });
@@ -391,6 +432,7 @@ function FacultyDashboard() {
 
         slot1: {
           subject: newSchedule.slot1Subject,
+          facultyId: newSchedule.slot1FacultyId,
           facultyName: newSchedule.slot1Faculty || facultyName,
           startTime: newSchedule.slot1StartTime,
           endTime: newSchedule.slot1EndTime,
@@ -403,6 +445,7 @@ function FacultyDashboard() {
 
         slot2: {
           subject: newSchedule.slot2Subject,
+          facultyId: newSchedule.slot2FacultyId,
           facultyName: newSchedule.slot2Faculty || facultyName,
           startTime: newSchedule.slot2StartTime,
           endTime: newSchedule.slot2EndTime,
@@ -415,6 +458,7 @@ function FacultyDashboard() {
 
         slot3: {
           subject: newSchedule.slot3Subject,
+          facultyId: newSchedule.slot3FacultyId,
           facultyName: newSchedule.slot3Faculty || facultyName,
           startTime: newSchedule.slot3StartTime,
           endTime: newSchedule.slot3EndTime,
@@ -452,18 +496,21 @@ function FacultyDashboard() {
           group: "",
           slot1Subject: "",
           slot1Faculty: "",
+          slot1FacultyId: "",
           slot1StartTime: "",
           slot1EndTime: "",
           lunchStartTime: "",
           lunchEndTime: "",
           slot2Subject: "",
           slot2Faculty: "",
+          slot2FacultyId: "",
           slot2StartTime: "",
           slot2EndTime: "",
           teaStartTime: "",
           teaEndTime: "",
           slot3Subject: "",
           slot3Faculty: "",
+          slot3FacultyId: "",
           slot3StartTime: "",
           slot3EndTime: "",
         });
@@ -910,17 +957,33 @@ function FacultyDashboard() {
                     }
                   />
 
-                  <input
-                    type="text"
-                    placeholder="Faculty Name"
-                    value={newSchedule.slot1Faculty}
-                    onChange={(e) =>
+                  <select
+                    value={newSchedule.slot1FacultyId}
+                    onChange={(e) => {
+                      const selectedFaculty = facultyList.find(
+                        (faculty) => faculty.facultyId === e.target.value
+                      );
+
                       setNewSchedule({
                         ...newSchedule,
-                        slot1Faculty: e.target.value,
-                      })
-                    }
-                  />
+                        slot1FacultyId: selectedFaculty?.facultyId || "",
+                        slot1Faculty: selectedFaculty?.name || "",
+                      });
+                    }}
+                  >
+                    <option value="">Select Faculty</option>
+
+                    {facultyList
+                      .filter((faculty) => faculty.section === user?.department)
+                      .map((faculty) => (
+                        <option
+                          key={faculty.facultyId}
+                          value={faculty.facultyId}
+                        >
+                          {faculty.name} ({faculty.facultyId})
+                        </option>
+                      ))}
+                  </select>
 
                   {!hasTodaySchedule && (
                     <>
@@ -1028,17 +1091,33 @@ function FacultyDashboard() {
                     }
                   />
 
-                  <input
-                    type="text"
-                    placeholder="Faculty Name"
-                    value={newSchedule.slot2Faculty}
-                    onChange={(e) =>
+                  <select
+                    value={newSchedule.slot2FacultyId}
+                    onChange={(e) => {
+                      const selectedFaculty = facultyList.find(
+                        (faculty) => faculty.facultyId === e.target.value
+                      );
+
                       setNewSchedule({
                         ...newSchedule,
-                        slot2Faculty: e.target.value,
-                      })
-                    }
-                  />
+                        slot2FacultyId: selectedFaculty?.facultyId || "",
+                        slot2Faculty: selectedFaculty?.name || "",
+                      });
+                    }}
+                  >
+                    <option value="">Select Faculty</option>
+
+                    {facultyList
+                      .filter((faculty) => faculty.section === user?.department)
+                      .map((faculty) => (
+                        <option
+                          key={faculty.facultyId}
+                          value={faculty.facultyId}
+                        >
+                          {faculty.name} ({faculty.facultyId})
+                        </option>
+                      ))}
+                  </select>
 
                   {!hasTodaySchedule && (
                     <>
@@ -1146,17 +1225,33 @@ function FacultyDashboard() {
                     }
                   />
 
-                  <input
-                    type="text"
-                    placeholder="Faculty Name"
-                    value={newSchedule.slot3Faculty}
-                    onChange={(e) =>
+                  <select
+                    value={newSchedule.slot3FacultyId}
+                    onChange={(e) => {
+                      const selectedFaculty = facultyList.find(
+                        (faculty) => faculty.facultyId === e.target.value
+                      );
+
                       setNewSchedule({
                         ...newSchedule,
-                        slot3Faculty: e.target.value,
-                      })
-                    }
-                  />
+                        slot3FacultyId: selectedFaculty?.facultyId || "",
+                        slot3Faculty: selectedFaculty?.name || "",
+                      });
+                    }}
+                  >
+                    <option value="">Select Faculty</option>
+
+                    {facultyList
+                      .filter((faculty) => faculty.section === user?.department)
+                      .map((faculty) => (
+                        <option
+                          key={faculty.facultyId}
+                          value={faculty.facultyId}
+                        >
+                          {faculty.name} ({faculty.facultyId})
+                        </option>
+                      ))}
+                  </select>
 
                   {!hasTodaySchedule && (
                     <>
@@ -1265,14 +1360,33 @@ function FacultyDashboard() {
                       setNewSchedule({ ...newSchedule, slot1Subject: e.target.value })
                     }
                   />
-                  <input
-                    type="text"
-                    placeholder="Faculty Name"
-                    value={newSchedule.slot1Faculty}
-                    onChange={(e) =>
-                      setNewSchedule({ ...newSchedule, slot1Faculty: e.target.value })
-                    }
-                  />
+ <select
+  value={newSchedule.slot1FacultyId}
+  onChange={(e) => {
+    const selectedFaculty = facultyList.find(
+      (faculty) => faculty.facultyId === e.target.value
+    );
+
+    setNewSchedule({
+      ...newSchedule,
+      slot1FacultyId: selectedFaculty?.facultyId || "",
+      slot1Faculty: selectedFaculty?.name || "",
+    });
+  }}
+>
+  <option value="">Select Faculty</option>
+
+  {facultyList
+    .filter((faculty) => faculty.section === user?.department)
+    .map((faculty) => (
+      <option
+        key={faculty.facultyId}
+        value={faculty.facultyId}
+      >
+        {faculty.name} ({faculty.facultyId})
+      </option>
+    ))}
+</select>
                   <label>Start Time</label>
                   <input
                     type="time"
@@ -1325,14 +1439,33 @@ function FacultyDashboard() {
                       setNewSchedule({ ...newSchedule, slot2Subject: e.target.value })
                     }
                   />
-                  <input
-                    type="text"
-                    placeholder="Faculty Name"
-                    value={newSchedule.slot2Faculty}
-                    onChange={(e) =>
-                      setNewSchedule({ ...newSchedule, slot2Faculty: e.target.value })
-                    }
-                  />
+ <select
+  value={newSchedule.slot2FacultyId}
+  onChange={(e) => {
+    const selectedFaculty = facultyList.find(
+      (faculty) => faculty.facultyId === e.target.value
+    );
+
+    setNewSchedule({
+      ...newSchedule,
+      slot2FacultyId: selectedFaculty?.facultyId || "",
+      slot2Faculty: selectedFaculty?.name || "",
+    });
+  }}
+>
+  <option value="">Select Faculty</option>
+
+  {facultyList
+    .filter((faculty) => faculty.section === user?.department)
+    .map((faculty) => (
+      <option
+        key={faculty.facultyId}
+        value={faculty.facultyId}
+      >
+        {faculty.name} ({faculty.facultyId})
+      </option>
+    ))}
+</select>
                   <label>Start Time</label>
                   <input
                     type="time"
@@ -1385,14 +1518,33 @@ function FacultyDashboard() {
                       setNewSchedule({ ...newSchedule, slot3Subject: e.target.value })
                     }
                   />
-                  <input
-                    type="text"
-                    placeholder="Faculty Name"
-                    value={newSchedule.slot3Faculty}
-                    onChange={(e) =>
-                      setNewSchedule({ ...newSchedule, slot3Faculty: e.target.value })
-                    }
-                  />
+<select
+  value={newSchedule.slot3FacultyId}
+  onChange={(e) => {
+    const selectedFaculty = facultyList.find(
+      (faculty) => faculty.facultyId === e.target.value
+    );
+
+    setNewSchedule({
+      ...newSchedule,
+      slot3FacultyId: selectedFaculty?.facultyId || "",
+      slot3Faculty: selectedFaculty?.name || "",
+    });
+  }}
+>
+  <option value="">Select Faculty</option>
+
+  {facultyList
+    .filter((faculty) => faculty.section === user?.department)
+    .map((faculty) => (
+      <option
+        key={faculty.facultyId}
+        value={faculty.facultyId}
+      >
+        {faculty.name} ({faculty.facultyId})
+      </option>
+    ))}
+</select>
                   <label>Start Time</label>
                   <input
                     type="time"

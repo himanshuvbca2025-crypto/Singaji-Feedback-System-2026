@@ -269,41 +269,34 @@ function Reports() {
 
           <div className="leaderboard-list">
 
-            {topFaculty.length > 0 ? (
-              topFaculty.map((f, i) => (
+  {topFaculty.filter((f) => Number(f.rating) >= 3.5).length > 0 ? (
+  topFaculty
+    .filter((f) => Number(f.rating) >= 3.5)
+    .map((f, i) => (
+      <div
+        key={i}
+        className="leaderboard-item"
+      >
+        <span className="rank-num">
+          #{i + 1}
+        </span>
 
-                <div
-                  key={i}
-                  className="leaderboard-item"
-                >
+        <div className="leader-info">
+          <strong>{f.facultyName}</strong>
 
-                  <span className="rank-num">
-                    #{i + 1}
-                  </span>
+          <p>
+            {f.department} • {f.subject}
+          </p>
+        </div>
 
-                  <div className="leader-info">
-
-                    <strong>
-                      {f.facultyName}
-                    </strong>
-
-                    <p>
-                      {f.department} • {f.subject}
-                    </p>
-
-                  </div>
-
-                  <span className="leader-score">
-                    ⭐ {f.rating}
-                  </span>
-
-                </div>
-
-              ))
-            ) : (
-              <p>No faculty feedback for this date.</p>
-            )}
-
+        <span className="leader-score">
+          ⭐ {f.rating}
+        </span>
+      </div>
+    ))
+) : (
+  <p>No top-rated faculty for this date.</p>
+)}
           </div>
         </div>
 

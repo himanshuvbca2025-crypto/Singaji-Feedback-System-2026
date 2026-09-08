@@ -5,9 +5,7 @@ const scheduleSchema = new mongoose.Schema(
     date: {
       type: Date,
       default: Date.now,
-      index: {
-        expires: "24h",
-      },
+      index: true,
     },
 
     department: {
@@ -38,6 +36,11 @@ const scheduleSchema = new mongoose.Schema(
     // ==========================================
     slot1: {
       subject: {
+        type: String,
+        trim: true,
+      },
+
+      facultyId: {
         type: String,
         trim: true,
       },
@@ -83,6 +86,11 @@ const scheduleSchema = new mongoose.Schema(
         trim: true,
       },
 
+      facultyId: {
+        type: String,
+        trim: true,
+      },
+
       facultyName: {
         type: String,
         trim: true,
@@ -120,6 +128,11 @@ const scheduleSchema = new mongoose.Schema(
     // ==========================================
     slot3: {
       subject: {
+        type: String,
+        trim: true,
+      },
+
+      facultyId: {
         type: String,
         trim: true,
       },

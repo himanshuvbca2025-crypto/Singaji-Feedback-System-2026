@@ -10,15 +10,20 @@ const transporter = nodemailer.createTransport({
 
 const sendFeedbackLinkEmail = async (
   studentEmail,
+   facultyId,
   facultyName,
   subject,
-  time
+  time,
+  endTime
 ) => {
-  const feedbackUrl = 
-`http://localhost:5173/student/feedback?faculty=${encodeURIComponent(
-    facultyName
-  )}&subject=${encodeURIComponent(subject)}&time=${encodeURIComponent(time)}`;
-
+const feedbackUrl =
+  `http://localhost:5173/student/feedback` +
+  `?facultyId=${encodeURIComponent(facultyId)}` +
+  `&faculty=${encodeURIComponent(facultyName)}` +
+  `&subject=${encodeURIComponent(subject)}` +
+  `&time=${encodeURIComponent(time)}` +
+  `&endTime=${encodeURIComponent(endTime || "")}`;
+  
   const mailOptions = {
     from: process.env.MAIL_USER,
     to: studentEmail,
@@ -33,7 +38,8 @@ const sendFeedbackLinkEmail = async (
       <p>
         <strong>Faculty:</strong> ${facultyName}<br>
         <strong>Subject:</strong> ${subject}<br>
-        <strong>Time:</strong> ${time}
+        <strong>Time:</strong> ${time}<br>
+        <strong>Lecture End Time:</strong> ${endTime || "Not available"}
       </p>
 
       <p>
@@ -51,6 +57,10 @@ const sendFeedbackLinkEmail = async (
 
     console.log("==========================================");
     console.log(`[EMAIL SENT] To: ${studentEmail}`);
+    console.log(`Faculty: ${facultyName}`);
+    console.log(`Subject: ${subject}`);
+    console.log(`Lecture Time: ${time}`);
+    console.log(`Lecture End Time: ${endTime}`);
     console.log(`Message ID: ${info.messageId}`);
     console.log("==========================================");
 
@@ -59,6 +69,7 @@ const sendFeedbackLinkEmail = async (
       message: "Email sent successfully",
       studentEmail,
       feedbackUrl,
+      lectureEndTime: endTime,
     };
   } catch (error) {
     console.error("EMAIL ERROR:", error);

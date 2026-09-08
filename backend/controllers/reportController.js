@@ -120,38 +120,46 @@ const getOverallReport = async (req, res) => {
     // =========================================================
 
     const topRatedFaculty = await Feedback.aggregate([
-      // Date filter only when date is selected
-      ...(date ? [{ $match: dateFilter }] : []),
+  // Date filter only when date is selected
+  ...(date ? [{ $match: dateFilter }] : []),
 
-      {
-        $group: {
-          _id: {
-            facultyName: '$facultyName',
-            section: '$section',
-            subject: '$subject',
-          },
-
-          averageRating: {
-            $avg: '$metrics.Overall',
-          },
-
-          totalFeedbacks: {
-            $sum: 1,
-          },
-        },
+  {
+    $group: {
+      _id: {
+        facultyName: "$facultyName",
+        section: "$section",
+        subject: "$subject",
       },
 
-      {
-        $sort: {
-          averageRating: -1,
-        },
+      averageRating: {
+        $avg: "$metrics.Overall",
       },
 
-      {
-        $limit: 4,
+      totalFeedbacks: {
+        $sum: 1,
       },
-    ]);
+    },
+  },
 
+  // Only ratings >= 3.5 will be considered Top Rated
+  {
+    $match: {
+      averageRating: {
+        $gte: 3.5,
+      },
+    },
+  },
+
+  {
+    $sort: {
+      averageRating: -1,
+    },
+  },
+
+  {
+    $limit: 4,
+  },
+]);
     // =========================================================
     // 4. LOW SCORE ALERTS
     // =========================================================

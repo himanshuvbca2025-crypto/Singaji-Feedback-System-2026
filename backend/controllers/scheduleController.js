@@ -1,7 +1,6 @@
 const Schedule = require("../models/Schedule");
 const Students = require("../models/Students");
 
-
 // =====================================================
 // Get today's start and end according to Indian time
 // =====================================================
@@ -36,7 +35,6 @@ const getTodayRange = () => {
   };
 };
 
-
 // =====================================================
 // Create Schedule
 // =====================================================
@@ -53,7 +51,6 @@ const createSchedule = async (req, res) => {
       slot3,
     } = req.body;
 
-
     // =================================================
     // Basic validation
     // =================================================
@@ -64,14 +61,12 @@ const createSchedule = async (req, res) => {
       });
     }
 
-
     if (!Array.isArray(groups) || groups.length === 0) {
       return res.status(400).json({
         success: false,
         message: "At least one group is required",
       });
     }
-
 
     // =================================================
     // Calculate total strength
@@ -82,7 +77,6 @@ const createSchedule = async (req, res) => {
     });
 
     const strength = students.length;
-
 
     // =================================================
     // Find today's existing schedule
@@ -97,7 +91,6 @@ const createSchedule = async (req, res) => {
       },
     }).sort({ date: 1 });
 
-
     // =================================================
     // If today's schedule already exists
     // then reuse its timing
@@ -108,50 +101,45 @@ const createSchedule = async (req, res) => {
     let finalTeaBreak;
     let finalSlot3;
 
-
     if (existingSchedule) {
-
       // -----------------------------------------------
       // Timing already exists for today
       // -----------------------------------------------
 
       finalSlot1 = {
         subject: slot1?.subject || "",
+        facultyId: slot1?.facultyId || "",
         facultyName: slot1?.facultyName || "",
         startTime: existingSchedule.slot1?.startTime,
         endTime: existingSchedule.slot1?.endTime,
       };
-
 
       finalLunchBreak = {
         startTime: existingSchedule.lunchBreak?.startTime,
         endTime: existingSchedule.lunchBreak?.endTime,
       };
 
-
       finalSlot2 = {
         subject: slot2?.subject || "",
+        facultyId: slot2?.facultyId || "",
         facultyName: slot2?.facultyName || "",
         startTime: existingSchedule.slot2?.startTime,
         endTime: existingSchedule.slot2?.endTime,
       };
-
 
       finalTeaBreak = {
         startTime: existingSchedule.teaBreak?.startTime,
         endTime: existingSchedule.teaBreak?.endTime,
       };
 
-
       finalSlot3 = {
         subject: slot3?.subject || "",
+        facultyId: slot3?.facultyId || "",
         facultyName: slot3?.facultyName || "",
         startTime: existingSchedule.slot3?.startTime,
         endTime: existingSchedule.slot3?.endTime,
       };
-
     } else {
-
       // -----------------------------------------------
       // First schedule of the day
       // Timing is required
@@ -176,7 +164,6 @@ const createSchedule = async (req, res) => {
         });
       }
 
-
       finalSlot1 = slot1;
 
       finalLunchBreak = lunchBreak;
@@ -187,7 +174,6 @@ const createSchedule = async (req, res) => {
 
       finalSlot3 = slot3;
     }
-
 
     // =================================================
     // Create schedule
@@ -209,7 +195,6 @@ const createSchedule = async (req, res) => {
       slot3: finalSlot3,
     });
 
-
     // =================================================
     // Response
     // =================================================
@@ -221,9 +206,7 @@ const createSchedule = async (req, res) => {
 
       schedule,
     });
-
   } catch (error) {
-
     console.error("Create schedule error:", error);
 
     return res.status(500).json({
@@ -232,7 +215,6 @@ const createSchedule = async (req, res) => {
     });
   }
 };
-
 
 // =====================================================
 // Get Today's Schedules
@@ -269,7 +251,6 @@ const getTodaySchedules = async (req, res) => {
   }
 };
 
-
 // =====================================================
 // Update Schedule
 // =====================================================
@@ -288,7 +269,6 @@ const updateSchedule = async (req, res) => {
       slot3,
     } = req.body;
 
-  
     const existingSchedule = await Schedule.findById(id);
 
     if (!existingSchedule) {
@@ -325,7 +305,9 @@ const updateSchedule = async (req, res) => {
         department,
         groups,
         class: className,
+
         strength,
+
         slot1,
         lunchBreak,
         slot2,
@@ -353,7 +335,6 @@ const updateSchedule = async (req, res) => {
   }
 };
 
-
 // =====================================================
 // Delete Schedule
 // =====================================================
@@ -370,6 +351,7 @@ const deleteSchedule = async (req, res) => {
       });
     }
 
+    // Schedule _id se hi delete hoga
     await Schedule.findByIdAndDelete(id);
 
     return res.status(200).json({
@@ -385,7 +367,6 @@ const deleteSchedule = async (req, res) => {
     });
   }
 };
-
 
 module.exports = {
   createSchedule,

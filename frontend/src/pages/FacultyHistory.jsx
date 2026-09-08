@@ -7,193 +7,561 @@ function FacultyHistory() {
   const navigate = useNavigate();
 
   const [facultyData, setFacultyData] = useState(null);
-  const [feedbacks, setFeedbacks] = useState([]);
+  const [historyData, setHistoryData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Mock faculty database matching ID or fallback
-  const mockFacultyDetails = {
-    "1": {
-      name: "Dr. Rahul Sharma",
-      department: "ITEG",
-      subject: "Programming in C++ & Java",
-      email: "rahul.sharma@singaji.edu.in",
-      totalLectures: 48,
-      feedbackCount: 380,
-      avgRating: 4.6,
-    },
-    "2": {
-      name: "Prof. Neha Jain",
-      department: "ITEG",
-      subject: "Database Management Systems",
-      email: "neha.jain@singaji.edu.in",
-      totalLectures: 42,
-      feedbackCount: 310,
-      avgRating: 4.4,
-    },
-    "3": {
-      name: "Dr. Amit Singh",
-      department: "ITEG",
-      subject: "Web Development & Frameworks",
-      email: "amit.singh@singaji.edu.in",
-      totalLectures: 36,
-      feedbackCount: 290,
-      avgRating: 4.7,
-    },
+  // =========================================================
+  // FORMAT DATE
+  // =========================================================
+
+  const formatDate = (value) => {
+    if (!value) return "N/A";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return "N/A";
+    }
+
+    return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
 
-  const defaultFaculty = mockFacultyDetails[facultyId] || {
-    name: "Faculty Member",
-    department: "Engineering",
-    subject: "Core Specialization",
-    email: "faculty@singaji.edu.in",
-    totalLectures: 40,
-    feedbackCount: 320,
-    avgRating: 4.5,
-  };
+  // =========================================================
+  // FETCH FACULTY + HISTORY
+  // =========================================================
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const nameToQuery = defaultFaculty.name;
-        const res = await fetch(`http://localhost:5000/api/feedback/faculty/${encodeURIComponent(nameToQuery)}`);
-        const data = await res.json();
-        if (res.ok && data.success && data.feedbacks) {
-          setFeedbacks(data.feedbacks);
-          setFacultyData({
-            ...defaultFaculty,
-            feedbackCount: data.count || defaultFaculty.feedbackCount,
-            avgRating: data.avgRating || defaultFaculty.avgRating,
-          });
-        } else {
-          setFacultyData(defaultFaculty);
+        setLoading(true);
+        setError("");
+
+        // =====================================================
+        // 1. GET ALL FACULTY
+        // =====================================================
+
+        const facultyResponse = await fetch(
+          "http://localhost:5000/api/faculty"
+        );
+
+        const facultyResult =
+          await facultyResponse.json();
+
+        if (
+          !facultyResponse.ok ||
+          !facultyResult.success
+        ) {
+          throw new Error(
+            facultyResult.message ||
+              "Failed to fetch faculty details."
+          );
         }
+
+        // =====================================================
+        // 2. FIND CURRENT FACULTY BY FACULTY ID
+        // =====================================================
+
+        const sections =
+          facultyResult.sections || {};
+
+        let selectedFaculty = null;
+
+        for (const sectionName of Object.keys(
+          sections
+        )) {
+          const sectionFaculty =
+            Array.isArray(sections[sectionName])
+              ? sections[sectionName]
+              : [];
+
+          const found =
+            sectionFaculty.find(
+              (member) =>
+                String(
+                  member.facultyId ||
+                    member.id ||
+                    member._id ||
+                    ""
+                ) === String(facultyId)
+            );
+
+          if (found) {
+            selectedFaculty = {
+              ...found,
+              department:
+                found.section ||
+                sectionName,
+            };
+
+            break;
+          }
+        }
+
+        if (!selectedFaculty) {
+          throw new Error(
+            "Faculty member not found."
+          );
+        }
+
+        // =====================================================
+        // 3. GET FACULTY HISTORY
+        // =====================================================
+
+      const historyUrl =
+        `http://localhost:5000/api/feedback/faculty-history/${encodeURIComponent(
+         facultyId
+       )}`;
+
+        const historyResponse = await fetch(
+          historyUrl
+        );
+
+        const historyResult =
+          await historyResponse.json();
+
+        if (
+          !historyResponse.ok ||
+          !historyResult.success
+        ) {
+          throw new Error(
+            historyResult.message ||
+              "Failed to fetch faculty history."
+          );
+        }
+
+        console.log(
+          "[FACULTY HISTORY] Faculty:",
+          selectedFaculty
+        );
+
+        console.log(
+          "[FACULTY HISTORY] History:",
+          historyResult
+        );
+
+        // =====================================================
+        // 4. SET DATA
+        // =====================================================
+
+        setFacultyData({
+          name:
+            historyResult.faculty?.name ||
+            selectedFaculty.name,
+
+          department:
+            historyResult.faculty?.department ||
+            selectedFaculty.department ||
+            "N/A",
+
+          subject:
+            Array.isArray(selectedFaculty.subjects)
+              ? selectedFaculty.subjects.join(" & ")
+              : selectedFaculty.subject ||
+                "Core Specialization",
+
+          email:
+            selectedFaculty.gmail ||
+            selectedFaculty.email ||
+            "N/A",
+        });
+
+        setHistoryData(historyResult);
       } catch (err) {
-        setFacultyData(defaultFaculty);
+        console.error(
+          "[FACULTY HISTORY ERROR]:",
+          err
+        );
+
+        setError(
+          err.message ||
+            "Failed to load faculty history."
+        );
       } finally {
         setLoading(false);
       }
     };
 
-    fetchHistory();
+    if (facultyId) {
+      fetchHistory();
+    }
   }, [facultyId]);
 
-  const faculty = facultyData || defaultFaculty;
+  // =========================================================
+  // LOADING
+  // =========================================================
+
+  if (loading) {
+    return (
+      <div className="faculty-history-page">
+        <button
+          className="history-back-btn"
+          onClick={() =>
+            navigate("/admin/faculty")
+          }
+        >
+          ← Back to Faculty List
+        </button>
+
+        <div className="history-section-card">
+          <h2>Loading Faculty History...</h2>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================
+  // ERROR
+  // =========================================================
+
+  if (error) {
+    return (
+      <div className="faculty-history-page">
+        <button
+          className="history-back-btn"
+          onClick={() =>
+            navigate("/admin/faculty")
+          }
+        >
+          ← Back to Faculty List
+        </button>
+
+        <div className="history-section-card">
+          <h2>Unable to Load History</h2>
+
+          <p
+            style={{
+              color: "#dc2626",
+              marginTop: "10px",
+            }}
+          >
+            {error}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!facultyData || !historyData) {
+    return null;
+  }
+
+  const faculty = facultyData;
+
+  // =========================================================
+  // QUESTION-WISE DATA
+  // =========================================================
+
+  const parameterAverages =
+    historyData.parameterAverages || {};
 
   const questionScores = [
-    { question: "Punctuality & Class Readiness", score: 4.8, category: "Classroom Management" },
-    { question: "Clarity of Explanation & Concepts", score: 4.6, category: "Teaching" },
-    { question: "Communication & Interaction", score: 4.5, category: "Communication" },
-    { question: "Subject Knowledge & Depth", score: 4.7, category: "Subject Knowledge" },
-    { question: "Availability for Doubts & Guidance", score: 4.4, category: "Overall Experience" },
+    {
+      question:
+        "Punctuality & Class Readiness",
+      score:
+        Number(
+          parameterAverages.Punctuality
+        ) || 0,
+      category: "Classroom Management",
+    },
+
+    {
+      question:
+        "Clarity of Explanation & Concepts",
+      score:
+        Number(
+          parameterAverages.Explanation
+        ) || 0,
+      category: "Teaching",
+    },
+
+    {
+      question:
+        "Communication & Interaction",
+      score:
+        Number(
+          parameterAverages.Engagement
+        ) || 0,
+      category: "Communication",
+    },
+
+    {
+      question:
+        "Subject Knowledge & Depth",
+      score:
+        Number(
+          parameterAverages.Resolution
+        ) || 0,
+      category: "Subject Knowledge",
+    },
+
+    {
+      question:
+        "Availability for Doubts & Guidance",
+      score:
+        Number(
+          parameterAverages.Overall
+        ) || 0,
+      category: "Overall Experience",
+    },
   ];
 
-  const displayFeedbacks = feedbacks.length > 0
-    ? feedbacks.map(item => ({
-        date: new Date(item.timestamp || Date.now()).toLocaleDateString("en-GB"),
-        student: `Student (${item.level || "Level 1A"})`,
-        rating: item.metrics?.Overall || 5,
-        comment: item.remarks || "Great explanation and interactive session.",
-      }))
-    : [
-        {
-          date: "01 Sep 2026",
-          student: "Student (Level 1A)",
-          rating: 5,
-          comment: "Excellent lecture on Object Oriented Concepts with clear real-world examples.",
-        },
-        {
-          date: "28 Aug 2026",
-          student: "Student (Level 1B)",
-          rating: 4,
-          comment: "Very detailed explanation. Pace was smooth and well-managed.",
-        },
-        {
-          date: "25 Aug 2026",
-          student: "Student (Level 2A)",
-          rating: 5,
-          comment: "Great practical session and doubt clearing.",
-        },
-      ];
+  // =========================================================
+  // RECENT COMMENTS
+  // =========================================================
+
+  const recentComments =
+    Array.isArray(
+      historyData.recentComments
+    )
+      ? historyData.recentComments
+      : [];
+
+  // =========================================================
+  // RENDER
+  // =========================================================
 
   return (
     <div className="faculty-history-page">
-      <button className="history-back-btn" onClick={() => navigate("/admin/faculty")}>
+      {/* =====================================================
+          BACK BUTTON
+      ===================================================== */}
+
+      <button
+        className="history-back-btn"
+        onClick={() =>
+          navigate("/admin/faculty")
+        }
+      >
         ← Back to Faculty List
       </button>
 
-      {/* Header Profile Card */}
+      {/* =====================================================
+          HEADER PROFILE CARD
+      ===================================================== */}
+
       <div className="profile-card">
         <div className="profile-avatar">
-          {faculty.name.replace("Dr. ", "").replace("Prof. ", "").charAt(0)}
+          {faculty.name
+            ?.replace(/^Dr\.\s*/i, "")
+            .replace(
+              /^Prof\.\s*/i,
+              ""
+            )
+            .trim()
+            .charAt(0)
+            .toUpperCase() || "F"}
         </div>
+
         <div className="profile-details">
           <h1>{faculty.name}</h1>
+
           <p className="profile-sub">
-            {faculty.department} Department • {faculty.subject}
+            {faculty.department} Department
+            {" • "}
+            {faculty.subject}
           </p>
-          <p className="profile-email">✉ {faculty.email}</p>
+
+          <p className="profile-email">
+            ✉ {faculty.email}
+          </p>
         </div>
       </div>
 
-      {/* Summary KPI Cards */}
+      {/* =====================================================
+          SUMMARY KPI CARDS
+      ===================================================== */}
+
       <div className="history-kpi-grid">
-        <div className="kpi-card">
-          <span className="kpi-label">Total Lectures Held</span>
-          <span className="kpi-value">{faculty.totalLectures}</span>
-          <span className="kpi-desc">Sessions completed</span>
-        </div>
+        {/* Total Lectures */}
 
         <div className="kpi-card">
-          <span className="kpi-label">Total Feedbacks Received</span>
-          <span className="kpi-value">{faculty.feedbackCount}</span>
-          <span className="kpi-desc">Student evaluations</span>
+          <span className="kpi-label">
+            Total Lectures Held
+          </span>
+
+          <span className="kpi-value">
+            {Number(
+              historyData.totalLectures || 0
+            )}
+          </span>
+
+          <span className="kpi-desc">
+            Sessions completed
+          </span>
         </div>
+
+        {/* Total Feedbacks */}
+
+        <div className="kpi-card">
+          <span className="kpi-label">
+            Total Feedbacks Received
+          </span>
+
+          <span className="kpi-value">
+            {Number(
+              historyData.totalFeedbacks ||
+                0
+            )}
+          </span>
+
+          <span className="kpi-desc">
+            Student evaluations
+          </span>
+        </div>
+
+        {/* Average Score */}
 
         <div className="kpi-card highlight-kpi">
-          <span className="kpi-label">Average Score</span>
-          <span className="kpi-value">
-            ⭐ {faculty.avgRating} <small>/ 5</small>
+          <span className="kpi-label">
+            Average Score
           </span>
-          <span className="kpi-desc">Overall satisfaction score</span>
+
+          <span className="kpi-value">
+            ⭐{" "}
+            {Number(
+              historyData.averageScore ||
+                0
+            ).toFixed(1)}
+
+            <small> / 5</small>
+          </span>
+
+          <span className="kpi-desc">
+            Overall satisfaction score
+          </span>
         </div>
       </div>
 
-      {/* Question-wise Scores */}
+      {/* =====================================================
+          QUESTION-WISE SCORES
+      ===================================================== */}
+
       <div className="history-section-card">
-        <h2>Question-Wise Rating Analysis</h2>
+        <h2>
+          Question-Wise Rating Analysis
+        </h2>
+
         <div className="question-scores-list">
-          {questionScores.map((qs, index) => (
-            <div key={index} className="qs-row">
-              <div className="qs-info">
-                <span className="qs-category">{qs.category}</span>
-                <span className="qs-text">{qs.question}</span>
+          {questionScores.map(
+            (qs, index) => (
+              <div
+                key={index}
+                className="qs-row"
+              >
+                <div className="qs-info">
+                  <span className="qs-category">
+                    {qs.category}
+                  </span>
+
+                  <span className="qs-text">
+                    {qs.question}
+                  </span>
+                </div>
+
+                <div className="qs-score-bar">
+                  <div
+                    className="qs-bar-fill"
+                    style={{
+                      width: `${
+                        (qs.score / 5) *
+                        100
+                      }%`,
+                    }}
+                  />
+                </div>
+
+                <span className="qs-score-number">
+                  {qs.score.toFixed(1)} / 5
+                </span>
               </div>
-              <div className="qs-score-bar">
-                <div
-                  className="qs-bar-fill"
-                  style={{ width: `${(qs.score / 5) * 100}%` }}
-                ></div>
-              </div>
-              <span className="qs-score-number">{qs.score} / 5</span>
-            </div>
-          ))}
+            )
+          )}
         </div>
       </div>
 
-      {/* Recent Student Feedback Comments */}
+      {/* =====================================================
+          RECENT STUDENT COMMENTS
+      ===================================================== */}
+
       <div className="history-section-card">
-        <h2>Recent Student Comments</h2>
+        <h2>
+          Recent Student Comments
+        </h2>
+
         <div className="comments-list">
-          {displayFeedbacks.map((fb, idx) => (
-            <div key={idx} className="comment-card">
-              <div className="comment-top">
-                <span className="comment-date">{fb.date}</span>
-                <span className="comment-rating">{"★".repeat(fb.rating)} ({fb.rating}/5)</span>
-              </div>
-              <p className="comment-text">"{fb.comment}"</p>
-              <span className="comment-student">{fb.student}</span>
+          {recentComments.length > 0 ? (
+            recentComments.map(
+              (fb, idx) => {
+                const rating = Math.max(
+                  0,
+                  Math.min(
+                    5,
+                    Number(
+                      fb.rating || 0
+                    )
+                  )
+                );
+
+                return (
+                  <div
+                    key={idx}
+                    className="comment-card"
+                  >
+                    <div className="comment-top">
+                      <span className="comment-date">
+                        {formatDate(
+                          fb.date
+                        )}
+                      </span>
+
+                      <span className="comment-rating">
+                        {"★".repeat(
+                          Math.round(
+                            rating
+                          )
+                        )}
+
+                        {" "}
+                        (
+                        {rating.toFixed(
+                          1
+                        )}
+                        /5)
+                      </span>
+                    </div>
+
+                    <p className="comment-text">
+                      "{fb.remark}"
+                    </p>
+
+                    <span className="comment-student">
+                      Student{" "}
+                      {fb.level
+                        ? `(Level ${fb.level})`
+                        : ""}
+                    </span>
+                  </div>
+                );
+              }
+            )
+          ) : (
+            <div className="comment-card">
+              <p
+                className="comment-text"
+                style={{
+                  color: "#64748b",
+                }}
+              >
+                No student comments available.
+              </p>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>

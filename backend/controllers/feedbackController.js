@@ -1,7 +1,7 @@
 
 const Feedback = require("../models/feedback");
-const SelectedStudents = require("../models/SeletedStudents");
-
+const Schedule = require("../models/Schedule");
+const SelectedStudent = require('../models/SeletedStudents');
 // =========================================================
 // SUBMIT FEEDBACK
 // =========================================================
@@ -9,8 +9,11 @@ const submitFeedback = async (req, res) => {
   try {
     const {
       studentGmail,
+      facultyId,
       facultyName,
       subject,
+      lectureTime,
+      lectureEndTime,
       metrics,
       remarks,
     } = req.body;
@@ -29,8 +32,11 @@ const submitFeedback = async (req, res) => {
     // =====================================================
     if (
       !studentGmail ||
+      !facultyId ||
       !facultyName ||
       !subject ||
+      !lectureTime ||
+      !lectureEndTime ||
       !metrics
     ) {
       return res.status(400).json({
@@ -96,20 +102,21 @@ const submitFeedback = async (req, res) => {
 
     // =====================================================
     // 6. CHECK DUPLICATE FEEDBACK
-    // =====================================================
-    const existingFeedback =
-      await Feedback.findOne({
-        studentGmail: normalizedGmail,
-        facultyName,
-        subject,
-      });
+       const existingFeedback =
+     await Feedback.findOne({
+    studentGmail: normalizedGmail,
+     facultyId,
+    facultyName: facultyName.trim(),
+    subject: subject.trim(),
+    lectureEndTime: lectureEndTime.trim(),
+  });
 
 
     if (existingFeedback) {
       return res.status(400).json({
         success: false,
         message:
-          "You have already submitted feedback for this faculty and subject.",
+          "You have already submitted feedback for this lecture.",
       });
     }
 
@@ -155,9 +162,15 @@ const submitFeedback = async (req, res) => {
 
       section: studentSection,
 
+       facultyId,
+
       facultyName: facultyName.trim(),
 
       subject: subject.trim(),
+
+      lectureTime: lectureTime.trim(),
+
+      lectureEndTime: lectureEndTime.trim(),
 
       metrics: {
         Explanation: Number(
@@ -220,31 +233,22 @@ const submitFeedback = async (req, res) => {
 };
 
 
-
 // =========================================================
 // GET ALL FEEDBACK
 // =========================================================
 const getAllFeedback = async (req, res) => {
   try {
-
     const { date } = req.query;
 
     let matchStage = null;
-
 
     // =====================================================
     // DATE FILTER
     // =====================================================
     if (date) {
+      const startDate = new Date(`${date}T00:00:00+05:30`);
 
-      const startDate = new Date(
-        `${date}T00:00:00+05:30`
-      );
-
-      const endDate = new Date(
-        `${date}T23:59:59.999+05:30`
-      );
-
+      const endDate = new Date(`${date}T23:59:59.999+05:30`);
 
       matchStage = {
         timestamp: {
@@ -254,9 +258,7 @@ const getAllFeedback = async (req, res) => {
       };
     }
 
-
     const pipeline = [];
-
 
     // =====================================================
     // APPLY DATE FILTER
@@ -267,39 +269,40 @@ const getAllFeedback = async (req, res) => {
       });
     }
 
-
     // =====================================================
     // GROUP FEEDBACK
     // =====================================================
     pipeline.push(
       {
         $group: {
-
           _id: {
+            facultyId: "$facultyId",
             facultyName: "$facultyName",
             section: "$section",
+            date: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$timestamp",
+                timezone: "Asia/Kolkata",
+              },
+            },
           },
-
 
           subjects: {
             $addToSet: "$subject",
           },
 
-
           overallRating: {
             $avg: "$metrics.Overall",
           },
-
 
           totalFeedbacks: {
             $sum: 1,
           },
 
-
           latestDate: {
             $max: "$timestamp",
           },
-
 
           latestRemarks: {
             $last: "$remarks",
@@ -307,68 +310,54 @@ const getAllFeedback = async (req, res) => {
         },
       },
 
-
       // ===================================================
       // PROJECT
       // ===================================================
       {
         $project: {
-
           _id: 0,
+
+          facultyId: "$_id.facultyId",
 
           facultyName: "$_id.facultyName",
 
           department: "$_id.section",
 
+          date: "$_id.date",
+
           subjects: 1,
 
           overallRating: {
-            $round: [
-              "$overallRating",
-              1,
-            ],
+            $round: ["$overallRating", 1],
           },
 
           totalFeedbacks: 1,
 
           comment: "$latestRemarks",
 
-          date: "$latestDate",
+          latestDate: "$latestDate",
         },
       },
-
 
       // ===================================================
       // SORT
       // ===================================================
       {
         $sort: {
-          overallRating: -1,
+          latestDate: -1,
         },
       }
     );
 
-
-    const feedbacks =
-      await Feedback.aggregate(
-        pipeline
-      );
-
+    const feedbacks = await Feedback.aggregate(pipeline);
 
     return res.status(200).json({
       success: true,
       count: feedbacks.length,
       feedbacks,
     });
-
-
   } catch (error) {
-
-    console.error(
-      "Get all feedback error:",
-      error
-    );
-
+    console.error("Get all feedback error:", error);
 
     return res.status(500).json({
       success: false,
@@ -376,8 +365,6 @@ const getAllFeedback = async (req, res) => {
     });
   }
 };
-
-
 
 // =========================================================
 // GET FEEDBACK BY FACULTY
@@ -389,21 +376,13 @@ const getFeedbackByFaculty = async (
 
   try {
 
-    const { facultyName } =
-      req.params;
+  const { facultyId } = req.params;
 
-
-    const feedbacks =
-      await Feedback.find({
-        facultyName: {
-          $regex: new RegExp(
-            facultyName,
-            "i"
-          ),
-        },
-      }).sort({
-        timestamp: -1,
-      });
+const feedbacks = await Feedback.find({
+  facultyId,
+}).sort({
+  timestamp: -1,
+});
 
 
     const totalCount =
@@ -477,9 +456,13 @@ const sendFeedbackInvite = async (
 
     const {
       studentEmail,
+      facultyId,
       facultyName,
       subject,
       time,
+      lectureEndTime,
+
+      
     } = req.body;
 
 
@@ -488,6 +471,7 @@ const sendFeedbackInvite = async (
     // =====================================================
     if (
       !studentEmail ||
+      !facultyId ||
       !facultyName ||
       !subject
     ) {
@@ -506,10 +490,12 @@ const sendFeedbackInvite = async (
     const result =
       await sendFeedbackLinkEmail(
         studentEmail,
+        facultyId,
         facultyName,
         subject,
         time ||
-          "10:00 AM - 11:30 AM"
+          "10:00 AM - 11:30 AM",
+           lectureEndTime || ""
       );
 
 
@@ -539,6 +525,963 @@ const sendFeedbackInvite = async (
   }
 };
 
+/// =========================================================
+// GET FACULTY HISTORY
+// =========================================================
+// GET /api/feedback/faculty-history/:facultyId
+// =========================================================
+
+const getFacultyHistory = async (req, res) => {
+  try {
+    const { facultyId } = req.params;
+
+    if (!facultyId) {
+      return res.status(400).json({
+        success: false,
+        message: "facultyId is required.",
+      });
+    }
+
+    // =====================================================
+    // 1. GET ALL SCHEDULES
+    // =====================================================
+
+    const schedules = await Schedule.find({})
+      .sort({ date: 1 })
+      .lean();
+
+    // =====================================================
+    // 2. COUNT FACULTY LECTURES
+    // =====================================================
+
+    const facultyLectures = [];
+
+    for (const schedule of schedules) {
+      const slots = [
+        {
+          slotName: "slot1",
+          slot: schedule.slot1,
+        },
+        {
+          slotName: "slot2",
+          slot: schedule.slot2,
+        },
+        {
+          slotName: "slot3",
+          slot: schedule.slot3,
+        },
+      ];
+
+      for (const item of slots) {
+        const slot = item.slot;
+
+        if (!slot) {
+          continue;
+        }
+
+        // Match faculty using facultyId
+        if (
+          String(slot.facultyId || "").trim() !==
+          String(facultyId).trim()
+        ) {
+          continue;
+        }
+
+        if (!slot.startTime || !slot.endTime) {
+          continue;
+        }
+
+        facultyLectures.push({
+          scheduleId: schedule._id,
+          slotName: item.slotName,
+
+          date: schedule.date,
+
+          department: schedule.department || "",
+
+          className: schedule.class || "",
+
+          groups: schedule.groups || [],
+
+          subject: slot.subject || "",
+
+          facultyId: slot.facultyId || "",
+
+          facultyName: slot.facultyName || "",
+
+          startTime: slot.startTime || "",
+
+          endTime: slot.endTime || "",
+        });
+      }
+    }
+
+    // =====================================================
+    // 3. GET ALL FEEDBACKS FOR FACULTY
+    // =====================================================
+
+    const facultyFeedbacks = await Feedback.find({
+      facultyId: String(facultyId).trim(),
+    })
+      .sort({ timestamp: -1 })
+      .lean();
+
+    // =====================================================
+    // 4. TOTAL FEEDBACKS
+    // =====================================================
+
+    const totalFeedbacks = facultyFeedbacks.length;
+
+    // =====================================================
+    // 5. OVERALL RATING
+    // =====================================================
+
+    const overallRatings = facultyFeedbacks
+      .map((feedback) =>
+        Number(feedback.metrics?.Overall)
+      )
+      .filter(
+        (rating) =>
+          Number.isFinite(rating) &&
+          rating >= 1 &&
+          rating <= 5
+      );
+
+    const averageScore =
+      overallRatings.length > 0
+        ? Number(
+            (
+              overallRatings.reduce(
+                (sum, rating) => sum + rating,
+                0
+              ) / overallRatings.length
+            ).toFixed(1)
+          )
+        : 0;
+
+    // =====================================================
+    // 6. QUESTION-WISE AVERAGES
+    // =====================================================
+
+    const getMetricAverage = (metricName) => {
+      const values = facultyFeedbacks
+        .map((feedback) =>
+          Number(feedback.metrics?.[metricName])
+        )
+        .filter(
+          (value) =>
+            Number.isFinite(value) &&
+            value >= 1 &&
+            value <= 5
+        );
+
+      if (!values.length) {
+        return 0;
+      }
+
+      return Number(
+        (
+          values.reduce(
+            (sum, value) => sum + value,
+            0
+          ) / values.length
+        ).toFixed(1)
+      );
+    };
+
+    const parameterAverages = {
+      Explanation: getMetricAverage("Explanation"),
+
+      Punctuality: getMetricAverage("Punctuality"),
+
+      Engagement: getMetricAverage("Engagement"),
+
+      Resolution: getMetricAverage("Resolution"),
+
+      Overall: getMetricAverage("Overall"),
+    };
+
+    // =====================================================
+    // 7. RECENT COMMENTS
+    // =====================================================
+
+    const recentComments = facultyFeedbacks
+      .filter(
+        (feedback) =>
+          feedback.remarks &&
+          feedback.remarks.trim() !== ""
+      )
+      .slice(0, 10)
+      .map((feedback) => ({
+        date: feedback.timestamp,
+
+        remark: feedback.remarks.trim(),
+
+        level: feedback.level || "",
+
+        rating:
+          Number(
+            feedback.metrics?.Overall
+          ) || 0,
+      }));
+
+    // =====================================================
+    // 8. FACULTY NAME + DEPARTMENT
+    // =====================================================
+
+    let facultyName = "";
+
+    let department = "";
+
+    if (facultyLectures.length > 0) {
+      facultyName =
+        facultyLectures[0].facultyName || "";
+
+      department =
+        facultyLectures[0].department || "";
+    } else if (facultyFeedbacks.length > 0) {
+      facultyName =
+        facultyFeedbacks[0].facultyName || "";
+
+      department =
+        facultyFeedbacks[0].section || "";
+    }
+
+    // =====================================================
+    // 9. RESPONSE
+    // =====================================================
+
+    return res.status(200).json({
+      success: true,
+
+      faculty: {
+        facultyId: String(facultyId).trim(),
+        name: facultyName,
+        department,
+      },
+
+      totalLectures: facultyLectures.length,
+
+      totalFeedbacks,
+
+      averageScore,
+
+      parameterAverages,
+
+      recentComments,
+    });
+  } catch (error) {
+    console.error(
+      "Get faculty history error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch faculty history.",
+      error: error.message,
+    });
+  }
+};
+// =========================================================
+// GET FACULTY FEEDBACK VIEW
+// =========================================================
+// @route GET /api/feedback/faculty-view?facultyName=Anees%20sir&date=2026-09-07
+// =========================================================
+// GET FACULTY FEEDBACK VIEW
+// =========================================================
+// GET /api/feedback/faculty-view
+// ?facultyName=Anees%20sir&date=2026-09-07
+// =========================================================
+// =========================================================
+// GET FACULTY FEEDBACK VIEW
+// =========================================================
+// GET /api/feedback/faculty-view
+// ?facultyId=ITEG-F003&date=2026-09-07
+// =========================================================
+
+const getFacultyFeedbackView = async (req, res) => {
+  try {
+    const { facultyId, date } = req.query;
+
+    // -----------------------------------------------------
+    // 1. VALIDATION
+    // -----------------------------------------------------
+
+    if (!facultyId || !date) {
+      return res.status(400).json({
+        success: false,
+        message: "facultyId and date are required.",
+      });
+    }
+
+    // -----------------------------------------------------
+    // 2. DATE RANGE - INDIA TIME
+    // -----------------------------------------------------
+
+    const startOfDay = new Date(
+      `${date}T00:00:00+05:30`
+    );
+
+    const endOfDay = new Date(
+      `${date}T23:59:59.999+05:30`
+    );
+
+    // -----------------------------------------------------
+    // 3. GET SCHEDULES FOR THIS DATE
+    // -----------------------------------------------------
+
+    const schedules = await Schedule.find({
+      date: {
+        $gte: startOfDay,
+        $lte: endOfDay,
+      },
+    }).lean();
+
+    // -----------------------------------------------------
+    // 4. EXTRACT FACULTY LECTURE SLOTS
+    // -----------------------------------------------------
+
+    const facultyLectures = [];
+
+    for (const schedule of schedules) {
+      const normalizedDepartment = String(
+        schedule.department || ""
+      )
+        .trim()
+        .toLowerCase();
+
+      const slots = [
+        {
+          slotName: "slot1",
+          slotNumber: 1,
+          slot: schedule.slot1,
+        },
+        {
+          slotName: "slot2",
+          slotNumber: 2,
+          slot: schedule.slot2,
+        },
+        {
+          slotName: "slot3",
+          slotNumber: 3,
+          slot: schedule.slot3,
+        },
+      ];
+
+      const matchingSlots = slots.filter((item) => {
+        const slot = item.slot;
+
+        if (
+          !slot ||
+          !slot.subject ||
+          !slot.facultyId ||
+          !slot.startTime ||
+          !slot.endTime
+        ) {
+          return false;
+        }
+
+        return (
+          String(slot.facultyId).trim() ===
+          String(facultyId).trim()
+        );
+      });
+
+      for (const item of matchingSlots) {
+        
+       const actualStrength = await SelectedStudent.countDocuments({
+        level: { $in: schedule.groups || [] },
+      });
+
+        facultyLectures.push({
+          scheduleId: schedule._id,
+          slotName: item.slotName,
+          slotNumber: item.slotNumber,
+
+          department: normalizedDepartment,
+
+          subject: item.slot.subject.trim(),
+
+          facultyId: item.slot.facultyId.trim(),
+
+          facultyName: item.slot.facultyName.trim(),
+
+          startTime: item.slot.startTime.trim(),
+
+          endTime: item.slot.endTime.trim(),
+
+          className: schedule.class,
+
+          groups: schedule.groups || [],
+
+          strength: actualStrength, 
+        });
+      }
+    }
+
+    // -----------------------------------------------------
+    // 5. SORT LECTURES BY START TIME
+    // -----------------------------------------------------
+
+    facultyLectures.sort(
+      (a, b) =>
+        convertTimeToMinutes(a.startTime) -
+        convertTimeToMinutes(b.startTime)
+    );
+
+    // -----------------------------------------------------
+    // 6. FIND NEXT SLOT START TIME
+    // -----------------------------------------------------
+
+    facultyLectures.forEach((lecture, index) => {
+      const nextLecture =
+        facultyLectures[index + 1];
+
+      lecture.startMinutes =
+        convertTimeToMinutes(
+          lecture.startTime
+        );
+
+      lecture.endMinutes =
+        convertTimeToMinutes(
+          lecture.endTime
+        );
+
+      if (nextLecture) {
+        nextLecture.startMinutes =
+          convertTimeToMinutes(
+            nextLecture.startTime
+          );
+
+        /*
+         * Feedback for current lecture is accepted
+         * only until 10 minutes before next lecture.
+         */
+
+        lecture.maxFeedbackMinutes =
+          nextLecture.startMinutes - 10;
+      } else {
+        /*
+         * Last lecture of the day.
+         * No next lecture exists, so use end of day.
+         */
+
+        lecture.maxFeedbackMinutes =
+          24 * 60;
+      }
+    });
+
+    // -----------------------------------------------------
+    // 7. GET FEEDBACKS FOR THIS FACULTY + DATE
+    // -----------------------------------------------------
+
+    const feedbacks = await Feedback.find({
+      facultyId: String(facultyId).trim(),
+
+      timestamp: {
+        $gte: startOfDay,
+        $lte: endOfDay,
+      },
+    }).lean();
+
+    // -----------------------------------------------------
+    // 8. GROUP FEEDBACKS INTO CORRECT LECTURES
+    // -----------------------------------------------------
+
+    const lectureFeedbackMap = new Map();
+
+    facultyLectures.forEach((lecture, index) => {
+      lectureFeedbackMap.set(
+        getLectureKey(lecture),
+        {
+          ...lecture,
+          feedbacks: [],
+          lectureIndex: index,
+        }
+      );
+    });
+
+    for (const feedback of feedbacks) {
+      const feedbackDepartment = String(
+        feedback.section || ""
+      )
+        .trim()
+        .toLowerCase();
+
+      const feedbackSubject = String(
+        feedback.subject || ""
+      )
+        .trim()
+        .toLowerCase();
+
+      const feedbackFacultyId = String(
+        feedback.facultyId || ""
+      )
+        .trim();
+
+      const feedbackLectureEndTime = String(
+        feedback.lectureEndTime || ""
+      )
+        .trim()
+        .toLowerCase();
+
+      const possibleLectures =
+        facultyLectures.filter((lecture) => {
+          const lectureDepartment = String(
+            lecture.department || ""
+          )
+            .trim()
+            .toLowerCase();
+
+          const lectureFacultyId = String(
+            lecture.facultyId || ""
+          ).trim();
+
+          const lectureEndTime = String(
+            lecture.endTime || ""
+          )
+            .trim()
+            .toLowerCase();
+
+          const lectureGroups =
+            (lecture.groups || []).map((group) =>
+              String(group)
+                .trim()
+                .toLowerCase()
+            );
+
+          const feedbackLevel = String(
+            feedback.level || ""
+          )
+            .trim()
+            .toLowerCase();
+
+          return (
+            lectureDepartment ===
+              feedbackDepartment &&
+            lectureFacultyId ===
+              feedbackFacultyId &&
+            lectureGroups.includes(
+              feedbackLevel
+            ) &&
+            lectureEndTime ===
+              feedbackLectureEndTime
+          );
+        });
+
+      // ---------------------------------------------------
+      // Assign feedback to the correct lecture
+      // ---------------------------------------------------
+
+      if (possibleLectures.length > 0) {
+        /*
+         * Normally only one lecture should match because
+         * the feedback submission time falls inside that
+         * lecture's allowed feedback time window.
+         *
+         * If multiple lectures somehow match, choose the
+         * latest-starting lecture.
+         */
+
+        const matchedLecture =
+          possibleLectures.sort(
+            (a, b) =>
+              b.startMinutes -
+              a.startMinutes
+          )[0];
+
+        const key =
+          getLectureKey(matchedLecture);
+
+        const target =
+          lectureFeedbackMap.get(key);
+
+        if (target) {
+          target.feedbacks.push(feedback);
+        }
+      }
+    }
+
+    // -----------------------------------------------------
+    // 9. ONLY LECTURES WITH SUBMITTED FEEDBACK
+    // -----------------------------------------------------
+
+    const lecturesWithFeedback =
+      Array.from(
+        lectureFeedbackMap.values()
+      );
+
+    // -----------------------------------------------------
+    // 10. BUILD FINAL LECTURE DATA
+    // -----------------------------------------------------
+
+    const lectures =
+      lecturesWithFeedback.map(
+        (lecture, index) => {
+          const lectureFeedbacks =
+            lecture.feedbacks;
+
+          const responses =
+            lectureFeedbacks.length;
+
+          // ----------------------------------------------
+          // Overall average
+          // ----------------------------------------------
+
+          const overallAverage =
+            average(
+              lectureFeedbacks.map(
+                (item) =>
+                  Number(
+                    item.metrics?.Overall || 0
+                  )
+              )
+            );
+
+          // ----------------------------------------------
+          // Parameters
+          // ----------------------------------------------
+
+          const parameters = [
+            {
+              name: "Explanation",
+              values:
+                lectureFeedbacks.map(
+                  (item) =>
+                    Number(
+                      item.metrics
+                        ?.Explanation || 0
+                    )
+                ),
+            },
+
+            {
+              name: "Punctuality",
+              values:
+                lectureFeedbacks.map(
+                  (item) =>
+                    Number(
+                      item.metrics
+                        ?.Punctuality || 0
+                    )
+                ),
+            },
+
+            {
+              name: "Engagement",
+              values:
+                lectureFeedbacks.map(
+                  (item) =>
+                    Number(
+                      item.metrics
+                        ?.Engagement || 0
+                    )
+                ),
+            },
+
+            {
+              name: "Resolution",
+              values:
+                lectureFeedbacks.map(
+                  (item) =>
+                    Number(
+                      item.metrics
+                        ?.Resolution || 0
+                    )
+                ),
+            },
+
+            {
+              name: "Overall",
+              values:
+                lectureFeedbacks.map(
+                  (item) =>
+                    Number(
+                      item.metrics?.Overall || 0
+                    )
+                ),
+            },
+          ].map((parameter) => ({
+            name: parameter.name,
+
+            ratings: [
+              countRating(
+                parameter.values,
+                1
+              ),
+
+              countRating(
+                parameter.values,
+                2
+              ),
+
+              countRating(
+                parameter.values,
+                3
+              ),
+
+              countRating(
+                parameter.values,
+                4
+              ),
+
+              countRating(
+                parameter.values,
+                5
+              ),
+            ],
+
+            avg: average(
+              parameter.values
+            ),
+          }));
+
+          // ----------------------------------------------
+          // Remarks
+          // ----------------------------------------------
+
+          const remarks =
+            lectureFeedbacks
+              .map(
+                (item) =>
+                  item.remarks?.trim()
+              )
+              .filter(
+                (remark) =>
+                  remark &&
+                  remark.length > 0 &&
+                  remark !==
+                    "Great lecture session."
+              );
+
+          return {
+            lectureId:
+              `${lecture.scheduleId}-${lecture.slotName}`,
+
+            number:
+              `Lecture ${index + 1}`,
+
+            subject:
+              lecture.subject,
+
+            lectureTime:
+              `${lecture.startTime} - ${lecture.endTime}`,
+
+            className:
+              lecture.className,
+
+            groups:
+              lecture.groups,
+
+            strength:
+              lecture.strength,
+
+            responses,
+
+            overallRating:
+              overallAverage,
+
+            parameters,
+
+            remarks,
+          };
+        }
+      );
+
+    // -----------------------------------------------------
+    // 11. FACULTY TOTALS
+    // -----------------------------------------------------
+
+    const totalResponses =
+      lectures.reduce(
+        (sum, lecture) =>
+          sum + lecture.responses,
+        0
+      );
+
+    const allOverallValues = [];
+
+    lectures.forEach((lecture) => {
+      for (
+        let i = 0;
+        i < lecture.responses;
+        i++
+      ) {
+        allOverallValues.push(
+          lecture.overallRating
+        );
+      }
+    });
+
+    const overallRating =
+      totalResponses > 0
+        ? Number(
+            average(
+              allOverallValues
+            )
+          )
+        : 0;
+
+    return res.status(200).json({
+      success: true,
+
+      faculty: {
+        facultyId:
+          String(facultyId).trim(),
+
+        name:
+          lectures[0]?.facultyName ||
+          facultyLectures[0]
+            ?.facultyName ||
+          "",
+
+        department:
+          lectures[0]?.department ||
+          facultyLectures[0]
+            ?.department ||
+          "",
+      },
+
+      date,
+
+      totalResponses,
+
+      overallRating,
+
+      lectures,
+    });
+  } catch (error) {
+    console.error(
+      "Get faculty feedback view error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+// =========================================================
+// HELPER FUNCTIONS
+// =========================================================
+
+function convertTimeToMinutes(timeString) {
+  if (!timeString) return 0;
+
+  const time = timeString
+    .trim()
+    .toUpperCase();
+
+  // Supports:
+  // 09:02
+  // 09:02 AM
+  // 9:02 AM
+  // 16:25
+
+  const match = time.match(
+    /^(\d{1,2}):(\d{2})(?:\s*(AM|PM))?$/
+  );
+
+  if (!match) {
+    return 0;
+  }
+
+  let hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  const period = match[3];
+
+  if (period === "AM" && hours === 12) {
+    hours = 0;
+  }
+
+  if (period === "PM" && hours !== 12) {
+    hours += 12;
+  }
+
+  return hours * 60 + minutes;
+}
+
+
+function getIndianTimeMinutes(dateValue) {
+  const date = new Date(dateValue);
+
+  const parts =
+    new Intl.DateTimeFormat(
+      "en-IN",
+      {
+        timeZone: "Asia/Kolkata",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }
+    ).formatToParts(date);
+
+  const hour = Number(
+    parts.find(
+      (part) =>
+        part.type === "hour"
+    )?.value || 0
+  );
+
+  const minute = Number(
+    parts.find(
+      (part) =>
+        part.type === "minute"
+    )?.value || 0
+  );
+
+  return hour * 60 + minute;
+}
+
+
+function average(values) {
+  const validValues =
+    values.filter(
+      (value) =>
+        Number.isFinite(Number(value))
+    );
+
+  if (!validValues.length) {
+    return 0;
+  }
+
+  const sum =
+    validValues.reduce(
+      (total, value) =>
+        total + Number(value),
+      0
+    );
+
+  return Number(
+    (sum / validValues.length).toFixed(1)
+  );
+}
+
+
+function countRating(values, rating) {
+  return values.filter(
+    (value) =>
+      Number(value) === rating
+  ).length;
+}
+
+function getLectureKey(lecture) {
+  return [
+    String(lecture.scheduleId),
+    lecture.slotName,
+    String(lecture.facultyId || "").trim(),
+    lecture.endTime.trim().toLowerCase(),
+  ].join("|");
+}
+
+function escapeRegex(value) {
+  return value.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    "\\$&"
+  );
+}
 
 
 // =========================================================
@@ -549,4 +1492,6 @@ module.exports = {
   getAllFeedback,
   getFeedbackByFaculty,
   sendFeedbackInvite,
+  getFacultyFeedbackView,
+  getFacultyHistory,
 };
