@@ -9,10 +9,12 @@ import Modal from "../components/Modal.jsx";
 
 import "./ManageFaculty.css";
 
+
 function ManageFaculty() {
   const navigate = useNavigate();
 
   const [selectedDepartment, setSelectedDepartment] = useState(null);
+  
 
   const [facultyData, setFacultyData] = useState({
     ITEG: [],
@@ -41,11 +43,18 @@ function ManageFaculty() {
     },
   ];
 
+  
+
   useEffect(() => {
     const fetchFaculty = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/faculty"
+          "http://localhost:5000/api/faculty",
+        {
+           headers: {
+            Authorization: `Bearer ${authUser?.token}`,
+          },
+        }
         );
 
         const data = await response.json();
@@ -110,6 +119,7 @@ function ManageFaculty() {
     setIsEditModalOpen(true);
   };
 
+  const authUser = JSON.parse(localStorage.getItem("authUser"));
   // Save Edit Faculty
   const handleSaveEdit = async (e) => {
     e.preventDefault();
@@ -128,6 +138,7 @@ function ManageFaculty() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${authUser?.token}`,
           },
           body: JSON.stringify({
             name: editingFaculty.name,
@@ -198,6 +209,7 @@ function ManageFaculty() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${authUser?.token}`,
           },
           body: JSON.stringify({
             name: newFaculty.name.trim(),
@@ -254,7 +266,12 @@ function ManageFaculty() {
         `http://localhost:5000/api/faculty/${deletingFaculty.id}`,
         {
           method: "DELETE",
+           headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authUser?.token}`,
+          },
         }
+        
       );
 
       const data = await response.json();

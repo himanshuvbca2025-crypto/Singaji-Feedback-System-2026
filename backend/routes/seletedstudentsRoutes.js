@@ -1,5 +1,7 @@
 
 const express = require("express");
+const { protect,authorize } = require("../middleware/authMiddleware");
+
 
 const {
   saveSelectedStudents,
@@ -8,9 +10,9 @@ getSelectedStudents,
 
 const router = express.Router();
 
-router.post("/", saveSelectedStudents);
-router.get("/", getSelectedStudents);
+router.post("/", protect, authorize("Admin"), saveSelectedStudents);
+router.get("/", protect, authorize("Admin"), getSelectedStudents);
 
-router.post("/", saveSelectedStudents);
+router.post("/", protect, authorize("Admin"), saveSelectedStudents);
 
 module.exports = router;

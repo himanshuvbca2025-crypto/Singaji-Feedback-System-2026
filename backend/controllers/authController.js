@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const Admin = require("../models/Admin");
 const Faculty = require("../models/Faculty");
@@ -36,66 +37,87 @@ const Login = async (req, res) => {
           message: "Invalid Gmail or password",
         });
       }
+           const token = jwt.sign(
+            {
+            userId: admin._id,
+             role: "Admin",
+            },
+          process.env.JWT_SECRET,
+           {
+              expiresIn: "1h",
+            }
+          );
 
-      return res.status(200).json({
-        success: true,
-        role: "Admin",
-        message: "Admin login successful",
+          
 
-        user: {
-          name: admin.username,
-          gmail: admin.gmail,
-          role: "Admin",
-        },
-      });
+return res.status(200).json({
+  success: true,
+  role: "Admin",
+  token,
+  message: "Admin login successful",
+
+  user: {
+    name: admin.username,
+    gmail: admin.gmail,
+    role: "Admin",
+  },
+});
     }
 
     // ==========================================
     // 2. CHECK FACULTY
     // ==========================================
 
-    const faculty = await Faculty.findOne({
-      gmail: normalizedGmail,
+  const faculty = await Faculty.findOne({
+  gmail: normalizedGmail,
+});
+
+if (faculty) {
+  if (!faculty.isActive) {
+    return res.status(403).json({
+      success: false,
+      message: "Faculty account is inactive",
     });
+  }
 
-    if (faculty) {
-      if (!faculty.isActive) {
-        return res.status(403).json({
-          success: false,
-          message: "Faculty account is inactive",
-        });
-      }
+  const isPasswordValid = await bcrypt.compare(
+    password,
+    faculty.password
+  );
 
-      const isPasswordValid = await bcrypt.compare(
-        password,
-        faculty.password
-      );
+  if (!isPasswordValid) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid Gmail or password",
+    });
+  }
 
-      if (!isPasswordValid) {
-        return res.status(401).json({
-          success: false,
-          message: "Invalid Gmail or password",
-        });
-      }
-
-      return res.status(200).json({
-        success: true,
-        role: "Faculty",
-        message: "Faculty login successful",
-
-        user: {
-          name: faculty.name,
-          gmail: faculty.gmail,
-
-          // DB mein section hai
-          // frontend mein department use karenge
-          department: faculty.section,
-
-          subjects: faculty.subjects,
-          role: "Faculty",
-        },
-      });
+  const token = jwt.sign(
+    {
+      userId: faculty._id,
+      role: "Faculty",
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "1h",
     }
+  );
+
+  return res.status(200).json({
+    success: true,
+    role: "Faculty",
+    token,
+    message: "Faculty login successful",
+
+    user: {
+      name: faculty.name,
+      gmail: faculty.gmail,
+      department: faculty.section,
+      subjects: faculty.subjects,
+      role: "Faculty",
+    },
+  });
+}
 
     // ==========================================
     // 3. NEITHER ADMIN NOR FACULTY

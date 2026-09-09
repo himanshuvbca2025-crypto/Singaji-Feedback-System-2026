@@ -81,7 +81,7 @@ function AdminFeedback() {
     useState(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const authUser = JSON.parse(localStorage.getItem("authUser"));
   // ==========================================
   // FETCH FEEDBACKS
   // ==========================================
@@ -95,8 +95,11 @@ function AdminFeedback() {
             )}`
           : "http://localhost:5000/api/feedback/all";
 
-        const response = await fetch(url);
-
+      const response = await fetch(url, {
+       headers: {
+       Authorization: `Bearer ${authUser?.token}`,
+    },
+});
         const data = await response.json();
 
         console.log(

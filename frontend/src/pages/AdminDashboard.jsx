@@ -29,12 +29,19 @@ function AdminDashboard() {
     lowScoreAlerts: 0,
   });
 
+  const authUser = JSON.parse(localStorage.getItem("authUser"));
+
   useEffect(() => {
   const fetchTodaySchedules = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5000/api/schedules/today"
-      );
+  "http://localhost:5000/api/schedules/today",
+  {
+    headers: {
+      Authorization: `Bearer ${authUser?.token}`,
+    },
+  }
+);
 
       const data = await response.json();
 
@@ -82,10 +89,18 @@ function AdminDashboard() {
         
        const today = new Date()
   .toLocaleDateString("en-CA");
+  
 
 const response = await fetch(
-  `http://localhost:5000/api/reports?date=${today}`
+  `http://localhost:5000/api/reports?date=${today}`,
+  {
+    headers: {
+      Authorization: `Bearer ${authUser?.token}`,
+    },
+  }
 );
+
+
         const data = await response.json();
 
         if (!response.ok) {

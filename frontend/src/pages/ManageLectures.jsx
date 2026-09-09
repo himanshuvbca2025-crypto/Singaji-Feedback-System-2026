@@ -23,7 +23,7 @@ function ManageLectures() {
   });
 
   const [activeLecture, setActiveLecture] = useState(null);
-
+   const authUser = JSON.parse(localStorage.getItem("authUser"));
   // ---------------------------------------
   // GET TODAY'S SCHEDULES FROM DATABASE
   // ---------------------------------------
@@ -33,7 +33,12 @@ function ManageLectures() {
         setLoading(true);
 
         const response = await fetch(
-          "http://localhost:5000/api/schedules/today"
+          "http://localhost:5000/api/schedules/today",
+          {
+              headers: {
+                Authorization: `Bearer ${authUser?.token}`,
+              },
+          }
         );
 
         const data = await response.json();

@@ -11,6 +11,8 @@ function FacultyHistory() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const authUser = JSON.parse(localStorage.getItem("authUser"));
+
   // =========================================================
   // FORMAT DATE
   // =========================================================
@@ -46,7 +48,12 @@ function FacultyHistory() {
         // =====================================================
 
         const facultyResponse = await fetch(
-          "http://localhost:5000/api/faculty"
+          "http://localhost:5000/api/faculty",
+          {
+           headers: {
+            Authorization: `Bearer ${authUser?.token}`,
+            },
+          }
         );
 
         const facultyResult =
@@ -118,7 +125,12 @@ function FacultyHistory() {
        )}`;
 
         const historyResponse = await fetch(
-          historyUrl
+          historyUrl,
+           {
+                headers: {
+                Authorization: `Bearer ${authUser?.token}`,
+            },
+          }
         );
 
         const historyResult =

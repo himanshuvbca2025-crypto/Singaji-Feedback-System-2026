@@ -32,7 +32,7 @@ function Reports() {
   const [departmentReports, setDepartmentReports] = useState([]);
   const [topFaculty, setTopFaculty] = useState([]);
   const [lowScoreAlerts, setLowScoreAlerts] = useState([]);
-
+  const authUser = JSON.parse(localStorage.getItem("authUser"));
   // =========================================================
   // FETCH REPORT WHEN DATE CHANGES
   // =========================================================
@@ -41,7 +41,13 @@ function Reports() {
     const fetchReport = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/reports?date=${selectedDate}`
+          `http://localhost:5000/api/reports?date=${selectedDate}`,
+          {
+              headers: {
+             Authorization: `Bearer ${authUser?.token}`,
+            },
+          }
+          
         );
 
         const data = await response.json();

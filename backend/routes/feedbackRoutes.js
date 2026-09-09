@@ -1,4 +1,6 @@
 const express = require('express');
+const { protect,authorize } = require("../middleware/authMiddleware");
+
 
 const {
   submitFeedback,
@@ -12,21 +14,25 @@ const {
 
 const router = express.Router();
 
-router.post('/submit', submitFeedback);
+router.post('/submit', protect, submitFeedback);
 
-router.get('/all', getAllFeedback);
+router.get('/all', protect, authorize("Admin"), getAllFeedback);
 
-router.get('/faculty/:facultyId', getFeedbackByFaculty);
+router.get('/faculty/:facultyId', protect, authorize("Admin"), getFeedbackByFaculty);
 
-router.post('/send-invite', sendFeedbackInvite);
+router.post('/send-invite', protect, authorize("Admin"), sendFeedbackInvite);
 
 router.get(
   "/faculty-view",
+  protect,
+  authorize("Admin"),
   getFacultyFeedbackView
 );
 
 router.get(
   "/faculty-history/:facultyId",
+  protect,
+  authorize("Admin"),
   getFacultyHistory
 );
 

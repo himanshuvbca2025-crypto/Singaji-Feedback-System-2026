@@ -13,12 +13,21 @@ function ManageQuestions() {
     "Overall Experience",
   ];
 
+const authUser = JSON.parse(localStorage.getItem("authUser"));
+
   useEffect(() => {
   const fetchQuestions = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/questions"
-      );
+     
+
+     const response = await fetch(
+     "http://localhost:5000/api/questions",
+     {
+    headers: {
+      Authorization: `Bearer ${authUser?.token}`,
+    },
+  }
+);
 
       const data = await response.json();
 
@@ -67,6 +76,7 @@ function ManageQuestions() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+           Authorization: `Bearer ${authUser?.token}`,
         },
         body: JSON.stringify({
           text: newQuestion.text,
@@ -122,6 +132,7 @@ function ManageQuestions() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+           Authorization: `Bearer ${authUser?.token}`,
         },
         body: JSON.stringify({
           text: editingQuestion.text,
@@ -173,6 +184,9 @@ function ManageQuestions() {
       `http://localhost:5000/api/questions/${editingQuestion.id}`,
       {
         method: "DELETE",
+        headers: {
+           Authorization: `Bearer ${authUser?.token}`,
+        },
       }
     );
 

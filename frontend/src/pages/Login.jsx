@@ -60,7 +60,10 @@ function Login() {
       department: data.user.department,
       subjects: data.user.subjects,
       isActive: data.user.isActive,
+      token: data.token,
     });
+
+    
 
     // Role ke according dashboard
     if (data.role === "Faculty") {

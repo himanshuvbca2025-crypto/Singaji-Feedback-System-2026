@@ -71,6 +71,8 @@ function FacultyDashboard() {
   });
 
   const facultyName = user?.name || "";
+  const authUser = JSON.parse(localStorage.getItem("authUser"));
+
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -81,7 +83,14 @@ function FacultyDashboard() {
   useEffect(() => {
   const fetchFaculty = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/faculty");
+      const response = await fetch("http://localhost:5000/api/faculty",
+        
+        {
+          headers: {
+          Authorization: `Bearer ${authUser?.token}`,
+        },
+        });
+
       const data = await response.json();
 
       if (!response.ok || !data.success) {
@@ -118,7 +127,12 @@ function FacultyDashboard() {
       const response = await fetch(
         `http://localhost:5000/api/schedules/today?department=${encodeURIComponent(
           department
-        )}`
+        )}`,
+         {
+           headers: {
+           Authorization: `Bearer ${authUser?.token}`,
+    },
+  }
       );
       const data = await response.json();
 
@@ -305,6 +319,7 @@ function FacultyDashboard() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+             Authorization: `Bearer ${authUser?.token}`,
           },
           body: JSON.stringify(scheduleData),
         }
@@ -471,6 +486,7 @@ function FacultyDashboard() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+             Authorization: `Bearer ${authUser?.token}`,
           },
           body: JSON.stringify(scheduleData),
         }
@@ -541,6 +557,9 @@ function FacultyDashboard() {
         `http://localhost:5000/api/schedules/${row.id}`,
         {
           method: "DELETE",
+          headers: {
+          Authorization: `Bearer ${authUser?.token}`,
+           },
         }
       );
 

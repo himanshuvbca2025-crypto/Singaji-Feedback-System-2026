@@ -51,14 +51,21 @@ function ManageStudents() {
   ];
 
   const levels = ["1A", "1B", "1C", "2A", "2B", "2C"];
+    const authUser = JSON.parse(localStorage.getItem("authUser"));
 
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:5000/api/students"
-        );
+       
 
+         const response = await fetch(
+         "http://localhost:5000/api/students",
+        {
+          headers: {
+            Authorization: `Bearer ${authUser?.token}`,
+          },
+       }
+      );
         const data = await response.json();
 
         if (!response.ok) {
@@ -165,6 +172,7 @@ function ManageStudents() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+             Authorization: `Bearer ${authUser?.token}`,
           },
           body: JSON.stringify({
             department: selectedDepartment,
@@ -211,10 +219,15 @@ function ManageStudents() {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/selected-students?department=${encodeURIComponent(
-          selectedDepartment
-        )}&level=${encodeURIComponent(selectedLevel)}`
-      );
+       `http://localhost:5000/api/selected-students?department=${encodeURIComponent(
+        selectedDepartment
+      )}&level=${encodeURIComponent(selectedLevel)}`,
+        {
+        headers: {
+        Authorization: `Bearer ${authUser?.token}`,
+    },
+  }
+);
 
       const data = await response.json();
 

@@ -1,4 +1,6 @@
 const express = require("express");
+const { protect , authorize} = require("../middleware/authMiddleware");
+
 
 const {
   getAllFaculty,
@@ -10,10 +12,10 @@ const {
 
 const router = express.Router();
 
-router.get("/", getAllFaculty);
-router.post("/create", createFaculty);
-router.put("/:facultyId", updateFaculty);
-router.delete("/:facultyId", deleteFaculty);
+router.get("/",protect, authorize("Admin", "Faculty"), getAllFaculty);
+router.post("/create",protect, authorize("Admin"), createFaculty);
+router.put("/:facultyId",protect, authorize("Admin"), updateFaculty);
+router.delete("/:facultyId",protect, authorize("Admin"), deleteFaculty);
 router.post("/login", facultyLogin);
 
 

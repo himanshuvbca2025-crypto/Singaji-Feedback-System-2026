@@ -14,6 +14,8 @@ function FacultySchedule() {
     slot3: { startTime: "", endTime: "" },
   });
 
+  const authUser = JSON.parse(localStorage.getItem("authUser"));
+
   // Get only today's schedules for the logged-in faculty's department
   useEffect(() => {
     const fetchTodaySchedules = async () => {
@@ -23,7 +25,12 @@ function FacultySchedule() {
         const response = await fetch(
           `http://localhost:5000/api/schedules/today?department=${encodeURIComponent(
             user.department
-          )}`
+          )}`,
+           {
+           headers: {
+            Authorization: `Bearer ${authUser?.token}`,
+            },
+          }
         );
 
         const data = await response.json();

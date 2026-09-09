@@ -27,6 +27,9 @@ function FacultyFeedbackModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+    const authUser = JSON.parse(localStorage.getItem("authUser"));
+
+
   useEffect(() => {
     if (!isOpen || !faculty || !selectedDate) {
       return;
@@ -38,11 +41,16 @@ function FacultyFeedbackModal({
         setError("");
         setViewData(null);
 
-        const response = await fetch(
-          `http://localhost:5000/api/feedback/faculty-view?facultyId=${encodeURIComponent(
-           faculty.facultyId
-         )}&date=${selectedDate}`
-      );
+      const response = await fetch(
+        `http://localhost:5000/api/feedback/faculty-view?facultyId=${encodeURIComponent(
+         faculty.facultyId
+       )}&date=${selectedDate}`,
+    {
+          headers: {
+          Authorization: `Bearer ${authUser?.token}`,
+    },
+  }
+);
 
         const data = await response.json();
 
