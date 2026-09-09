@@ -79,10 +79,13 @@ function AdminDashboard() {
   useEffect(() => {
     const fetchFeedbackReport = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:5000/api/reports"
-        );
+        
+       const today = new Date()
+  .toLocaleDateString("en-CA");
 
+const response = await fetch(
+  `http://localhost:5000/api/reports?date=${today}`
+);
         const data = await response.json();
 
         if (!response.ok) {

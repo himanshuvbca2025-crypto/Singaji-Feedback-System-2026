@@ -1,7 +1,7 @@
 
 const Feedback = require("../models/feedback");
 const Schedule = require("../models/Schedule");
-const SelectedStudent = require('../models/SeletedStudents');
+const SelectedStudents = require('../models/SeletedStudents');
 // =========================================================
 // SUBMIT FEEDBACK
 // =========================================================
@@ -890,7 +890,7 @@ const getFacultyFeedbackView = async (req, res) => {
 
       for (const item of matchingSlots) {
         
-       const actualStrength = await SelectedStudent.countDocuments({
+       const actualStrength = await SelectedStudents.countDocuments({
         level: { $in: schedule.groups || [] },
       });
 
