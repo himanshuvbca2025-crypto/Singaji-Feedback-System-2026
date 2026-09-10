@@ -1,89 +1,67 @@
 /* ========================================
-   NAVBAR — Clean Professional White
+   NAVBAR — Clean Professional Commercial Header
 ======================================== */
 
 .navbar {
   width: 100%;
-  height: 64px;
-
+  height: 68px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  padding: 0 24px;
-
+  padding: 0 28px;
   box-sizing: border-box;
 
   background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-light, #e2e8f0);
 
   position: sticky;
   top: 0;
   z-index: 1000;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
 }
-
-
-/* ========================================
-   BRAND
-======================================== */
 
 .navbar-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   user-select: none;
-  border-radius: 8px;
-  padding: 4px 8px;
-  margin: 0 -8px;
-  transition: background 0.18s ease;
+  border-radius: 12px;
+  padding: 6px 10px;
+  margin: 0 -10px;
+  transition: background 0.2s ease;
 }
 
 .navbar-brand:hover {
-  background: #f9fafb;
+  background: #f8fafc;
 }
 
-
-/* ========================================
-   LOGO
-======================================== */
-
 .navbar-logo {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   object-fit: contain;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
-
-/* ========================================
-   BRAND TEXT
-======================================== */
-
 .navbar-brand-text h1 {
   margin: 0;
   font-size: 17px;
-  font-weight: 700;
-  color: #111827;
-  letter-spacing: -0.2px;
+  font-weight: 800;
+  color: var(--text-primary, #0f172a);
+  letter-spacing: -0.02em;
 }
 
 .navbar-brand-text p {
-  margin: 2px 0 0;
+  margin: 1px 0 0;
   font-size: 11px;
-  color: #6b7280;
-  font-weight: 500;
+  color: var(--text-secondary, #475569);
+  font-weight: 600;
 }
-
-
-/* ========================================
-   RIGHT SIDE
-======================================== */
 
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
 }
 
 .navbar-user {
@@ -93,71 +71,49 @@
 .navbar-user-name {
   display: block;
   font-size: 14px;
-  font-weight: 600;
-  color: #111827;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
 }
 
 .navbar-user-role {
-  display: block;
-  margin-top: 1px;
-  font-size: 11px;
-  color: #6b7280;
-  font-weight: 500;
+  display: inline-block;
+  margin-top: 2px;
+  padding: 2px 8px;
+  font-size: 10px;
+  color: #ea580c;
+  background: #fff7ed;
+  border: 1px solid #ffedd5;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.05em;
+  border-radius: 6px;
 }
-
-
-/* ========================================
-   LOGOUT BUTTON
-======================================== */
 
 .navbar-logout {
   border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+  padding: 9px 18px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
   color: #ffffff;
   font-size: 13px;
   font-weight: 700;
-  font-family: 'Inter', Arial, sans-serif;
+  font-family: inherit;
   cursor: pointer;
-  box-shadow: 0 3px 10px rgba(234, 88, 12, 0.25);
+  box-shadow: 0 3px 10px rgba(249, 115, 22, 0.25);
   transition: all 0.2s ease;
 }
 
 .navbar-logout:hover {
-  background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
   transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(234, 88, 12, 0.35);
+  box-shadow: 0 6px 16px rgba(249, 115, 22, 0.35);
 }
 
-
-/* ========================================
-   MOBILE
-======================================== */
-
 @media (max-width: 768px) {
-
   .navbar {
     padding: 0 16px;
   }
-
-  .navbar-brand-text h1 {
-    font-size: 14px;
-  }
-
-  .navbar-brand-text p {
+  .navbar-brand-text p, .navbar-user {
     display: none;
   }
-
-  .navbar-user {
-    display: none;
-  }
-
-  .navbar-logo {
-    width: 38px;
-    height: 38px;
-  }
-
 }

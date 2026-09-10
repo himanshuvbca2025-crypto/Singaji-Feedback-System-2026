@@ -1,30 +1,27 @@
 /* ========================================
-   MANAGE FACULTY
+   MANAGE FACULTY — Modern Commercial Design
 ======================================== */
 
 .manage-faculty {
     width: 100%;
     box-sizing: border-box;
+    animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
-
-/* ========================================
-   HEADINGS
-======================================== */
 
 .manage-faculty h1 {
     margin: 0;
     font-size: 30px;
-    font-weight: 700;
-    color: #111827;
+    font-weight: 800;
+    color: var(--text-primary, #0f172a);
+    letter-spacing: -0.03em;
 }
 
 .faculty-page-title p {
     margin: 6px 0 0;
     font-size: 14px;
-    color: #4b5563;
+    color: var(--text-secondary, #475569);
+    font-weight: 500;
 }
-
 
 /* ========================================
    DEPARTMENT GRID
@@ -33,139 +30,115 @@
 .faculty-department-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    margin-top: 25px;
+    gap: 22px;
+    margin-top: 28px;
 }
 
-
-/* ========================================
-   DEPARTMENT CARD
-======================================== */
-
 .faculty-department-card {
-    min-height: 200px;
-    padding: 24px;
-
+    min-height: 220px;
+    padding: 28px 24px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
-    gap: 12px;
-
+    gap: 14px;
     box-sizing: border-box;
 
     background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 16px;
-
-    color: #111827;
+    border: 1px solid var(--border-light, #e2e8f0);
+    border-radius: 20px;
+    color: var(--text-primary, #0f172a);
     cursor: pointer;
 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--shadow-sm, 0 2px 4px 0 rgba(15, 23, 42, 0.04));
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .faculty-department-card:hover {
-    background: rgba(255, 255, 255, 0.22);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-color: rgba(255, 255, 255, 0.5);
-
+    background: #ffffff;
+    border-color: #cbd5e1;
     transform: translateY(-4px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--shadow-xl, 0 20px 30px -6px rgba(15, 23, 42, 0.16));
 }
 
 .faculty-department-image {
-    width: 76px;
-    height: 76px;
+    width: 80px;
+    height: 80px;
     object-fit: contain;
     border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    transition: transform 0.25s ease;
+}
+
+.faculty-department-card:hover .faculty-department-image {
+    transform: scale(1.05);
 }
 
 .faculty-department-card h2 {
     margin: 0;
     font-size: 20px;
-    font-weight: 700;
-    color: #111827;
+    font-weight: 800;
+    color: var(--text-primary, #0f172a);
+    letter-spacing: -0.02em;
 }
 
 .faculty-dept-sub {
     margin: 0;
-    font-size: 12px;
-    color: #6b7280;
+    font-size: 13px;
+    color: var(--text-secondary, #475569);
     text-align: center;
+    font-weight: 500;
 }
 
-
 /* ========================================
-   BACK BUTTON
+   BACK BUTTON & HEADER
 ======================================== */
 
 .faculty-back-button {
-    margin-bottom: 20px;
-    padding: 9px 16px;
+    margin-bottom: 24px;
+    padding: 10px 18px;
     background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    color: #374151;
+    border: 1px solid var(--border-light, #e2e8f0);
+    border-radius: 12px;
+    color: var(--text-secondary, #475569);
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.25s ease;
+    box-shadow: var(--shadow-xs);
+    transition: all 0.2s ease;
 }
 
 .faculty-back-button:hover {
-    background: rgba(255, 255, 255, 0.22);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-color: rgba(255, 255, 255, 0.5);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    background: #f8fafc;
+    color: var(--text-primary, #0f172a);
+    border-color: #cbd5e1;
 }
-
-
-/* ========================================
-   FACULTY HEADER
-======================================== */
 
 .faculty-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 22px;
+    margin-bottom: 24px;
 }
-
-.faculty-header p {
-    margin: 6px 0 0;
-    font-size: 14px;
-    color: #4b5563;
-}
-
-
-/* ========================================
-   ADD FACULTY BUTTON
-======================================== */
 
 .add-faculty-button {
-    padding: 10px 18px;
+    padding: 11px 20px;
     border: none;
-    border-radius: 8px;
-    background: linear-gradient(135deg, #ea580c 0%, #d97706 100%);
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
     color: #ffffff;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
-    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
+    transition: all 0.25s ease;
 }
 
 .add-faculty-button:hover {
-    background: linear-gradient(135deg, #c2410c 0%, #b45309 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(234, 88, 12, 0.35);
+    background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(249, 115, 22, 0.4);
 }
-
-
 
 /* ========================================
    FACULTY LIST & ROWS
@@ -174,43 +147,41 @@
 .faculty-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    max-width: 900px;
+    gap: 14px;
+    max-width: 950px;
 }
 
 .faculty-row {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 16px 20px;
+    gap: 18px;
+    padding: 18px 24px;
     background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--border-light, #e2e8f0);
+    border-radius: 16px;
+    box-shadow: var(--shadow-xs);
     transition: all 0.25s ease;
 }
 
 .faculty-row:hover {
-    background: rgba(255, 255, 255, 0.22);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-color: rgba(255, 255, 255, 0.5);
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-md);
+    border-color: #cbd5e1;
     transform: translateY(-2px);
 }
 
 .faculty-avatar {
-    width: 48px;
-    height: 48px;
+    width: 50px;
+    height: 50px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: #111827;
+    background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
     color: #ffffff;
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 19px;
+    font-weight: 800;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
 }
 
 .faculty-info {
@@ -221,29 +192,28 @@
 .faculty-info h3 {
     margin: 0;
     font-size: 16px;
-    font-weight: 600;
-    color: #111827;
+    font-weight: 700;
+    color: var(--text-primary, #0f172a);
 }
 
 .faculty-info p {
     margin: 3px 0 6px;
     font-size: 13px;
-    color: #6b7280;
+    color: var(--text-secondary, #475569);
 }
 
 .faculty-subject-tag {
     display: inline-block;
     padding: 3px 10px;
     border-radius: 6px;
-    background: #f3f4f6;
-    color: #374151;
+    background: #f1f5f9;
+    color: var(--text-secondary, #475569);
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600;
 }
 
-
 /* ========================================
-   FACULTY ACTIONS
+   FACULTY ACTIONS & MODAL
 ======================================== */
 
 .faculty-actions {
@@ -253,142 +223,49 @@
 
 .btn-edit,
 .btn-view {
-    padding: 8px 14px;
-    border-radius: 8px;
+    padding: 9px 16px;
+    border-radius: 10px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .btn-edit {
     background: #ffffff;
-    border: 1px solid #d1d5db;
-    color: #374151;
+    border: 1px solid var(--border-light, #e2e8f0);
+    color: var(--text-secondary, #475569);
 }
 
 .btn-edit:hover {
-    background: #f9fafb;
-    border-color: #9ca3af;
+    background: #f8fafc;
+    color: var(--text-primary, #0f172a);
+    border-color: #cbd5e1;
 }
 
 .btn-view {
-    background: #4f46e5;
+    background: #6366f1;
     border: none;
     color: #ffffff;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .btn-view:hover {
-    background: #4338ca;
-}
-
-
-/* ========================================
-   MODAL FORM & CONTROLS
-======================================== */
-
-.faculty-modal-form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-top: 10px;
-}
-
-.modal-form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.modal-form-group label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #374151;
-}
-
-.modal-form-group input,
-.modal-form-group select {
-    padding: 10px 14px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 14px;
-    outline: none;
-}
-
-.modal-form-group input:focus,
-.modal-form-group select:focus {
-    border-color: #111827;
-    box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.1);
-}
-
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.btn-primary {
-    padding: 10px 18px;
-    background: linear-gradient(135deg, #ea580c 0%, #d97706 100%);
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 14px;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
-    transition: all 0.2s ease;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(135deg, #c2410c 0%, #b45309 100%);
+    background: #4f46e5;
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(234, 88, 12, 0.35);
 }
-
-
-.btn-secondary {
-    padding: 10px 18px;
-    background: #f3f4f6;
-    color: #374151;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-.btn-secondary:hover {
-    background: #e5e7eb;
-}
-
-
-/* ========================================
-   FACULTY COUNT
-======================================== */
 
 .faculty-count {
     width: fit-content;
-    margin-top: 20px;
-    padding: 10px 16px;
+    margin-top: 24px;
+    padding: 10px 18px;
     background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 9px;
-    color: #4b5563;
+    border: 1px solid var(--border-light, #e2e8f0);
+    border-radius: 12px;
+    color: var(--text-secondary, #475569);
     font-size: 14px;
-    transition: all 0.25s ease;
+    font-weight: 600;
 }
-
-.faculty-count:hover {
-    background: rgba(255, 255, 255, 0.22);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-color: rgba(255, 255, 255, 0.5);
-}
-
-
-/* RESPONSIVE */
 
 @media (max-width: 1100px) {
     .faculty-department-grid {
@@ -400,21 +277,8 @@
     .faculty-department-grid {
         grid-template-columns: 1fr;
     }
-
-    .faculty-header {
+    .faculty-header, .faculty-row {
         flex-direction: column;
         align-items: flex-start;
-        gap: 12px;
-    }
-
-    .faculty-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    }
-
-    .faculty-actions {
-        width: 100%;
-        justify-content: flex-end;
     }
 }

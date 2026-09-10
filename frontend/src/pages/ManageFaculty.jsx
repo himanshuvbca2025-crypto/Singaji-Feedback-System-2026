@@ -14,6 +14,7 @@ function ManageFaculty() {
   const navigate = useNavigate();
 
   const [selectedDepartment, setSelectedDepartment] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
   
 
   const [facultyData, setFacultyData] = useState({
