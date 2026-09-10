@@ -105,7 +105,11 @@ function ManageStudents() {
   ======================================== */
 
   const filteredStudents = currentStudentsList.filter((student) => {
+    // Hide already selected students from the list
+    if (selectedStudents.includes(student.id)) return false;
+
     const search = searchTerm.toLowerCase().trim();
+    if (!search) return true;
     return (
       student.name.toLowerCase().includes(search) ||
       student.email.toLowerCase().includes(search)
@@ -212,6 +216,13 @@ function ManageStudents() {
 
   const handleViewSelectedStudents = async () => {
     if (!selectedDepartment || !selectedLevel) {
+      return;
+    }
+
+    // Toggle off if already showing
+    if (showSelectedStudents) {
+      setShowSelectedStudents(false);
+      setSavedStudents([]);
       return;
     }
 
@@ -341,20 +352,45 @@ function ManageStudents() {
             ← Back to Levels
           </button>
 
-          <div className="student-page-header">
-            <div>
-              <h1>
-                {selectedDepartment} — Level {selectedLevel}
-              </h1>
+          {/* ── TOP ACTION BAR ── */}
+          <div className="action-bar-top">
+            <div className="student-page-title">
+              <h1>{selectedDepartment} — Level {selectedLevel}</h1>
               <p>Select exactly 10 students for feedback sampling.</p>
             </div>
 
-            <div className={`selection-count ${selectedStudents.length === 10 ? 'count-complete' : ''}`}>
-              <span>Selected:</span>
-              <strong>{selectedStudents.length} / 10</strong>
+            <div className="top-controls-group">
+              {/* Selection counter */}
+              <div className={`selection-counter-badge ${selectedStudents.length === 10 ? "count-complete" : ""}`}>
+                <span className="counter-dot"></span>
+                <span>Selected: <strong>{selectedStudents.length} / 10</strong></span>
+              </div>
+
+              {/* View Selected Students button — always visible at top */}
+              <button
+                className={`view-selected-btn ${showSelectedStudents ? "view-selected-btn--active" : ""}`}
+                onClick={handleViewSelectedStudents}
+                disabled={loadingSelectedStudents}
+              >
+                {loadingSelectedStudents
+                  ? "⏳ Loading..."
+                  : showSelectedStudents
+                  ? "✕ Hide Selected"
+                  : "👁 View Selected Students"}
+              </button>
+
+              {/* Save button */}
+              <button
+                className="save-button"
+                onClick={handleSave}
+                disabled={selectedStudents.length !== 10}
+              >
+                💾 Save Selection
+              </button>
             </div>
           </div>
 
+          {/* SUCCESS TOAST */}
           {saveSuccessMessage && (
             <div className="save-success-toast">
               <span className="toast-icon">✓</span>
@@ -362,8 +398,100 @@ function ManageStudents() {
             </div>
           )}
 
+          {/* SELECTED STUDENTS PANEL (shows below action bar when toggled) */}
+          {showSelectedStudents && (
+            <div className="selected-students-container">
+              <div className="selected-students-header">
+                <div>
+                  <h2>✅ Currently Selected Students</h2>
+                  <p>{selectedDepartment} — Level {selectedLevel}</p>
+                </div>
+                <span className="selected-total">
+                  {savedStudents.length} / 10
+                </span>
+              </div>
+
+              {savedStudents.length > 0 ? (
+                <div className="selected-students-table-wrap">
+                  <table className="selected-students-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Student Name</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {savedStudents.map((student, index) => (
+                        <tr key={student._id}>
+                          <td>
+                            <span className="student-number">{index + 1}</span>
+                          </td>
+                          <td>
+                            <div className="table-user-cell">
+                              <div className="avatar-circle">
+                                {student.name?.charAt(0).toUpperCase()}
+                              </div>
+                              <span className="user-name">{student.name}</span>
+                            </div>
+                          </td>
+                          <td className="text-secondary">{student.gmail}</td>
+                          <td>
+                            <span className="status-pill pill-active">Selected</span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="no-selected-students">
+                  No students have been selected for this department and level yet.
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* SELECTED STUDENTS MINI PANEL */}
+          {selectedStudents.length > 0 && (
+            <div className="selected-mini-panel">
+              <div className="selected-mini-header">
+                <div className="selected-mini-title">
+                  <span className="selected-mini-icon">✅</span>
+                  <span>Selected Students</span>
+                </div>
+                <span className={`selected-mini-count ${selectedStudents.length === 10 ? "count-full" : ""}`}>
+                  {selectedStudents.length} / 10
+                </span>
+              </div>
+
+              <div className="selected-mini-list">
+                {currentStudentsList
+                  .filter((s) => selectedStudents.includes(s.id))
+                  .map((student, index) => (
+                    <div key={student.id} className="selected-mini-row">
+                      <span className="selected-mini-num">{index + 1}</span>
+                      <div className="selected-mini-info">
+                        <span className="selected-mini-name">{student.name}</span>
+                        <span className="selected-mini-email">{student.email}</span>
+                      </div>
+                      <button
+                        className="remove-student-btn"
+                        onClick={() => handleStudentSelect(student.id)}
+                        title="Remove student"
+                      >
+                        ✕ Remove
+                      </button>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
           {/* SEARCH */}
           <div className="student-search">
+            <span className="search-icon">🔍</span>
             <input
               type="text"
               placeholder="Search student by name or email..."
@@ -372,100 +500,69 @@ function ManageStudents() {
             />
           </div>
 
-          {/* STUDENT LIST */}
-          <div className="students-list">
-            {filteredStudents.length > 0 ? (
-              filteredStudents.map((student) => {
-                const isSelected = selectedStudents.includes(student.id);
-
-                return (
-                  <div
-                    key={student.id}
-                    className={`student-row ${isSelected ? "selected" : ""}`}
-                    onClick={() => handleStudentSelect(student.id)}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => handleStudentSelect(student.id)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-
-                    <div className="student-info">
-                      <h3>{student.name}</h3>
-                      <p>{student.email}</p>
-                    </div>
-
-                    <span className={`status-pill ${isSelected ? "pill-active" : ""}`}>
-                      {isSelected ? "Selected" : "Unselected"}
-                    </span>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="no-students">No students found matching search.</div>
-            )}
+          {/* STUDENT TABLE */}
+          <div className="data-table-card">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th style={{ width: 48 }}></th>
+                  <th>Student</th>
+                  <th>Email</th>
+                  <th>Section</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredStudents.length > 0 ? (
+                  filteredStudents.map((student) => {
+                    const isSelected = selectedStudents.includes(student.id);
+                    return (
+                      <tr
+                        key={student.id}
+                        className={isSelected ? "row-selected" : ""}
+                        onClick={() => handleStudentSelect(student.id)}
+                      >
+                        <td>
+                          <input
+                            type="checkbox"
+                            className="custom-checkbox"
+                            checked={isSelected}
+                            onChange={() => handleStudentSelect(student.id)}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </td>
+                        <td>
+                          <div className="table-user-cell">
+                            <div className={`avatar-circle ${isSelected ? "avatar-selected" : ""}`}>
+                              {student.name?.charAt(0).toUpperCase()}
+                            </div>
+                            <span className="user-name">{student.name}</span>
+                          </div>
+                        </td>
+                        <td className="text-secondary">{student.email}</td>
+                        <td>
+                          <span className="dept-badge">{selectedLevel}</span>
+                        </td>
+                        <td>
+                          <span className={`status-pill ${isSelected ? "pill-active" : ""}`}>
+                            {isSelected ? "✓ Selected" : "Unselected"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="no-data-cell">
+                      No students found matching your search.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
 
-          {/* VIEW SELECTED STUDENTS */}
-          <div className="view-selected-section">
-            <button
-              className="view-selected-button"
-              onClick={handleViewSelectedStudents}
-              disabled={loadingSelectedStudents}
-            >
-              {loadingSelectedStudents
-                ? "Loading..."
-                : "View Selected Students"}
-            </button>
-          </div>
-
-          {showSelectedStudents && (
-            <div className="selected-students-container">
-              <div className="selected-students-header">
-                <div>
-                  <h2>Selected Students</h2>
-                  <p>
-                    {selectedDepartment} — Level {selectedLevel}
-                  </p>
-                </div>
-
-                <span className="selected-total">
-                  {savedStudents.length} / 10
-                </span>
-              </div>
-
-              {savedStudents.length > 0 ? (
-                <div className="selected-students-list">
-                  {savedStudents.map((student, index) => (
-                    <div
-                      key={student._id}
-                      className="selected-student-row"
-                    >
-                      <span className="student-number">
-                        {index + 1}
-                      </span>
-
-                      <div className="student-info">
-                        <h3>{student.name}</h3>
-                        <p>{student.gmail}</p>
-                      </div>
-
-                      <span className="status-pill pill-active">
-                        Selected
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="no-selected-students">
-                  No students have been selected for this department and level.
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* SAVE BAR */}
+          {/* BOTTOM SAVE BAR */}
           <div className="save-section">
             <p>
               Requirements: Exactly 10 students required. Currently selected:{" "}
@@ -477,7 +574,7 @@ function ManageStudents() {
               onClick={handleSave}
               disabled={selectedStudents.length !== 10}
             >
-              Save Selection
+              💾 Save Selection
             </button>
           </div>
         </section>

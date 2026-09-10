@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth.js";
 
 import ssecLogo from "../assets/rename.png";
@@ -7,33 +7,21 @@ import "./Login.css";
 
 function Login() {
   const navigate = useNavigate();
-  // const { login, isAuthenticated, user } = useAuth();
   const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
-  // useEffect(() => {
-  //   if (isAuthenticated && user) {
-  //     if (user.role === "Faculty") {
-  //       navigate("/faculty/dashboard", { replace: true });
-  //     } else {
-  //       navigate("/admin/dashboard", { replace: true });
-  //     }
-  //   }
-  // }, [isAuthenticated, user, navigate]);
-
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    setError("");
+    try {
+      setError("");
+      setIsLoading(true);
 
-    const response = await fetch(
-      "http://localhost:5000/api/auth/login",
-      {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -42,124 +30,136 @@ function Login() {
           gmail: email,
           password: password,
         }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Invalid email or password");
+        return;
       }
-    );
 
-    const data = await response.json();
+      // Login successful
+      login({
+        email: data.user.gmail,
+        role: data.role,
+        name: data.user.name,
+        department: data.user.department,
+        subjects: data.user.subjects,
+        isActive: data.user.isActive,
+        token: data.token,
+      });
 
-    if (!response.ok) {
-      setError(data.message || "Invalid email or password");
-      return;
+      // Role ke according dashboard
+      if (data.role === "Faculty") {
+        navigate("/faculty/dashboard");
+      } else if (data.role === "Admin") {
+        navigate("/admin/dashboard");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("Unable to connect to server. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    // Login successful
-    login({
-      email: data.user.gmail,
-      role: data.role,
-      name: data.user.name,
-      department: data.user.department,
-      subjects: data.user.subjects,
-      isActive: data.user.isActive,
-      token: data.token,
-    });
+  return (
+    <div className="login-page">
 
-    
-
-    // Role ke according dashboard
-    if (data.role === "Faculty") {
-      navigate("/faculty/dashboard");
-    } else if (data.role === "Admin") {
-      navigate("/admin/dashboard");
-    }
-  } catch (error) {
-    console.error("Login error:", error);
-    setError("Unable to connect to server. Please try again.");
-  }
-};
-
-return (
-  <div className="login-page">
-    <div className="login-card">
-
-      <div className="login-logo-wrapper">
-        <img
-          src={ssecLogo}
-          alt="SSISM Logo"
-          className="login-logo"
-        />
-      </div>
-
-      <h1 className="login-title">Welcome</h1>
-
-      <p className="login-subtitle">
-        Sign in to your account to continue
-      </p>
-
-      {/* <div className="demo-credentials-hints">
-
-          <button
-            type="button"
-            className="demo-chip faculty-chip"
-            onClick={handleFillDemoFaculty}
-          >
-            Demo Faculty
-          </button>
-        </div> */}
-
-      <form onSubmit={handleSubmit} className="login-form">
-
-        <div className="login-form-group">
-          <label htmlFor="email">Email Address</label>
-
-          <input
-            id="email"
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setError("");
-            }}
-            required
-          />
-        </div>
-
-        <div className="login-form-group">
-          <label htmlFor="password">Password</label>
-
-          <input
-            id="password"
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setError("");
-            }}
-            required
-          />
-        </div>
-
-        {error && (
-          <div className="login-error">
-            <span>⚠</span> {error}
+      {/* ── Top Navbar ── */}
+      <nav className="login-navbar">
+        <div className="login-navbar-brand">
+          <img src={ssecLogo} alt="SSISM Logo" className="login-navbar-logo" />
+          <div className="login-navbar-text">
+            <span className="login-navbar-name">SSISM</span>
+            <span className="login-navbar-full">Singaji Education Society</span>
           </div>
-        )}
+        </div>
+      </nav>
 
-        <button type="submit" className="login-button">
-          Sign In
-        </button>
+      {/* ── Main Content ── */}
+      <div className="login-content">
 
-      </form>
+        {/* ── Left Branding ── */}
+        <div className="login-branding">
+          <p className="login-branding-tagline">Welcome to</p>
+          <h1 className="login-branding-title">SANT SINGAJI EDUCATIONAL<br />SOCIETY<br /></h1>
+          <div className="login-branding-divider"></div>
+          <p className="login-branding-sub">Empowering Quality Education Through Feedback</p>
+        </div>
 
-      {/* <div className="register-link">
-          <span>Don't have an account?</span>
-          <Link to="/register">Register</Link>
-        </div> */}
+        {/* ── Right Login Card ── */}
+        <div className="login-card">
 
+          <div className="login-logo-wrapper">
+            <img src={ssecLogo} alt="SSISM Logo" className="login-logo" />
+          </div>
+
+          <h2 className="login-title">Sign In</h2>
+          <p className="login-subtitle">Enter your credentials to continue</p>
+
+          <form onSubmit={handleSubmit} className="login-form">
+
+            <div className="login-form-group">
+              <label htmlFor="email">Email Address</label>
+              <input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setError("");
+                }}
+                required
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className="login-form-group">
+              <label htmlFor="password">Password</label>
+              <input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setError("");
+                }}
+                required
+                disabled={isLoading}
+              />
+            </div>
+
+            {error && (
+              <div className="login-error">
+                <span>⚠</span> {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="login-button"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span className="login-btn-loading">
+                  <span className="login-spinner"></span>
+                  Signing in…
+                </span>
+              ) : (
+                "Sign In"
+              )}
+            </button>
+
+          </form>
+
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
 }
 
 export default Login;
