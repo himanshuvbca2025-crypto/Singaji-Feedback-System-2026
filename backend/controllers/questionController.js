@@ -28,9 +28,9 @@ const getAllQuestions = async (req, res) => {
     });
   }
 };
+
 // @desc    Create a question
 // @route   POST /api/questions
-
 const createQuestion = async (req, res) => {
   try {
     const {
@@ -58,12 +58,12 @@ const createQuestion = async (req, res) => {
     // Convert frontend status into database boolean
     const isActive = status === 'Active';
 
-    // Find the last question of the same category
-    const lastQuestion = await Question.findOne({
-      category,
-    }).sort({ order: -1 });
+    // Find the last question from all categories
+    const lastQuestion = await Question.findOne().sort({
+      order: -1,
+    });
 
-    // Generate next order automatically
+    // Generate next global order automatically
     const newOrder = lastQuestion
       ? lastQuestion.order + 1
       : 1;
@@ -91,6 +91,7 @@ const createQuestion = async (req, res) => {
     });
   }
 };
+
 // @desc    Update a question
 // @route   PUT /api/questions/:id
 const updateQuestion = async (req, res) => {
@@ -111,29 +112,15 @@ const updateQuestion = async (req, res) => {
     // Status ko frontend ke string se database ke boolean mein convert karo
     const isActive = status === 'Active';
 
-    let newOrder = existingQuestion.order;
-
-    // Agar category change hui hai
-    if (category && category !== existingQuestion.category) {
-      // New category ka highest order find karo
-      const lastQuestion = await Question.findOne({
-        category,
-      }).sort({ order: -1 });
-
-      // New category mein next order
-      newOrder = lastQuestion
-        ? lastQuestion.order + 1
-        : 1;
-    }
-
     // Question update karo
+    // Order ko same rakhenge
     const question = await Question.findByIdAndUpdate(
       id,
       {
         text,
         category,
         isActive,
-        order: newOrder,
+        order: existingQuestion.order,
       },
       {
         new: true,
@@ -154,7 +141,6 @@ const updateQuestion = async (req, res) => {
       message: error.message,
     });
   }
-
 };
 
 // @desc    Delete a question
@@ -173,21 +159,16 @@ const deleteQuestion = async (req, res) => {
       });
     }
 
-    // 2. Store category
-    const deletedCategory = question.category;
-
-    // 3. Delete question
+    // 2. Delete question
     await Question.findByIdAndDelete(id);
 
-    // 4. Get remaining questions of same category
-    const remainingQuestions = await Question.find({
-      category: deletedCategory,
-    }).sort({
+    // 3. Get all remaining questions
+    const remainingQuestions = await Question.find().sort({
       order: 1,
       createdAt: 1,
     });
 
-    // 5. Re-arrange order: 1, 2, 3, 4...
+    // 4. Re-arrange global order: 1, 2, 3, 4...
     for (let i = 0; i < remainingQuestions.length; i++) {
       remainingQuestions[i].order = i + 1;
       await remainingQuestions[i].save();
