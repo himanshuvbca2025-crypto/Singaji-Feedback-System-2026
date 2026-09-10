@@ -448,9 +448,22 @@ const getAllFeedback = async (req, res) => {
             $addToSet: "$subject",
           },
 
-          overallRating: {
-            $avg: "$metrics.Overall",
-          },
+        overallRating: {
+  $avg: {
+    $divide: [
+      {
+        $add: [
+          "$metrics.Explanation",
+          "$metrics.Punctuality",
+          "$metrics.Engagement",
+          "$metrics.Resolution",
+          "$metrics.Overall",
+        ],
+      },
+      5,
+    ],
+  },
+},
 
           totalFeedbacks: {
             $sum: 1,
@@ -550,18 +563,42 @@ const feedbacks = await Feedback.find({
 
     if (totalCount > 0) {
 
-      const sum =
-        feedbacks.reduce(
-          (acc, item) =>
-            acc +
-            (item.metrics?.Overall || 0),
-          0
-        );
+      const sum = feedbacks.reduce((acc, item) => {
+  const explanation = Number(
+    item.metrics?.Explanation || 0
+  );
 
+  const punctuality = Number(
+    item.metrics?.Punctuality || 0
+  );
 
-      avgRating = (
-        sum / totalCount
-      ).toFixed(1);
+  const engagement = Number(
+    item.metrics?.Engagement || 0
+  );
+
+  const resolution = Number(
+    item.metrics?.Resolution || 0
+  );
+
+  const overall = Number(
+    item.metrics?.Overall || 0
+  );
+
+  const feedbackRating =
+    (
+      explanation +
+      punctuality +
+      engagement +
+      resolution +
+      overall
+    ) / 5;
+
+  return acc + feedbackRating;
+}, 0);
+
+avgRating = (
+  sum / totalCount
+).toFixed(1);
     }
 
 
@@ -792,28 +829,64 @@ const getFacultyHistory = async (req, res) => {
     // 5. OVERALL RATING
     // =====================================================
 
-    const overallRatings = facultyFeedbacks
-      .map((feedback) =>
-        Number(feedback.metrics?.Overall)
-      )
-      .filter(
-        (rating) =>
-          Number.isFinite(rating) &&
-          rating >= 1 &&
-          rating <= 5
-      );
+   const feedbackRatings = facultyFeedbacks
+  .map((feedback) => {
+    const explanation = Number(
+      feedback.metrics?.Explanation
+    );
 
-    const averageScore =
-      overallRatings.length > 0
-        ? Number(
-            (
-              overallRatings.reduce(
-                (sum, rating) => sum + rating,
-                0
-              ) / overallRatings.length
-            ).toFixed(1)
-          )
-        : 0;
+    const punctuality = Number(
+      feedback.metrics?.Punctuality
+    );
+
+    const engagement = Number(
+      feedback.metrics?.Engagement
+    );
+
+    const resolution = Number(
+      feedback.metrics?.Resolution
+    );
+
+    const overall = Number(
+      feedback.metrics?.Overall
+    );
+
+    if (
+      !Number.isFinite(explanation) ||
+      !Number.isFinite(punctuality) ||
+      !Number.isFinite(engagement) ||
+      !Number.isFinite(resolution) ||
+      !Number.isFinite(overall)
+    ) {
+      return null;
+    }
+
+    return (
+      explanation +
+      punctuality +
+      engagement +
+      resolution +
+      overall
+    ) / 5;
+  })
+  .filter(
+    (rating) =>
+      Number.isFinite(rating) &&
+      rating >= 1 &&
+      rating <= 5
+  );
+
+const averageScore =
+  feedbackRatings.length > 0
+    ? Number(
+        (
+          feedbackRatings.reduce(
+            (sum, rating) => sum + rating,
+            0
+          ) / feedbackRatings.length
+        ).toFixed(1)
+      )
+    : 0;
 
     // =====================================================
     // 6. QUESTION-WISE AVERAGES
@@ -1285,15 +1358,37 @@ const getFacultyFeedbackView = async (req, res) => {
           // Overall average
           // ----------------------------------------------
 
-          const overallAverage =
-            average(
-              lectureFeedbacks.map(
-                (item) =>
-                  Number(
-                    item.metrics?.Overall || 0
-                  )
-              )
-            );
+       const overallAverage = average(
+  lectureFeedbacks.map((item) => {
+    const explanation = Number(
+      item.metrics?.Explanation || 0
+    );
+
+    const punctuality = Number(
+      item.metrics?.Punctuality || 0
+    );
+
+    const engagement = Number(
+      item.metrics?.Engagement || 0
+    );
+
+    const resolution = Number(
+      item.metrics?.Resolution || 0
+    );
+
+    const overall = Number(
+      item.metrics?.Overall || 0
+    );
+
+    return (
+      explanation +
+      punctuality +
+      engagement +
+      resolution +
+      overall
+    ) / 5;
+  })
+);
 
           // ----------------------------------------------
           // Parameters

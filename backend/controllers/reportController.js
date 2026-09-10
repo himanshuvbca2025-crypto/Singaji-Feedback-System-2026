@@ -57,22 +57,53 @@ const getOverallReport = async (req, res) => {
           _id: null,
 
           overallRating: {
-            $avg: '$metrics.Overall',
-          },
+  $avg: {
+    $divide: [
+      {
+        $add: [
+          '$metrics.Explanation',
+          '$metrics.Punctuality',
+          '$metrics.Engagement',
+          '$metrics.Resolution',
+          '$metrics.Overall',
+        ],
+      },
+      5,
+    ],
+  },
+},
 
-          totalSubmissions: {
-            $sum: 1,
-          },
+totalSubmissions: {
+  $sum: 1,
+},
 
-          lowScoreAlerts: {
-            $sum: {
-              $cond: [
-                { $lt: ['$metrics.Overall', 3.5] },
-                1,
-                0,
-              ],
-            },
+lowScoreAlerts: {
+  $sum: {
+    $cond: [
+      {
+        $lt: [
+          {
+            $divide: [
+              {
+                $add: [
+                  '$metrics.Explanation',
+                  '$metrics.Punctuality',
+                  '$metrics.Engagement',
+                  '$metrics.Resolution',
+                  '$metrics.Overall',
+                ],
+              },
+              5,
+            ],
           },
+          3.5,
+        ],
+      },
+      1,
+      0,
+    ],
+  },
+},
         },
       },
     ]);
@@ -89,23 +120,55 @@ const getOverallReport = async (req, res) => {
         $group: {
           _id: '$section',
 
+         
           overallRating: {
-            $avg: '$metrics.Overall',
-          },
+  $avg: {
+    $divide: [
+      {
+        $add: [
+          '$metrics.Explanation',
+          '$metrics.Punctuality',
+          '$metrics.Engagement',
+          '$metrics.Resolution',
+          '$metrics.Overall',
+        ],
+      },
+      5,
+    ],
+  },
+},
 
-          totalSubmissions: {
-            $sum: 1,
-          },
+totalSubmissions: {
+  $sum: 1,
+},
 
-          lowScoreAlerts: {
-            $sum: {
-              $cond: [
-                { $lt: ['$metrics.Overall', 3.5] },
-                1,
-                0,
-              ],
-            },
+lowScoreAlerts: {
+  $sum: {
+    $cond: [
+      {
+        $lt: [
+          {
+            $divide: [
+              {
+                $add: [
+                  '$metrics.Explanation',
+                  '$metrics.Punctuality',
+                  '$metrics.Engagement',
+                  '$metrics.Resolution',
+                  '$metrics.Overall',
+                ],
+              },
+              5,
+            ],
           },
+          3.5,
+        ],
+      },
+      1,
+      0,
+    ],
+  },
+},
         },
       },
       {
@@ -130,14 +193,26 @@ const getOverallReport = async (req, res) => {
         section: "$section",
         subject: "$subject",
       },
-
-      averageRating: {
-        $avg: "$metrics.Overall",
+averageRating: {
+  $avg: {
+    $divide: [
+      {
+        $add: [
+          "$metrics.Explanation",
+          "$metrics.Punctuality",
+          "$metrics.Engagement",
+          "$metrics.Resolution",
+          "$metrics.Overall",
+        ],
       },
+      5,
+    ],
+  },
+},
 
-      totalFeedbacks: {
-        $sum: 1,
-      },
+totalFeedbacks: {
+  $sum: 1,
+},
     },
   },
 
@@ -164,18 +239,47 @@ const getOverallReport = async (req, res) => {
     // 4. LOW SCORE ALERTS
     // =========================================================
 
-    const lowScoreAlerts = await Feedback.find({
-      ...dateFilter,
 
-      'metrics.Overall': {
+const lowScoreAlerts = await Feedback.aggregate([
+  ...(date ? [{ $match: dateFilter }] : []),
+
+  {
+    $addFields: {
+      calculatedRating: {
+        $divide: [
+          {
+            $add: [
+              '$metrics.Explanation',
+              '$metrics.Punctuality',
+              '$metrics.Engagement',
+              '$metrics.Resolution',
+              '$metrics.Overall',
+            ],
+          },
+          5,
+        ],
+      },
+    },
+  },
+
+  {
+    $match: {
+      calculatedRating: {
         $lt: 3.5,
       },
-    })
-      .sort({ 'metrics.Overall': 1 })
-      .limit(10)
-      .select(
-        'facultyName section subject metrics.Overall remarks timestamp'
-      );
+    },
+  },
+
+  {
+    $sort: {
+      calculatedRating: 1,
+    },
+  },
+
+  {
+    $limit: 10,
+  },
+]);
 
     // =========================================================
     // 5. FINAL RESPONSE
@@ -238,7 +342,7 @@ const getOverallReport = async (req, res) => {
         facultyName: feedback.facultyName,
         department: feedback.section,
         subject: feedback.subject,
-        rating: feedback.metrics.Overall,
+        rating: Number(feedback.calculatedRating.toFixed(1)),
         reason: feedback.remarks,
         date: feedback.timestamp,
       })),
