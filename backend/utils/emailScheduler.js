@@ -136,14 +136,17 @@ const processSlot = async (schedule, slotName) => {
                 `[SCHEDULER] Sending feedback email to ${student.gmail}`
             );
 
-            const result = await sendFeedbackLinkEmail(
-                student.gmail,
-                slot.facultyId,
-                slot.facultyName,
-                slot.subject,
-                time,
-                slot.endTime
-            );
+           const result = await sendFeedbackLinkEmail(
+             student.gmail,
+             schedule.department,
+             student.level,
+             student.section,
+             slot.facultyId,
+             slot.facultyName,
+             slot.subject,
+             time,
+             slot.endTime
+);
 
             if (result.success) {
                 successCount++;

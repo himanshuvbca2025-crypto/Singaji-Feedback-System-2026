@@ -1,4 +1,6 @@
 const nodemailer = require("nodemailer");
+const crypto = require("crypto");
+const FeedbackToken = require("../models/FeedbackToken.js");
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -10,58 +12,146 @@ const transporter = nodemailer.createTransport({
 
 const sendFeedbackLinkEmail = async (
   studentEmail,
-   facultyId,
+  department,
+  level,
+  section,
+  facultyId,
   facultyName,
   subject,
   time,
   endTime
 ) => {
-const feedbackUrl =
-  `http://localhost:5173/student/feedback` +
-  `?facultyId=${encodeURIComponent(facultyId)}` +
-  `&faculty=${encodeURIComponent(facultyName)}` +
-  `&subject=${encodeURIComponent(subject)}` +
-  `&time=${encodeURIComponent(time)}` +
-  `&endTime=${encodeURIComponent(endTime || "")}`;
-  
-  const mailOptions = {
-    from: process.env.MAIL_USER,
-    to: studentEmail,
-    subject: `Feedback Required - ${facultyName}`,
-    html: `
-      <h2>Student Feedback</h2>
-
-      <p>Hello,</p>
-
-      <p>Please submit your feedback for:</p>
-
-      <p>
-        <strong>Faculty:</strong> ${facultyName}<br>
-        <strong>Subject:</strong> ${subject}<br>
-        <strong>Time:</strong> ${time}<br>
-        <strong>Lecture End Time:</strong> ${endTime || "Not available"}
-      </p>
-
-      <p>
-        <a href="${feedbackUrl}">
-          Click here to submit your feedback
-        </a>
-      </p>
-
-      <p>Thank you.</p>
-    `,
-  };
-
   try {
-    const info = await transporter.sendMail(mailOptions);
+    // ==========================================
+    // 1. GENERATE SECURE RANDOM TOKEN
+    // ==========================================
+
+    const rawToken = crypto.randomBytes(32).toString("hex");
+
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
+
+    // ==========================================
+    // 2. TOKEN EXPIRY
+    // ==========================================
+
+    const expiresAt = new Date(
+      Date.now() + 24 * 60 * 60 * 1000
+    );
+
+    // ==========================================
+    // 3. SAVE TRUSTED DATA
+    // ==========================================
+
+    await FeedbackToken.create({
+      tokenHash,
+
+      studentGmail: studentEmail
+        .trim()
+        .toLowerCase(),
+
+      department: (department || "")
+        .trim(),
+
+      level: (level || "")
+        .trim(),
+
+      section: (section || "")
+        .trim(),
+
+      facultyId: facultyId
+        .trim(),
+
+      facultyName: facultyName
+        .trim(),
+
+      subject: subject
+        .trim(),
+
+      lectureTime: (time || "")
+        .trim(),
+
+      lectureEndTime: (endTime || "")
+        .trim(),
+
+      expiresAt,
+
+      usedAt: null,
+    });
+
+    // ==========================================
+    // 4. FEEDBACK URL
+    // ==========================================
+
+    const feedbackUrl =
+      `http://localhost:5173/student/feedback` +
+      `?token=${encodeURIComponent(rawToken)}`;
+
+    // ==========================================
+    // 5. EMAIL
+    // ==========================================
+
+    const mailOptions = {
+      from: process.env.MAIL_USER,
+      to: studentEmail,
+
+      subject: `Feedback Required - ${facultyName}`,
+
+      html: `
+        <h2>Student Feedback</h2>
+
+        <p>Hello,</p>
+
+        <p>Please submit your feedback for:</p>
+
+        <p>
+          <strong>Department:</strong> ${department}<br>
+          <strong>Faculty:</strong> ${facultyName}<br>
+          <strong>Subject:</strong> ${subject}<br>
+          <strong>Class:</strong> ${level || "Not available"}<br>
+          <strong>Time:</strong> ${time}<br>
+          <strong>Lecture End Time:</strong> ${
+            endTime || "Not available"
+          }
+        </p>
+
+        <p>
+          <a href="${feedbackUrl}">
+            Click here to submit your feedback
+          </a>
+        </p>
+
+        <p>
+          This feedback link is personal to your college email
+          and should not be shared.
+        </p>
+
+        <p>Thank you.</p>
+      `,
+    };
+
+    // ==========================================
+    // 6. SEND EMAIL
+    // ==========================================
+
+    const info = await transporter.sendMail(
+      mailOptions
+    );
 
     console.log("==========================================");
-    console.log(`[EMAIL SENT] To: ${studentEmail}`);
+    console.log(
+      `[EMAIL SENT] To: ${studentEmail}`
+    );
+    console.log(`Department: ${department}`);
     console.log(`Faculty: ${facultyName}`);
     console.log(`Subject: ${subject}`);
     console.log(`Lecture Time: ${time}`);
     console.log(`Lecture End Time: ${endTime}`);
-    console.log(`Message ID: ${info.messageId}`);
+    console.log(
+      `Message ID: ${info.messageId}`
+    );
     console.log("==========================================");
 
     return {

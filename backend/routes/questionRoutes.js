@@ -10,7 +10,7 @@ const {
 
 const router = express.Router();
 
-router.get('/',protect, authorize("Admin"), getAllQuestions);
+router.get('/',getAllQuestions);
 
 router.post('/create',protect, authorize("Admin"), createQuestion);
 

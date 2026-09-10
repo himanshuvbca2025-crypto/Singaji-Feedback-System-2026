@@ -9,14 +9,20 @@ const {
   getFeedbackByFaculty,
   sendFeedbackInvite,
   getFacultyFeedbackView,
-  getFacultyHistory
+  getFacultyHistory,
+  verifyFeedbackToken,
 } = require('../controllers/feedbackController');
 
 const router = express.Router();
 
-router.post('/submit', protect, submitFeedback);
+router.get(
+  "/verify-token",
+  verifyFeedbackToken
+);
 
-router.get('/all', protect, authorize("Admin"), getAllFeedback);
+router.post('/submit', submitFeedback);
+
+router.get('/all',getAllFeedback);
 
 router.get('/faculty/:facultyId', protect, authorize("Admin"), getFeedbackByFaculty);
 

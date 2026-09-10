@@ -2,115 +2,163 @@
 const Feedback = require("../models/feedback");
 const Schedule = require("../models/Schedule");
 const SelectedStudents = require('../models/SeletedStudents');
+const crypto = require("crypto");
+const FeedbackToken = require("../models/FeedbackToken");
 // =========================================================
 // SUBMIT FEEDBACK
 // =========================================================
+// =========================================================
+// SUBMIT FEEDBACK
+// =========================================================
+
 const submitFeedback = async (req, res) => {
   try {
     const {
-      studentGmail,
-      facultyId,
-      facultyName,
-      subject,
-      lectureTime,
-      lectureEndTime,
+      token,
       metrics,
       remarks,
     } = req.body;
 
     console.log("======================================");
     console.log("FEEDBACK SUBMISSION REQUEST");
-    console.log("Gmail:", studentGmail);
-    console.log("Faculty:", facultyName);
-    console.log("Subject:", subject);
+    console.log("Token received:", !!token);
     console.log("Metrics:", metrics);
     console.log("======================================");
-
 
     // =====================================================
     // 1. REQUIRED DATA VALIDATION
     // =====================================================
-    if (
-      !studentGmail ||
-      !facultyId ||
-      !facultyName ||
-      !subject ||
-      !lectureTime ||
-      !lectureEndTime ||
-      !metrics
-    ) {
+
+    if (!token || !metrics) {
       return res.status(400).json({
         success: false,
-        message: "Required feedback data is missing.",
+        message: "Feedback token and metrics are required.",
       });
     }
 
+    // =====================================================
+    // 2. HASH TOKEN
+    // =====================================================
+
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
 
     // =====================================================
-    // 2. NORMALIZE GMAIL
+    // 3. FIND TOKEN
     // =====================================================
-    const normalizedGmail = studentGmail
-      .trim()
-      .toLowerCase();
 
-
-    // =====================================================
-    // 3. CHECK GMAIL IN SELECTED STUDENTS COLLECTION
-    // =====================================================
-    const selectedStudent = await SelectedStudents.findOne({
-      gmail: normalizedGmail,
+    const feedbackToken = await FeedbackToken.findOne({
+      tokenHash,
     });
 
-    console.log(
-      "Selected Student Found:",
-      selectedStudent
-    );
-
+    if (!feedbackToken) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid feedback link.",
+      });
+    }
 
     // =====================================================
-    // 4. GMAIL NOT FOUND
+    // 4. CHECK TOKEN EXPIRY
     // =====================================================
+
+    if (feedbackToken.expiresAt < new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: "This feedback link has expired.",
+      });
+    }
+
+    // =====================================================
+    // 5. CHECK TOKEN ALREADY USED
+    // =====================================================
+
+    if (feedbackToken.usedAt) {
+      return res.status(400).json({
+        success: false,
+        message: "Feedback has already been submitted using this link.",
+      });
+    }
+
+    // =====================================================
+    // 6. GET TRUSTED DATA FROM TOKEN
+    // =====================================================
+
+    const normalizedGmail =
+      feedbackToken.studentGmail
+        .trim()
+        .toLowerCase();
+
+    const facultyId =
+      feedbackToken.facultyId;
+
+    const facultyName =
+      feedbackToken.facultyName.trim();
+
+    const subject =
+      feedbackToken.subject.trim();
+
+    const lectureTime =
+      feedbackToken.lectureTime.trim();
+
+    const lectureEndTime =
+      feedbackToken.lectureEndTime.trim();
+
+    // =====================================================
+    // 7. VERIFY STUDENT IS STILL SELECTED
+    // =====================================================
+
+    const selectedStudent =
+      await SelectedStudents.findOne({
+        gmail: normalizedGmail,
+      });
+
     if (!selectedStudent) {
       return res.status(400).json({
         success: false,
-        message:
-          "Please submit the form using your registered college Gmail.",
+        message: "Student is not authorized for this feedback.",
       });
     }
 
+    // =====================================================
+    // 8. GET LEVEL + SECTION
+    // =====================================================
+
+ 
+
+const department =
+  (feedbackToken.department || "").trim();
+
+const studentLevel =
+  feedbackToken.level ||
+  selectedStudent.level ||
+  "";
+
+const studentSection =
+  feedbackToken.section ||
+  selectedStudent.section ||
+  "";
+
+    console.log("Student Gmail:", normalizedGmail);
+    console.log("Student Level:", studentLevel);
+    console.log("Student Section:", studentSection);
+    console.log("Faculty:", facultyName);
+    console.log("Subject:", subject);
 
     // =====================================================
-    // 5. GET LEVEL + SECTION FROM SELECTED STUDENTS
+    // 9. CHECK DUPLICATE FEEDBACK
     // =====================================================
-    const studentLevel =
-      selectedStudent.level || "";
 
-    const studentSection =
-      selectedStudent.section || "ITEG";
-
-
-    console.log(
-      "Student Level:",
-      studentLevel
-    );
-
-    console.log(
-      "Student Section:",
-      studentSection
-    );
-
-
-    // =====================================================
-    // 6. CHECK DUPLICATE FEEDBACK
-       const existingFeedback =
-     await Feedback.findOne({
-    studentGmail: normalizedGmail,
-     facultyId,
-    facultyName: facultyName.trim(),
-    subject: subject.trim(),
-    lectureEndTime: lectureEndTime.trim(),
-  });
-
+    const existingFeedback =
+      await Feedback.findOne({
+        studentGmail: normalizedGmail,
+        facultyId,
+        facultyName,
+        subject,
+        lectureEndTime,
+      });
 
     if (existingFeedback) {
       return res.status(400).json({
@@ -120,10 +168,10 @@ const submitFeedback = async (req, res) => {
       });
     }
 
+    // =====================================================
+    // 10. VALIDATE METRICS
+    // =====================================================
 
-    // =====================================================
-    // 7. VALIDATE METRICS
-    // =====================================================
     const requiredMetrics = [
       "Explanation",
       "Punctuality",
@@ -132,10 +180,8 @@ const submitFeedback = async (req, res) => {
       "Overall",
     ];
 
-
     for (const metric of requiredMetrics) {
       const value = metrics[metric];
-
 
       if (
         value === undefined ||
@@ -151,79 +197,77 @@ const submitFeedback = async (req, res) => {
       }
     }
 
+    // =====================================================
+    // 11. SAVE FEEDBACK
+    // =====================================================
 
-    // =====================================================
-    // 8. SAVE FEEDBACK IN Feedbacks COLLECTION
-    // =====================================================
     const feedback = await Feedback.create({
-      studentGmail: normalizedGmail,
+  studentGmail: normalizedGmail,
 
-      level: studentLevel,
+  level: studentLevel,
 
-      section: studentSection,
+  // IMPORTANT:
+  // Existing reporting code treats feedback.section
+  // as department.
+  section: department,
 
-       facultyId,
+  facultyId,
 
-      facultyName: facultyName.trim(),
+  facultyName,
 
-      subject: subject.trim(),
+  subject,
 
-      lectureTime: lectureTime.trim(),
+  lectureTime,
 
-      lectureEndTime: lectureEndTime.trim(),
+  lectureEndTime,
 
-      metrics: {
-        Explanation: Number(
-          metrics.Explanation
-        ),
+  metrics: {
+    Explanation: Number(metrics.Explanation),
+    Punctuality: Number(metrics.Punctuality),
+    Engagement: Number(metrics.Engagement),
+    Resolution: Number(metrics.Resolution),
+    Overall: Number(metrics.Overall),
+  },
 
-        Punctuality: Number(
-          metrics.Punctuality
-        ),
+  remarks: remarks
+    ? remarks.trim()
+    : "",
+});
+    // =====================================================
+    // 12. MARK TOKEN AS USED
+    // =====================================================
 
-        Engagement: Number(
-          metrics.Engagement
-        ),
-
-        Resolution: Number(
-          metrics.Resolution
-        ),
-
-        Overall: Number(
-          metrics.Overall
-        ),
-      },
-
-      remarks: remarks
-        ? remarks.trim()
-        : "",
-    });
-
+    await FeedbackToken.findByIdAndUpdate(
+      feedbackToken._id,
+      {
+        usedAt: new Date(),
+      }
+    );
 
     // =====================================================
-    // 9. SUCCESS RESPONSE
+    // 13. SUCCESS
     // =====================================================
+
     console.log(
       "Feedback successfully saved:",
       feedback._id
     );
 
+    console.log(
+      "Feedback token marked as used."
+    );
 
     return res.status(201).json({
       success: true,
-      message:
-        "Feedback submitted successfully.",
+      message: "Feedback submitted successfully.",
       feedback,
     });
 
-
   } catch (error) {
-
     console.error(
       "Submit feedback error:",
       error
     );
-
 
     return res.status(500).json({
       success: false,
@@ -232,7 +276,119 @@ const submitFeedback = async (req, res) => {
   }
 };
 
+// =========================================================
+// VERIFY FEEDBACK TOKEN
+// GET /api/feedback/verify-token?token=...
+// =========================================================
+// =========================================================
+// VERIFY FEEDBACK TOKEN
+// GET /api/feedback/verify-token?token=...
+// =========================================================
 
+const verifyFeedbackToken = async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "Feedback token is required.",
+      });
+    }
+
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+
+    const feedbackToken =
+      await FeedbackToken.findOne({
+        tokenHash,
+      });
+
+    if (!feedbackToken) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid feedback link.",
+      });
+    }
+
+    if (feedbackToken.expiresAt < new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: "This feedback link has expired.",
+      });
+    }
+
+    if (feedbackToken.usedAt) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Feedback has already been submitted using this link.",
+      });
+    }
+
+    const selectedStudent =
+      await SelectedStudents.findOne({
+        gmail: feedbackToken.studentGmail
+          .trim()
+          .toLowerCase(),
+      });
+
+    if (!selectedStudent) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Student is not authorized for this feedback.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+
+      feedback: {
+        department:
+          feedbackToken.department,
+
+        level:
+          feedbackToken.level ||
+          selectedStudent.level ||
+          "",
+
+        section:
+          feedbackToken.section ||
+          selectedStudent.section ||
+          "",
+
+        facultyId:
+          feedbackToken.facultyId,
+
+        facultyName:
+          feedbackToken.facultyName,
+
+        subject:
+          feedbackToken.subject,
+
+        lectureTime:
+          feedbackToken.lectureTime,
+
+        lectureEndTime:
+          feedbackToken.lectureEndTime,
+      },
+    });
+
+  } catch (error) {
+    console.error(
+      "Verify feedback token error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 // =========================================================
 // GET ALL FEEDBACK
 // =========================================================
@@ -1494,4 +1650,5 @@ module.exports = {
   sendFeedbackInvite,
   getFacultyFeedbackView,
   getFacultyHistory,
+  verifyFeedbackToken,
 };

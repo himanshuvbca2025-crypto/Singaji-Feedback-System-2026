@@ -82,85 +82,123 @@ function AdminDashboard() {
 }, []);
 
 
+useEffect(() => {
+  const fetchFeedbackReport = async () => {
+    try {
+      const today = new Date().toLocaleDateString("en-CA");
 
-  useEffect(() => {
-    const fetchFeedbackReport = async () => {
-      try {
-        
-       const today = new Date()
-  .toLocaleDateString("en-CA");
-  
+      // =====================================================
+      // 1. TODAY'S REPORT
+      //    Used only for top KPI cards
+      // =====================================================
 
-const response = await fetch(
-  `http://localhost:5000/api/reports?date=${today}`,
-  {
-    headers: {
-      Authorization: `Bearer ${authUser?.token}`,
-    },
-  }
-);
-
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          console.error(data.message);
-          return;
+      const todayResponse = await fetch(
+        `http://localhost:5000/api/reports?date=${today}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authUser?.token}`,
+          },
         }
+      );
 
-        if (data.success) {
-          setCampusCompletion(
-            data.campusFeedbackCompletion || {
-              percentage: 0,
-              submitted: 0,
-              designated: 0,
-            }
-          );
+      const todayData = await todayResponse.json();
 
-          setOverallReport(
-            data.overall || {
-              overallRating: 0,
-              totalSubmissions: 0,
-              lowScoreAlerts: 0,
-            }
-          );
-          const topRated = data.topRatedFaculty.map(
-            (faculty, index) => ({
-              id: index + 1,
-              student: faculty.department,
-              faculty: faculty.facultyName,
-              rating: faculty.rating,
-              date: "",
-              subject: faculty.subject || "Subject not available",
-            })
-          );
+      if (!todayResponse.ok) {
+        console.error(todayData.message);
+        return;
+      }
 
-          const lowRated = data.lowScoreDetails.map(
-            (faculty, index) => ({
-              id: index + 1,
-              faculty: faculty.facultyName,
-              department: faculty.department,
-              rating: faculty.rating,
-              date: faculty.date
-                ? new Date(faculty.date).toLocaleDateString()
-                : "",
-              course: faculty.subject || "Subject not available",
-            })
-          );
+      // =====================================================
+      // 2. ALL-TIME REPORT
+      //    Used only for bottom sections
+      // =====================================================
 
-          setRecentFeedback(topRated);
-          setLowScoreFeedback(lowRated);
+      const overallResponse = await fetch(
+        "http://localhost:5000/api/reports",
+        {
+          headers: {
+            Authorization: `Bearer ${authUser?.token}`,
+          },
         }
-      } catch (error) {
-        console.error(
-          "Error fetching feedback report:",
-          error
+      );
+
+      const overallData = await overallResponse.json();
+
+      if (!overallResponse.ok) {
+        console.error(overallData.message);
+        return;
+      }
+
+      // =====================================================
+      // 3. TOP CARDS → TODAY'S DATA
+      // =====================================================
+
+      if (todayData.success) {
+        setCampusCompletion(
+          todayData.campusFeedbackCompletion || {
+            percentage: 0,
+            submitted: 0,
+            designated: 0,
+          }
+        );
+
+        setOverallReport(
+          todayData.overall || {
+            overallRating: 0,
+            totalSubmissions: 0,
+            lowScoreAlerts: 0,
+          }
         );
       }
-    };
 
-    fetchFeedbackReport();
-  }, []);
+      // =====================================================
+      // 4. LOWER SECTIONS → OVERALL / ALL-TIME DATA
+      // =====================================================
+
+      if (overallData.success) {
+        const topRated = (
+          overallData.topRatedFaculty || []
+        ).map((faculty, index) => ({
+          id: index + 1,
+          student: faculty.department,
+          faculty: faculty.facultyName,
+          rating: faculty.rating,
+          date: "",
+          subject:
+            faculty.subject ||
+            "Subject not available",
+        }));
+
+        const lowRated = (
+          overallData.lowScoreDetails || []
+        ).map((faculty, index) => ({
+          id: index + 1,
+          faculty: faculty.facultyName,
+          department: faculty.department,
+          rating: faculty.rating,
+          date: faculty.date
+            ? new Date(
+                faculty.date
+              ).toLocaleDateString()
+            : "",
+          course:
+            faculty.subject ||
+            "Subject not available",
+        }));
+
+        setRecentFeedback(topRated);
+        setLowScoreFeedback(lowRated);
+      }
+    } catch (error) {
+      console.error(
+        "Error fetching feedback report:",
+        error
+      );
+    }
+  };
+
+  fetchFeedbackReport();
+},[]);
 
   return (
     <div className="admin-dashboard">
