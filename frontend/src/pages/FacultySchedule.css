@@ -182,6 +182,11 @@
     font-style: italic;
 }
 
+.my-assigned-slot {
+    background: #fff7ed !important;
+    border: 2px solid #fdba74 !important;
+}
+
 /* RESPONSIVE */
 @media (max-width: 1024px) {
     .faculty-summary-grid {

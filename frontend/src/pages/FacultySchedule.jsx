@@ -44,9 +44,30 @@ function FacultySchedule() {
         }
 
         const dbSchedules = data.schedules || [];
-        setSchedules(dbSchedules);
 
-        // All rows of the day use the timing from the first schedule.
+        // Filter schedules so the faculty only sees rows where their email/name matches one of the assigned slots
+        const userEmail = user?.email?.toLowerCase().trim() || "";
+        const userName = user?.name?.toLowerCase().trim() || "";
+
+        const mySchedules = dbSchedules.filter((row) => {
+          const slot1Match =
+            (row.slot1?.facultyId && row.slot1.facultyId.toLowerCase() === userEmail) ||
+            (row.slot1?.facultyName && row.slot1.facultyName.toLowerCase().includes(userName));
+
+          const slot2Match =
+            (row.slot2?.facultyId && row.slot2.facultyId.toLowerCase() === userEmail) ||
+            (row.slot2?.facultyName && row.slot2.facultyName.toLowerCase().includes(userName));
+
+          const slot3Match =
+            (row.slot3?.facultyId && row.slot3.facultyId.toLowerCase() === userEmail) ||
+            (row.slot3?.facultyName && row.slot3.facultyName.toLowerCase().includes(userName));
+
+          return slot1Match || slot2Match || slot3Match;
+        });
+
+        setSchedules(mySchedules);
+
+        // Timings set from the department's first schedule if available
         if (dbSchedules.length > 0) {
           const firstSchedule = dbSchedules[0];
 
@@ -87,7 +108,7 @@ function FacultySchedule() {
     };
 
     fetchTodaySchedules();
-  }, [user?.department]);
+  }, [user?.department, user?.email, user?.name]);
 
   const today = new Date();
 
@@ -113,7 +134,7 @@ function FacultySchedule() {
   const handleShareSchedule = async () => {
     let shareText =
       "SANT SINGAJI INSTITUTE OF SCIENCE AND MANAGEMENT, SANDALPUR\n";
-    shareText += `Date: ${currentDate} | Day: ${currentDay}\n`;
+    shareText += `My Personal Schedule | Date: ${currentDate} | Day: ${currentDay}\n`;
     shareText += "====================================\n\n";
 
     schedules.forEach((row) => {
@@ -163,7 +184,7 @@ function FacultySchedule() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "Today's Complete Academic Schedule",
+          title: "My Academic Schedule",
           text: shareText,
         });
       } catch (error) {
@@ -172,18 +193,28 @@ function FacultySchedule() {
     } else {
       try {
         await navigator.clipboard.writeText(shareText);
-        alert("Complete schedule copied to clipboard!");
+        alert("Personal schedule copied to clipboard!");
       } catch (error) {
         alert("Failed to copy schedule to clipboard.");
       }
     }
   };
 
+  const userEmail = user?.email?.toLowerCase().trim() || "";
+  const userName = user?.name?.toLowerCase().trim() || "";
+
+  const isMySlot = (slot) => {
+    if (!slot) return false;
+    const matchEmail = slot.facultyId && slot.facultyId.toLowerCase() === userEmail;
+    const matchName = slot.facultyName && slot.facultyName.toLowerCase().includes(userName);
+    return matchEmail || matchName;
+  };
+
   return (
     <div className="faculty-page">
       <div className="faculty-page-header">
-        <h1>My Schedule</h1>
-        <p>View and share the complete academic timetable for today.</p>
+        <h1>My Personal Schedule</h1>
+        <p>Lectures assigned to {user?.name || user?.email} for today.</p>
       </div>
 
       <div className="timetable-wrapper">
@@ -193,7 +224,7 @@ function FacultySchedule() {
               Sant Singaji Institute of Science and Management, Sandalpur
             </h2>
             <p>
-              Today • Date: {currentDate} • {currentDay}
+              Faculty: <strong>{user?.name || user?.email}</strong> • Date: {currentDate} ({currentDay})
             </p>
           </div>
 
@@ -201,7 +232,7 @@ function FacultySchedule() {
             className="btn-share-schedule"
             onClick={handleShareSchedule}
           >
-            <span>📤</span> Share Schedule
+            <span>📤</span> Share My Schedule
           </button>
         </div>
 
@@ -242,14 +273,12 @@ function FacultySchedule() {
               {schedules.map((row, index) => (
                 <tr key={row._id}>
                   <td>{index + 1}</td>
-
                   <td>{row.class}</td>
-
                   <td>{row.groups?.join(", ") || "-"}</td>
-
                   <td>{row.strength}</td>
 
-                  <td>
+                  {/* Slot 1 */}
+                  <td className={isMySlot(row.slot1) ? "my-assigned-slot" : ""}>
                     {row.slot1?.subject ? (
                       <>
                         <div className="slot-subject">
@@ -273,7 +302,8 @@ function FacultySchedule() {
                     </td>
                   )}
 
-                  <td>
+                  {/* Slot 2 */}
+                  <td className={isMySlot(row.slot2) ? "my-assigned-slot" : ""}>
                     {row.slot2?.subject ? (
                       <>
                         <div className="slot-subject">
@@ -297,7 +327,8 @@ function FacultySchedule() {
                     </td>
                   )}
 
-                  <td>
+                  {/* Slot 3 */}
+                  <td className={isMySlot(row.slot3) ? "my-assigned-slot" : ""}>
                     {row.slot3?.subject ? (
                       <>
                         <div className="slot-subject">
@@ -317,7 +348,7 @@ function FacultySchedule() {
               {schedules.length === 0 && (
                 <tr>
                   <td colSpan="9" className="empty-schedule">
-                    No schedule available for today.
+                    No lectures assigned to you today ({user?.name || user?.email}).
                   </td>
                 </tr>
               )}
