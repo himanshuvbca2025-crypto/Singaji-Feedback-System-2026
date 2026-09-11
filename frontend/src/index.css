@@ -108,7 +108,6 @@ body {
 
 .btn-view:hover {
   background: #4f46e5;
-  transform: translateY(-1px);
 }
 
 /* Delete */
@@ -123,7 +122,6 @@ body {
   border-color: #dc2626;
   color: #ffffff;
   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
-  transform: translateY(-1px);
 }
 
 /* Modal Primary Danger Action Button */
@@ -146,7 +144,6 @@ body {
 
 .btn-danger:hover {
   background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-  transform: translateY(-2px);
 }
 
 /* Custom Scrollbars */

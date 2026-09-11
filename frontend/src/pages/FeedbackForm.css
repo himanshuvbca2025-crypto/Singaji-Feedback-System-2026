@@ -139,8 +139,7 @@
 
 .give-feedback-btn:hover {
   background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.45);
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.4);
 }
 
 .questions-form {
@@ -186,7 +185,6 @@
 }
 
 .star-option-btn:hover {
-  transform: scale(1.25);
   color: #f59e0b;
 }
 
@@ -241,8 +239,7 @@
 
 .submit-feedback-btn:hover {
   background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.45);
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.4);
 }
 
 .submission-success-card {

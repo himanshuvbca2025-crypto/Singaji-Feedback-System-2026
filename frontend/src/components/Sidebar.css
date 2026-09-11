@@ -175,10 +175,7 @@
 
 .sidebar-link:hover {
   background: #f1f5f9;
-
   color: var(--text-primary, #0f172a);
-
-  transform: translateX(2px);
 }
 
 

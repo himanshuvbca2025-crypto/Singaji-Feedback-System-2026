@@ -57,8 +57,7 @@
 .faculty-department-card:hover {
     background: #ffffff;
     border-color: #cbd5e1;
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-xl, 0 20px 30px -6px rgba(15, 23, 42, 0.16));
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
 }
 
 .faculty-department-image {
@@ -67,11 +66,6 @@
     object-fit: contain;
     border-radius: 50%;
     box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    transition: transform 0.25s ease;
-}
-
-.faculty-department-card:hover .faculty-department-image {
-    transform: scale(1.05);
 }
 
 .faculty-department-card h2 {
@@ -136,8 +130,7 @@
 
 .add-faculty-button:hover {
     background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(249, 115, 22, 0.4);
+    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
 }
 
 /* ========================================
@@ -164,9 +157,8 @@
 }
 
 .faculty-row:hover {
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-sm);
     border-color: #cbd5e1;
-    transform: translateY(-2px);
 }
 
 .faculty-avatar {
@@ -252,7 +244,6 @@
 
 .btn-view:hover {
     background: #4f46e5;
-    transform: translateY(-1px);
 }
 
 .faculty-count {

@@ -50,15 +50,14 @@
 
 .add-btn:hover {
   background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.4);
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
 }
 
 .questions-list {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-width: 950px;
+  width: 100%;
 }
 
 .question-card {
@@ -71,12 +70,13 @@
   border-radius: 18px;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .question-card:hover {
   border-color: #cbd5e1;
-  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
-  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
 }
 
 .q-number-badge {
@@ -140,4 +140,24 @@
   background: #fef2f2;
   color: #ef4444;
   border: 1px solid #fecaca;
+}
+
+.q-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .question-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .q-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }

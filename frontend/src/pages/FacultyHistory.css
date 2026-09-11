@@ -109,12 +109,8 @@
 }
 
 .kpi-card:hover {
-    background: rgba(255, 255, 255, 0.22);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-color: rgba(255, 255, 255, 0.5);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.10);
-    transform: translateY(-3px);
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
 }
 
 .kpi-label {
