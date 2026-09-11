@@ -176,3 +176,29 @@ body {
 .fade-in {
   animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* Star & Rating Utilities */
+.star-display, .star-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.star-on, .star-filled {
+  color: #f59e0b;
+  display: inline-flex;
+}
+
+.star-off, .star-empty {
+  color: #d1d5db;
+  display: inline-flex;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}

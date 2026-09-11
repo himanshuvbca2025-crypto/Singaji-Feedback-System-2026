@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { FiEdit3, FiClock } from "react-icons/fi";
 import ssecLogo from "../assets/rename.png";
 import "./StudentDashboard.css";
 
@@ -29,7 +30,9 @@ function StudentDashboard() {
 
         <div className="student-card-grid">
           <div className="student-card">
-            <h3>📝 Give Feedback</h3>
+            <h3 style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+              <FiEdit3 style={{ color: "#ea580c" }} /> Give Feedback
+            </h3>
             <p>Complete your evaluation for today's active lectures.</p>
             <Link to="/student/feedback" className="student-card-btn">
               Start Feedback
@@ -37,7 +40,9 @@ function StudentDashboard() {
           </div>
 
           <div className="student-card">
-            <h3>📜 Feedback History</h3>
+            <h3 style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+              <FiClock style={{ color: "#ea580c" }} /> Feedback History
+            </h3>
             <p>View your past submitted feedback responses.</p>
             <Link to="/student/history" className="student-card-btn secondary">
               View History

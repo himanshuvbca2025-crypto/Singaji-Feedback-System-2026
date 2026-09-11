@@ -1,5 +1,14 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { FaStar } from "react-icons/fa";
+import {
+  FiAlertTriangle,
+  FiMail,
+  FiClock,
+  FiLock,
+  FiArrowRight,
+  FiCheckCircle,
+} from "react-icons/fi";
 import ssecLogo from "../assets/rename.png";
 import "./FeedbackForm.css";
 
@@ -423,7 +432,7 @@ function FeedbackForm() {
         <main className="feedback-form-main">
           <div className="feedback-card-wrapper">
             <div className="feedback-error-banner">
-              ⚠️{" "}
+              <FiAlertTriangle style={{ marginRight: "6px", verticalAlign: "-2px" }} />
               {validationError ||
                 "Invalid feedback link."}
             </div>
@@ -470,7 +479,8 @@ function FeedbackForm() {
 
             <div className="email-invitation-banner">
               <span className="email-badge">
-                📩 Lecture Completed Notification
+                <FiMail style={{ marginRight: "6px", verticalAlign: "-2px" }} />
+                Lecture Completed Notification
               </span>
 
               <h2>Your Feedback Matters!</h2>
@@ -520,7 +530,8 @@ function FeedbackForm() {
                 </span>
 
                 <strong className="meta-val">
-                  ⏰ {timeParam} ({dateParam})
+                  <FiClock style={{ marginRight: "6px", verticalAlign: "-2px" }} />
+                  {timeParam} ({dateParam})
                 </strong>
               </div>
 
@@ -529,15 +540,17 @@ function FeedbackForm() {
             <div className="invite-footer">
 
               <p className="anon-note">
-                🔒 Your feedback is 100% anonymous.
+                <FiLock style={{ marginRight: "6px", verticalAlign: "-2px" }} />
+                Your feedback is 100% anonymous.
                 Student identity is never shared.
               </p>
 
               <button
                 className="student-card-btn give-feedback-btn"
                 onClick={() => setStep("form")}
+                style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
               >
-                Give Feedback →
+                Give Feedback <FiArrowRight />
               </button>
 
             </div>
@@ -568,7 +581,8 @@ function FeedbackForm() {
 
             {validationError && (
               <div className="feedback-error-banner">
-                ⚠️ {validationError}
+                <FiAlertTriangle style={{ marginRight: "6px", verticalAlign: "-2px" }} />
+                {validationError}
               </div>
             )}
 
@@ -634,7 +648,7 @@ function FeedbackForm() {
                                 : "Excellent"
                             }`}
                           >
-                            ★
+                            <FaStar />
                           </button>
                         )
                       )}
@@ -713,7 +727,7 @@ function FeedbackForm() {
           <div className="submission-success-card">
 
             <div className="success-icon">
-              ✓
+              <FiCheckCircle size={36} />
             </div>
 
             <h2>

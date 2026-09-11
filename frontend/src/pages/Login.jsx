@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FiAlertCircle } from "react-icons/fi";
 import useAuth from "../hooks/useAuth.js";
 
 import ssecLogo from "../assets/rename.png";
@@ -135,7 +136,8 @@ function Login() {
 
             {error && (
               <div className="login-error">
-                <span>⚠</span> {error}
+                <FiAlertCircle size={16} style={{ flexShrink: 0 }} />
+                <span>{error}</span>
               </div>
             )}
 

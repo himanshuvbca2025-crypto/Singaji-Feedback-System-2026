@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { FiCalendar, FiClock, FiUser, FiHome, FiMapPin, FiTrash2 } from "react-icons/fi";
 import Modal from "../components/Modal.jsx";
 import "./ManageLectures.css";
 
@@ -225,20 +226,30 @@ function ManageLectures() {
             <div key={lec.id} className="lecture-row-card">
               <div className="lecture-main-info">
                 <div className="lecture-time-badge">
-                  <span>📅 {formatDate(lec.date)}</span>
-                  <strong>⏰ {lec.time}</strong>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                    <FiCalendar /> {formatDate(lec.date)}
+                  </span>
+                  <strong style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                    <FiClock /> {lec.time}
+                  </strong>
                 </div>
 
                 <div className="lecture-details">
                   <h3>{lec.subject}</h3>
 
                   <p>
-                    👨‍🏫 <strong>{lec.faculty}</strong> • 🏛{" "}
-                    {lec.department} Department
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                      <FiUser /> <strong>{lec.faculty}</strong>
+                    </span>
+                    {" • "}
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                      <FiHome /> {lec.department} Department
+                    </span>
                   </p>
 
                   <span className="room-tag">
-                    📍 Room / Venue: {lec.room}
+                    <FiMapPin style={{ marginRight: "5px", verticalAlign: "-2px" }} />
+                    Room / Venue: {lec.room}
                   </span>
                 </div>
               </div>
@@ -532,7 +543,9 @@ function ManageLectures() {
         title="Delete Lecture"
       >
         <div className="confirm-delete-body">
-          <span className="confirm-icon">🗑️</span>
+          <span className="confirm-icon">
+            <FiTrash2 />
+          </span>
 
           <p>
             Are you sure you want to cancel and delete the lecture{" "}

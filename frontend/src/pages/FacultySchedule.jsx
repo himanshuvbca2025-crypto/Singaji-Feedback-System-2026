@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { FiShare2 } from "react-icons/fi";
 import useAuth from "../hooks/useAuth.js";
 import "./FacultySchedule.css";
 
@@ -231,8 +232,9 @@ function FacultySchedule() {
           <button
             className="btn-share-schedule"
             onClick={handleShareSchedule}
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
           >
-            <span>📤</span> Share My Schedule
+            <FiShare2 /> Share My Schedule
           </button>
         </div>
 

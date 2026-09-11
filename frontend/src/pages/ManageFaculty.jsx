@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { FiArrowLeft, FiPlus, FiTrash2 } from "react-icons/fi";
 
 import itegImage from "../assets/iteg.png";
 import megImage from "../assets/meg.png";
@@ -350,7 +351,8 @@ function ManageFaculty() {
       {selectedDepartment && (
         <section>
           <button className="faculty-back-button" onClick={handleBack}>
-            ← Back to Departments
+            <FiArrowLeft style={{ marginRight: "6px", verticalAlign: "-2px" }} />
+            Back to Departments
           </button>
 
           <div className="faculty-header">
@@ -363,7 +365,8 @@ function ManageFaculty() {
               className="add-faculty-button"
               onClick={() => setIsAddModalOpen(true)}
             >
-              + Add Faculty
+              <FiPlus style={{ marginRight: "6px", verticalAlign: "-2px" }} />
+              Add Faculty
             </button>
           </div>
 
@@ -634,7 +637,9 @@ function ManageFaculty() {
         title="Delete Faculty Member"
       >
         <div className="confirm-delete-body">
-          <span className="confirm-icon">🗑️</span>
+          <span className="confirm-icon">
+            <FiTrash2 />
+          </span>
           <p>
             Are you sure you want to delete{" "}
             <strong>{deletingFaculty?.name}</strong>?

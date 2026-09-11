@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { FiPlus, FiTrash2 } from "react-icons/fi";
 import Modal from "../components/Modal.jsx";
 import "./ManageQuestions.css";
 
@@ -232,7 +233,8 @@ const authUser = JSON.parse(localStorage.getItem("authUser"));
         </div>
 
         <button className="add-btn" onClick={() => setIsAddModalOpen(true)}>
-          + Add Question
+          <FiPlus style={{ marginRight: "6px", verticalAlign: "-2px" }} />
+          Add Question
         </button>
       </div>
 
@@ -418,7 +420,9 @@ const authUser = JSON.parse(localStorage.getItem("authUser"));
         title="Delete Question"
       >
         <div className="confirm-delete-body">
-          <span className="confirm-icon">🗑️</span>
+          <span className="confirm-icon">
+            <FiTrash2 />
+          </span>
           <p>
             Are you sure you want to delete Question {editingQuestion?.number}?
             <br />

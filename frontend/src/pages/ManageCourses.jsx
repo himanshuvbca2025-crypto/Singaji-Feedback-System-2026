@@ -411,7 +411,7 @@ function ManageCourses() {
   //       title="Delete Course"
   //     >
   //       <div className="confirm-delete-body">
-  //         <span className="confirm-icon">🗑️</span>
+  //         <span className="confirm-icon"></span>
   //         <p>
   //           Are you sure you want to delete{" "}
   //           <strong>{activeCourse?.name}</strong>?

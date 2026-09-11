@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { FaStar } from "react-icons/fa";
+import { FiUser, FiClock, FiBookOpen, FiUsers, FiChevronUp, FiChevronDown } from "react-icons/fi";
 import { mockFaculties } from "../data/mockData.js";
 import "./FacultyFeedbackView.css";
 
@@ -10,7 +12,7 @@ function StarDisplay({ value }) {
           key={i}
           className={i <= Math.round(value) ? "star-on" : "star-off"}
         >
-          ★
+          <FaStar />
         </span>
       ))}
     </div>
@@ -47,7 +49,9 @@ function FacultyFeedbackView() {
           </p>
         </div>
         <div className="ffv-faculty-pill">
-          <span>👨‍🏫 {faculty.name}</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <FiUser /> {faculty.name}
+          </span>
           <span className="ffv-dept-badge">{faculty.department}</span>
         </div>
       </div>
@@ -55,7 +59,10 @@ function FacultyFeedbackView() {
       <div className="ffv-stats-strip">
         <div className="ffv-stat-card">
           <span className="label">Overall Feedback Rating</span>
-          <strong className="val">⭐ {faculty.overallRating} / 5.0</strong>
+          <strong className="val">
+            <FaStar style={{ color: "#f59e0b", marginRight: "5px", verticalAlign: "-2px" }} />
+            {faculty.overallRating} / 5.0
+          </strong>
         </div>
         <div className="ffv-stat-card">
           <span className="label">Total Responses</span>
@@ -79,9 +86,15 @@ function FacultyFeedbackView() {
                   <span className="ffv-lec-tag">{lecture.number}</span>
                   <h2>{lecture.subject}</h2>
                   <div className="ffv-lec-details">
-                    <span>⏰ {lecture.time}</span>
-                    <span>🏫 {lecture.className} ({lecture.group})</span>
-                    <span>👥 Strength: {lecture.strength}</span>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                      <FiClock /> {lecture.time}
+                    </span>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                      <FiBookOpen /> {lecture.className} ({lecture.group})
+                    </span>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                      <FiUsers /> Strength: {lecture.strength}
+                    </span>
                   </div>
                 </div>
 
@@ -136,7 +149,15 @@ function FacultyFeedbackView() {
                     className="ffv-expand-btn"
                     onClick={() => toggleMetrics(lecture.lectureId)}
                   >
-                    {isExpanded ? "Show Top 5 Metrics ▲" : "View 10 Metrics ▼"}
+                    {isExpanded ? (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                        Show Top 5 Metrics <FiChevronUp />
+                      </span>
+                    ) : (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                        View 10 Metrics <FiChevronDown />
+                      </span>
+                    )}
                   </button>
                 )}
               </div>
