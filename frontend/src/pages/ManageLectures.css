@@ -170,6 +170,52 @@
     margin-top: 10px;
 }
 
+/* Date Filter Only */
+.lecture-date-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.lecture-date-filter label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.lecture-date-filter input {
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    color: #374151;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.lecture-date-filter input:hover {
+    border-color: #9ca3af;
+}
+
+.lecture-date-filter input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .lecture-date-filter {
+        width: 100%;
+    }
+
+    .lecture-date-filter input {
+        flex: 1;
+    }
+}
 
 /* RESPONSIVE */
 

@@ -4,12 +4,9 @@ const Schedule = require("../models/Schedule");
 const SelectedStudents = require('../models/SeletedStudents');
 const crypto = require("crypto");
 const FeedbackToken = require("../models/FeedbackToken");
-// =========================================================
+const Faculty = require("../models/Faculty");
+
 // SUBMIT FEEDBACK
-// =========================================================
-// =========================================================
-// SUBMIT FEEDBACK
-// =========================================================
 
 const submitFeedback = async (req, res) => {
   try {
@@ -1736,6 +1733,575 @@ function escapeRegex(value) {
 
 
 // =========================================================
+// GET LOGGED-IN FACULTY'S FEEDBACK
+// =========================================================
+// GET /api/feedback/my-feedback?date=2026-09-11
+// =========================================================
+// =========================================================
+// GET LOGGED-IN FACULTY'S FEEDBACK
+// =========================================================
+// GET /api/feedback/my-feedback?date=2026-09-11
+// =========================================================
+
+const getMyFeedback = async (req, res) => {
+  try {
+    const { date } = req.query;
+
+    // -----------------------------------------------------
+    // 1. DATE REQUIRED
+    // -----------------------------------------------------
+
+    if (!date) {
+      return res.status(400).json({
+        success: false,
+        message: "Date is required.",
+      });
+    }
+
+    // -----------------------------------------------------
+    // 2. GET LOGGED-IN FACULTY
+    // -----------------------------------------------------
+
+    const faculty = await Faculty.findById(
+      req.user.userId
+    ).lean();
+
+    if (!faculty) {
+      return res.status(404).json({
+        success: false,
+        message: "Faculty not found.",
+      });
+    }
+
+    // -----------------------------------------------------
+    // 3. DATE RANGE - INDIA TIME
+    // -----------------------------------------------------
+
+    const startOfDay = new Date(
+      `${date}T00:00:00+05:30`
+    );
+
+    const endOfDay = new Date(
+      `${date}T23:59:59.999+05:30`
+    );
+
+    // -----------------------------------------------------
+    // 4. GET SCHEDULES FOR SELECTED DATE
+    // -----------------------------------------------------
+
+    const schedules = await Schedule.find({
+      date: {
+        $gte: startOfDay,
+        $lte: endOfDay,
+      },
+    }).lean();
+
+    // -----------------------------------------------------
+    // 5. FIND LOGGED-IN FACULTY'S LECTURES
+    // -----------------------------------------------------
+
+    const facultyLectures = [];
+
+    for (const schedule of schedules) {
+      const slots = [
+        {
+          slotName: "slot1",
+          slotNumber: 1,
+          slot: schedule.slot1,
+        },
+        {
+          slotName: "slot2",
+          slotNumber: 2,
+          slot: schedule.slot2,
+        },
+        {
+          slotName: "slot3",
+          slotNumber: 3,
+          slot: schedule.slot3,
+        },
+      ];
+
+      for (const item of slots) {
+        const slot = item.slot;
+
+        // -------------------------------------------------
+        // INVALID SLOT
+        // -------------------------------------------------
+
+        if (
+          !slot ||
+          !slot.subject ||
+          !slot.facultyId ||
+          !slot.startTime ||
+          !slot.endTime
+        ) {
+          continue;
+        }
+
+        // -------------------------------------------------
+        // MATCH LOGGED-IN FACULTY USING FACULTY ID
+        // -------------------------------------------------
+
+        if (
+          String(slot.facultyId).trim() !==
+          String(faculty.facultyId).trim()
+        ) {
+          continue;
+        }
+
+        // -------------------------------------------------
+        // STORE FACULTY LECTURE
+        // -------------------------------------------------
+
+        facultyLectures.push({
+          scheduleId: schedule._id,
+
+          slotName: item.slotName,
+
+          slotNumber: item.slotNumber,
+
+          subject: String(
+            slot.subject || ""
+          ).trim(),
+
+          facultyId: String(
+            slot.facultyId || ""
+          ).trim(),
+
+          facultyName: String(
+            slot.facultyName || faculty.name || ""
+          ).trim(),
+
+          startTime: String(
+            slot.startTime || ""
+          ).trim(),
+
+          endTime: String(
+            slot.endTime || ""
+          ).trim(),
+
+          department: String(
+            schedule.department || ""
+          ).trim(),
+
+          className: String(
+            schedule.class || ""
+          ).trim(),
+
+          groups: Array.isArray(
+            schedule.groups
+          )
+            ? schedule.groups
+            : [],
+
+          strength:
+            Number(schedule.strength) || 0,
+        });
+      }
+    }
+
+    // -----------------------------------------------------
+    // 6. GET FEEDBACKS FOR LOGGED-IN FACULTY + DATE
+    // -----------------------------------------------------
+    //
+    // IMPORTANT:
+    // Feedback lecture identification will NOT use
+    // feedback.lectureTime.
+    //
+    // We use:
+    // facultyId + subject + lectureEndTime
+    // -----------------------------------------------------
+
+    const feedbacks = await Feedback.find({
+      facultyId: String(
+        faculty.facultyId
+      ).trim(),
+
+      timestamp: {
+        $gte: startOfDay,
+        $lte: endOfDay,
+      },
+    })
+      .sort({
+        timestamp: -1,
+      })
+      .lean();
+
+    // -----------------------------------------------------
+    // 7. MATCH FEEDBACK WITH LECTURES
+    // -----------------------------------------------------
+
+    const lectures = facultyLectures.map(
+      (lecture) => {
+
+        const lectureFeedbacks =
+          feedbacks.filter(
+            (feedback) => {
+
+              // =========================================
+              // FACULTY ID
+              // =========================================
+
+              const sameFaculty =
+                String(
+                  feedback.facultyId || ""
+                ).trim() ===
+                String(
+                  lecture.facultyId || ""
+                ).trim();
+
+              // =========================================
+              // SUBJECT
+              // =========================================
+
+              const feedbackSubject =
+                String(
+                  feedback.subject || ""
+                )
+                  .trim()
+                  .toLowerCase();
+
+              const lectureSubject =
+                String(
+                  lecture.subject || ""
+                )
+                  .trim()
+                  .toLowerCase();
+
+              const sameSubject =
+                feedbackSubject ===
+                lectureSubject;
+
+              // =========================================
+              // LECTURE END TIME
+              // =========================================
+              //
+              // ONLY END TIME IS USED.
+              //
+              // feedback.lectureTime is NOT used.
+              // =========================================
+
+              const feedbackEndTime =
+                String(
+                  feedback.lectureEndTime || ""
+                )
+                  .trim()
+                  .toLowerCase();
+
+              const lectureEndTime =
+                String(
+                  lecture.endTime || ""
+                )
+                  .trim()
+                  .toLowerCase();
+
+              const sameEndTime =
+                feedbackEndTime ===
+                lectureEndTime;
+
+              // =========================================
+              // FINAL MATCH
+              // =========================================
+
+              return (
+                sameFaculty &&
+                sameSubject &&
+                sameEndTime
+              );
+            }
+          );
+
+        // -------------------------------------------------
+        // CALCULATE AVERAGE RATING
+        // -------------------------------------------------
+
+        const getAverage = (
+          metricName
+        ) => {
+
+          const values =
+            lectureFeedbacks
+              .map(
+                (feedback) =>
+                  Number(
+                    feedback.metrics?.[
+                      metricName
+                    ]
+                  )
+              )
+              .filter(
+                (value) =>
+                  Number.isFinite(value) &&
+                  value >= 1 &&
+                  value <= 5
+              );
+
+          if (!values.length) {
+            return 0;
+          }
+
+          const total =
+            values.reduce(
+              (sum, value) =>
+                sum + value,
+              0
+            );
+
+          return Number(
+            (
+              total / values.length
+            ).toFixed(1)
+          );
+        };
+
+        // -------------------------------------------------
+        // RETURN LECTURE DATA
+        // -------------------------------------------------
+
+        return {
+          scheduleId:
+            lecture.scheduleId,
+
+          slotName:
+            lecture.slotName,
+
+          slotNumber:
+            lecture.slotNumber,
+
+          subject:
+            lecture.subject,
+
+          startTime:
+            lecture.startTime,
+
+          endTime:
+            lecture.endTime,
+
+          department:
+            lecture.department,
+
+          className:
+            lecture.className,
+
+          groups:
+            lecture.groups,
+
+          strength:
+            lecture.strength,
+
+          // ---------------------------------------------
+          // FEEDBACK COUNT
+          // ---------------------------------------------
+
+          feedbackCount:
+            lectureFeedbacks.length,
+
+          // ---------------------------------------------
+          // RATINGS
+          // ---------------------------------------------
+
+          ratings: {
+            Explanation:
+              getAverage(
+                "Explanation"
+              ),
+
+            Punctuality:
+              getAverage(
+                "Punctuality"
+              ),
+
+            Engagement:
+              getAverage(
+                "Engagement"
+              ),
+
+            Resolution:
+              getAverage(
+                "Resolution"
+              ),
+
+            Overall:
+              getAverage(
+                "Overall"
+              ),
+          },
+
+          // ---------------------------------------------
+          // INDIVIDUAL FEEDBACKS
+          // ---------------------------------------------
+
+          feedbacks:
+            lectureFeedbacks.map(
+              (feedback) => {
+
+                return {
+                  id:
+                    feedback._id,
+
+                  studentLevel:
+                    feedback.level || "",
+
+                  section:
+                    feedback.section || "",
+
+                  overall:
+                    Number(
+                      feedback.metrics?.Overall
+                    ) || 0,
+
+                  explanation:
+                    Number(
+                      feedback.metrics?.Explanation
+                    ) || 0,
+
+                  punctuality:
+                    Number(
+                      feedback.metrics?.Punctuality
+                    ) || 0,
+
+                  engagement:
+                    Number(
+                      feedback.metrics?.Engagement
+                    ) || 0,
+
+                  resolution:
+                    Number(
+                      feedback.metrics?.Resolution
+                    ) || 0,
+
+                  remarks:
+                    feedback.remarks || "",
+
+                  submittedAt:
+                    feedback.timestamp,
+                };
+              }
+            ),
+        };
+      }
+    );
+
+    // -----------------------------------------------------
+    // 8. SORT LECTURES BY START TIME
+    // -----------------------------------------------------
+
+    lectures.sort(
+      (a, b) =>
+        convertTimeToMinutes(
+          a.startTime
+        ) -
+        convertTimeToMinutes(
+          b.startTime
+        )
+    );
+
+    // -----------------------------------------------------
+    // 9. TOTAL FEEDBACKS
+    // -----------------------------------------------------
+
+    const totalFeedbacks =
+      lectures.reduce(
+        (sum, lecture) =>
+          sum +
+          lecture.feedbackCount,
+        0
+      );
+
+    // -----------------------------------------------------
+    // 10. OVERALL RATING
+    // -----------------------------------------------------
+
+    const allOverallRatings = [];
+
+    lectures.forEach(
+      (lecture) => {
+
+        lecture.feedbacks.forEach(
+          (feedback) => {
+
+            const rating =
+              Number(
+                feedback.overall
+              );
+
+            if (
+              Number.isFinite(rating) &&
+              rating >= 1 &&
+              rating <= 5
+            ) {
+              allOverallRatings.push(
+                rating
+              );
+            }
+          }
+        );
+      }
+    );
+
+    const averageRating =
+      allOverallRatings.length > 0
+        ? Number(
+            (
+              allOverallRatings.reduce(
+                (sum, rating) =>
+                  sum + rating,
+                0
+              ) /
+              allOverallRatings.length
+            ).toFixed(1)
+          )
+        : 0;
+
+    // -----------------------------------------------------
+    // 11. RESPONSE
+    // -----------------------------------------------------
+
+    return res.status(200).json({
+      success: true,
+
+      faculty: {
+        facultyId:
+          faculty.facultyId,
+
+        name:
+          faculty.name,
+
+        gmail:
+          faculty.gmail,
+
+        department:
+          faculty.section,
+      },
+
+      date,
+
+      totalLectures:
+        lectures.length,
+
+      totalFeedbacks,
+
+      averageRating,
+
+      lectures,
+    });
+
+  } catch (error) {
+
+    console.error(
+      "Get my feedback error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message:
+        "Failed to fetch your feedback.",
+    });
+  }
+};
+
+// =========================================================
 // EXPORTS
 // =========================================================
 module.exports = {
@@ -1746,4 +2312,5 @@ module.exports = {
   getFacultyFeedbackView,
   getFacultyHistory,
   verifyFeedbackToken,
+  getMyFeedback,
 };

@@ -216,23 +216,73 @@ const createSchedule = async (req, res) => {
   }
 };
 
+
 // =====================================================
-// Get Today's Schedules
+// Get Schedules by Date
 // =====================================================
 const getTodaySchedules = async (req, res) => {
   try {
-    const { start, end } = getTodayRange();
+    let start;
+    let end;
 
+    // =================================================
+    // If date is provided → use selected date
+    // Otherwise → use today's date
+    // =================================================
+    if (req.query.date) {
+      const selectedDate = new Date(`${req.query.date}T00:00:00`);
+
+      if (Number.isNaN(selectedDate.getTime())) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid date",
+        });
+      }
+
+      // IST = UTC + 5:30
+      const istOffset = 5.5 * 60 * 60 * 1000;
+
+      const year = selectedDate.getFullYear();
+      const month = selectedDate.getMonth();
+      const day = selectedDate.getDate();
+
+      // Start of selected date in IST
+      start = new Date(
+        Date.UTC(year, month, day, 0, 0, 0, 0) - istOffset
+      );
+
+      // Start of next date in IST
+      end = new Date(
+        Date.UTC(year, month, day + 1, 0, 0, 0, 0) - istOffset
+      );
+    } else {
+      // No date → today's schedules
+      const todayRange = getTodayRange();
+
+      start = todayRange.start;
+      end = todayRange.end;
+    }
+
+    // =================================================
+    // Build filter
+    // =================================================
     const filter = {
-      date: { $gte: start, $lt: end },
+      date: {
+        $gte: start,
+        $lt: end,
+      },
     };
 
-    // Department diya hai to us department ka data
-    // nahi diya hai to sabhi departments ka data
+    // =================================================
+    // Department filter
+    // =================================================
     if (req.query.department) {
       filter.department = req.query.department;
     }
 
+    // =================================================
+    // Fetch schedules
+    // =================================================
     const schedules = await Schedule.find(filter).sort({
       createdAt: 1,
     });
@@ -242,14 +292,15 @@ const getTodaySchedules = async (req, res) => {
       schedules,
     });
   } catch (error) {
-    console.error("Get today's schedules error:", error);
+    console.error("Get schedules error:", error);
 
     return res.status(500).json({
       success: false,
-      message: "Failed to fetch today's schedules",
+      message: "Failed to fetch schedules",
     });
   }
 };
+
 
 // =====================================================
 // Update Schedule

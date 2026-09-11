@@ -17,6 +17,7 @@ import FacultySchedule from "../pages/FacultySchedule.jsx";
 import FacultyHistory from "../pages/FacultyHistory.jsx";
 import FacultyFeedbackView from "../pages/FacultyFeedbackView.jsx";
 import FacultyProfile from "../pages/FacultyProfile.jsx";
+import FacultyFeedback from "../pages/FacultyFeedback.jsx";
 
 import AdminDashboard from "../pages/AdminDashboard.jsx";
 import ManageStudents from "../pages/ManageStudents.jsx";
@@ -102,6 +103,13 @@ function AppRoutes() {
             path="schedule"
             element={<FacultySchedule />}
           />
+
+           {/* Faculty Feedback */}
+            <Route
+            path="feedback"
+              element={<FacultyFeedback />}
+            />
+
 
           {/* Faculty Profile */}
           <Route

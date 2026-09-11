@@ -6,6 +6,10 @@ function ManageLectures() {
   const [lectures, setLectures] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [selectedDate, setSelectedDate] = useState(
+  new Date().toLocaleDateString("en-CA")
+);
+
   const departments = ["ITEG", "MEG", "BEG", "B.Tech"];
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -33,7 +37,7 @@ function ManageLectures() {
         setLoading(true);
 
         const response = await fetch(
-          "http://localhost:5000/api/schedules/today",
+          `http://localhost:5000/api/schedules/today?date=${selectedDate}`,
           {
               headers: {
                 Authorization: `Bearer ${authUser?.token}`,
@@ -100,7 +104,7 @@ function ManageLectures() {
     };
 
     fetchLectures();
-  }, []);
+  }, [selectedDate]);
 
   // ---------------------------------------
   // LECTURE STATUS
@@ -208,14 +212,25 @@ function ManageLectures() {
 
   return (
     <div className="manage-lectures-page">
-      <div className="lectures-header">
-        <div>
-          <h1>Manage Daily Lectures</h1>
-          <p>
-            Schedule, manage classrooms, and track active lecture status.
-          </p>
-        </div>
-      </div>
+     <div className="lectures-header">
+  <div>
+    <h1>Manage Lectures</h1>
+    <p>
+      Schedule, manage classrooms, and track active lecture status.
+    </p>
+  </div>
+
+  <div className="lecture-date-filter">
+    <label htmlFor="lecture-date">Select Date</label>
+
+    <input
+      id="lecture-date"
+      type="date"
+      value={selectedDate}
+      onChange={(e) => setSelectedDate(e.target.value)}
+    />
+  </div>
+</div>
 
       <div className="lectures-list">
         {loading ? (
@@ -246,8 +261,8 @@ function ManageLectures() {
           ))
         ) : (
           <div className="no-data-box">
-            No lectures scheduled for today.
-          </div>
+            No lectures scheduled for {formatDate(selectedDate)}.
+        </div>
         )}
       </div>
 

@@ -11,6 +11,7 @@ const {
   getFacultyFeedbackView,
   getFacultyHistory,
   verifyFeedbackToken,
+  getMyFeedback,
 } = require('../controllers/feedbackController');
 
 const router = express.Router();
@@ -33,6 +34,13 @@ router.get(
   protect,
   authorize("Admin"),
   getFacultyFeedbackView
+);
+
+router.get(
+  "/my-feedback",
+  protect,
+  authorize("Faculty"),
+  getMyFeedback
 );
 
 router.get(
