@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
-const FeedbackToken = require("../models/FeedbackToken.js");
+const FeedbackToken = require("../models/FeedbackToken");
 
 const transporter = nodemailer.createTransport({
   service: "gmail",

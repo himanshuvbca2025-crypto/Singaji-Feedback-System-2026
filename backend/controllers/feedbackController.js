@@ -1,5 +1,5 @@
 
-const Feedback = require("../models/feedback");
+const Feedback = require("../models/Feedback");
 const Schedule = require("../models/Schedule");
 const SelectedStudents = require('../models/SeletedStudents');
 const crypto = require("crypto");

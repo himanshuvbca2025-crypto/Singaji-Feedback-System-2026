@@ -1,4 +1,4 @@
-const Feedback = require('../models/feedback');
+const Feedback = require('../models/Feedback');
 const SelectedStudents = require('../models/SeletedStudents');
 
 // @desc    Get complete reports
