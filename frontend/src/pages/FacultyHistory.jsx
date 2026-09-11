@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { FaStar } from "react-icons/fa";
+import { FiArrowLeft, FiMail } from "react-icons/fi";
 import "./FacultyHistory.css";
 
 function FacultyHistory() {
@@ -216,7 +218,8 @@ function FacultyHistory() {
             navigate("/admin/faculty")
           }
         >
-          ← Back to Faculty List
+          <FiArrowLeft style={{ marginRight: "6px", verticalAlign: "-2px" }} />
+          Back to Faculty List
         </button>
 
         <div className="history-section-card">
@@ -239,7 +242,8 @@ function FacultyHistory() {
             navigate("/admin/faculty")
           }
         >
-          ← Back to Faculty List
+          <FiArrowLeft style={{ marginRight: "6px", verticalAlign: "-2px" }} />
+          Back to Faculty List
         </button>
 
         <div className="history-section-card">
@@ -350,7 +354,8 @@ function FacultyHistory() {
           navigate("/admin/faculty")
         }
       >
-        ← Back to Faculty List
+        <FiArrowLeft style={{ marginRight: "6px", verticalAlign: "-2px" }} />
+        Back to Faculty List
       </button>
 
       {/* =====================================================
@@ -380,7 +385,8 @@ function FacultyHistory() {
           </p>
 
           <p className="profile-email">
-            ✉ {faculty.email}
+            <FiMail style={{ marginRight: "6px", verticalAlign: "-2px" }} />
+            {faculty.email}
           </p>
         </div>
       </div>
@@ -435,7 +441,7 @@ function FacultyHistory() {
           </span>
 
           <span className="kpi-value">
-            ⭐{" "}
+            <FaStar style={{ color: "#f59e0b", marginRight: "6px", verticalAlign: "-2px" }} />
             {Number(
               historyData.averageScore ||
                 0
@@ -532,13 +538,12 @@ function FacultyHistory() {
                         )}
                       </span>
 
-                      <span className="comment-rating">
-                        {"★".repeat(
-                          Math.round(
-                            rating
-                          )
-                        )}
-
+                      <span className="comment-rating" style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                        <span style={{ display: "inline-flex", gap: "2px", color: "#f59e0b" }}>
+                          {[...Array(Math.max(1, Math.min(5, Math.round(rating))))].map((_, i) => (
+                            <FaStar key={i} size={12} />
+                          ))}
+                        </span>
                         {" "}
                         (
                         {rating.toFixed(

@@ -40,9 +40,8 @@
 }
 
 .faculty-stat-card:hover {
-    transform: translateY(-2px);
-    border-color: #d1d5db;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
 }
 
 .stat-label {
@@ -111,8 +110,7 @@
 
 .btn-share-schedule:hover {
     background: linear-gradient(135deg, #c2410c 0%, #b45309 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(234, 88, 12, 0.35);
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
 }
 
 /* TIMETABLE TABLE */

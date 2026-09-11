@@ -58,8 +58,7 @@
 
 .department-card:hover {
   border-color: #cbd5e1;
-  box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.12);
-  transform: translateY(-4px);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
 }
 
 .department-image {
@@ -68,11 +67,6 @@
   object-fit: contain;
   border-radius: 50%;
   box-shadow: 0 3px 10px rgba(0,0,0,0.06);
-  transition: transform 0.25s ease;
-}
-
-.department-card:hover .department-image {
-  transform: scale(1.06);
 }
 
 .department-card h2 {
@@ -141,8 +135,7 @@
 
 .level-card:hover {
   border-color: #cbd5e1;
-  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
-  transform: translateY(-3px);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
 }
 
 .level-badge {
@@ -283,8 +276,7 @@
 
 .save-button:hover:not(:disabled) {
   background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(249, 115, 22, 0.4);
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
 }
 
 .save-button:disabled {
@@ -562,7 +554,6 @@
   background: #dc2626;
   color: #ffffff;
   border-color: #dc2626;
-  transform: scale(1.04);
 }
 
 /* ========================================

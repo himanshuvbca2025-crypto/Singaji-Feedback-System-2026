@@ -1,4 +1,15 @@
 import { useEffect, useState } from "react";
+import {
+  FiArrowLeft,
+  FiLoader,
+  FiEye,
+  FiEyeOff,
+  FiSave,
+  FiCheckCircle,
+  FiCheck,
+  FiX,
+  FiSearch,
+} from "react-icons/fi";
 
 import itegImage from "../assets/iteg.png";
 import megImage from "../assets/meg.png";
@@ -320,7 +331,8 @@ function ManageStudents() {
       {selectedDepartment && !selectedLevel && (
         <section>
           <button className="back-button" onClick={handleBackToDepartments}>
-            ← Back to Departments
+            <FiArrowLeft style={{ marginRight: "6px", verticalAlign: "-2px" }} />
+            Back to Departments
           </button>
 
           <div className="students-header">
@@ -349,7 +361,8 @@ function ManageStudents() {
       {selectedDepartment && selectedLevel && (
         <section>
           <button className="back-button" onClick={handleBackToLevels}>
-            ← Back to Levels
+            <FiArrowLeft style={{ marginRight: "6px", verticalAlign: "-2px" }} />
+            Back to Levels
           </button>
 
           {/* ── TOP ACTION BAR ── */}
@@ -372,11 +385,19 @@ function ManageStudents() {
                 onClick={handleViewSelectedStudents}
                 disabled={loadingSelectedStudents}
               >
-                {loadingSelectedStudents
-                  ? "⏳ Loading..."
-                  : showSelectedStudents
-                  ? "✕ Hide Selected"
-                  : "👁 View Selected Students"}
+                {loadingSelectedStudents ? (
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    <FiLoader className="spin" /> Loading...
+                  </span>
+                ) : showSelectedStudents ? (
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    <FiEyeOff /> Hide Selected
+                  </span>
+                ) : (
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    <FiEye /> View Selected Students
+                  </span>
+                )}
               </button>
 
               {/* Save button */}
@@ -385,7 +406,8 @@ function ManageStudents() {
                 onClick={handleSave}
                 disabled={selectedStudents.length !== 10}
               >
-                💾 Save Selection
+                <FiSave style={{ marginRight: "6px", verticalAlign: "-2px" }} />
+                Save Selection
               </button>
             </div>
           </div>
@@ -393,7 +415,9 @@ function ManageStudents() {
           {/* SUCCESS TOAST */}
           {saveSuccessMessage && (
             <div className="save-success-toast">
-              <span className="toast-icon">✓</span>
+              <span className="toast-icon">
+                <FiCheckCircle />
+              </span>
               <span>{saveSuccessMessage}</span>
             </div>
           )}
@@ -403,7 +427,10 @@ function ManageStudents() {
             <div className="selected-students-container">
               <div className="selected-students-header">
                 <div>
-                  <h2>✅ Currently Selected Students</h2>
+                  <h2>
+                    <FiCheckCircle style={{ color: "#10b981", marginRight: "8px", verticalAlign: "-2px" }} />
+                    Currently Selected Students
+                  </h2>
                   <p>{selectedDepartment} — Level {selectedLevel}</p>
                 </div>
                 <span className="selected-total">
@@ -458,7 +485,9 @@ function ManageStudents() {
             <div className="selected-mini-panel">
               <div className="selected-mini-header">
                 <div className="selected-mini-title">
-                  <span className="selected-mini-icon">✅</span>
+                  <span className="selected-mini-icon">
+                    <FiCheckCircle style={{ color: "#10b981" }} />
+                  </span>
                   <span>Selected Students</span>
                 </div>
                 <span className={`selected-mini-count ${selectedStudents.length === 10 ? "count-full" : ""}`}>
@@ -481,7 +510,8 @@ function ManageStudents() {
                         onClick={() => handleStudentSelect(student.id)}
                         title="Remove student"
                       >
-                        ✕ Remove
+                        <FiX style={{ marginRight: "4px", verticalAlign: "-1px" }} />
+                        Remove
                       </button>
                     </div>
                   ))}
@@ -491,7 +521,9 @@ function ManageStudents() {
 
           {/* SEARCH */}
           <div className="student-search">
-            <span className="search-icon">🔍</span>
+            <span className="search-icon">
+              <FiSearch />
+            </span>
             <input
               type="text"
               placeholder="Search student by name or email..."
@@ -545,7 +577,13 @@ function ManageStudents() {
                         </td>
                         <td>
                           <span className={`status-pill ${isSelected ? "pill-active" : ""}`}>
-                            {isSelected ? "✓ Selected" : "Unselected"}
+                            {isSelected ? (
+                              <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                                <FiCheck /> Selected
+                              </span>
+                            ) : (
+                              "Unselected"
+                            )}
                           </span>
                         </td>
                       </tr>
@@ -574,7 +612,8 @@ function ManageStudents() {
               onClick={handleSave}
               disabled={selectedStudents.length !== 10}
             >
-              💾 Save Selection
+              <FiSave style={{ marginRight: "6px", verticalAlign: "-2px" }} />
+              Save Selection
             </button>
           </div>
         </section>

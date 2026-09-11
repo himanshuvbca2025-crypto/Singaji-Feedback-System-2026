@@ -188,11 +188,6 @@
   border-radius: 50%;
   box-shadow: 0 8px 24px rgba(249, 115, 22, 0.2), 0 0 0 4px rgba(249, 115, 22, 0.08);
   padding: 4px;
-  transition: transform 0.3s ease;
-}
-
-.login-logo-wrapper:hover {
-  transform: scale(1.05) rotate(5deg);
 }
 
 .login-logo {
@@ -317,8 +312,7 @@
 
 .login-button:hover:not(:disabled) {
   background: linear-gradient(135deg, var(--primary-dk) 0%, var(--primary-dkr) 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(249, 115, 22, 0.48);
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.4);
 }
 
 .login-button:active:not(:disabled) {

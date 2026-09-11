@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { FaGraduationCap, FaStar } from "react-icons/fa";
+import { FiAlertTriangle, FiCheckCircle } from "react-icons/fi";
 import "./AdminDashboard.css";
 
 function StarRating({ value }) {
@@ -6,7 +8,7 @@ function StarRating({ value }) {
   for (let i = 1; i <= 5; i++) {
     stars.push(
       <span key={i} className={`star ${i <= Math.round(value) ? "star-filled" : "star-empty"}`}>
-        ★
+        <FaStar size={13} />
       </span>
     );
   }
@@ -219,7 +221,9 @@ useEffect(() => {
         <div className="stat-card">
           <div className="stat-card-top">
             <span className="stat-title">Today's Lectures Held</span>
-            <span className="stat-icon">🎓</span>
+            <span className="stat-icon-wrapper">
+              <FaGraduationCap size={20} color="#ea580c" />
+            </span>
           </div>
           <div className="stat-value">{todayLectures}</div>
           <div className="stat-description">Lectures conducted today</div>
@@ -230,7 +234,9 @@ useEffect(() => {
         <div className="stat-card stat-card-alert">
           <div className="stat-card-top">
             <span className="stat-title">Low Score Alerts</span>
-            <span className="stat-icon">⚠️</span>
+            <span className="stat-icon-wrapper alert-bg">
+              <FiAlertTriangle size={20} color="#ef4444" />
+            </span>
           </div>
           <div className="stat-value stat-value-alert">
             {overallReport.lowScoreAlerts}
@@ -243,7 +249,9 @@ useEffect(() => {
         <div className="stat-card">
           <div className="stat-card-top">
             <span className="stat-title">Today's Campus Avg</span>
-            <span className="stat-icon">⭐</span>
+            <span className="stat-icon-wrapper star-bg">
+              <FaStar size={20} color="#f59e0b" />
+            </span>
           </div>
           <div className="stat-value">
             {overallReport.overallRating}
@@ -257,7 +265,9 @@ useEffect(() => {
         <div className="stat-card">
           <div className="stat-card-top">
             <span className="stat-title">Feedback Completion</span>
-            <span className="stat-icon">✅</span>
+            <span className="stat-icon-wrapper check-bg">
+              <FiCheckCircle size={20} color="#10b981" />
+            </span>
           </div>
           <div className="stat-value">
             {campusCompletion.percentage}%
@@ -301,7 +311,8 @@ useEffect(() => {
                     <span className="feedback-faculty">{fb.faculty}</span>
                   </div>
                   <div className="feedback-rating-badge">
-                    ⭐ {fb.rating}
+                    <FaStar style={{ marginRight: "4px", verticalAlign: "-1px" }} />
+                    {fb.rating}
                   </div>
                 </div>
                 <p className="feedback-subject">{fb.subject}</p>
@@ -330,7 +341,8 @@ useEffect(() => {
                     <span className="feedback-faculty">{fb.faculty}</span>
                   </div>
                   <div className="feedback-rating-badge rating-badge-alert">
-                    ⚠️ {fb.rating}
+                    <FiAlertTriangle style={{ marginRight: "4px", verticalAlign: "-1px" }} />
+                    {fb.rating}
                   </div>
                 </div>
                 <p className="feedback-subject">{fb.course}</p>

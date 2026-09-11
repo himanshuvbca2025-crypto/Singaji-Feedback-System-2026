@@ -1,4 +1,16 @@
 import React, { useEffect, useState } from "react";
+import { FaStar } from "react-icons/fa";
+import {
+  FiCalendar,
+  FiX,
+  FiAlertCircle,
+  FiClock,
+  FiLayers,
+  FiUsers,
+  FiAlertTriangle,
+  FiChevronUp,
+  FiChevronDown,
+} from "react-icons/fi";
 import "./FacultyFeedbackModal.css";
 
 function StarDisplay({ value }) {
@@ -9,7 +21,7 @@ function StarDisplay({ value }) {
           key={i}
           className={i <= Math.round(value) ? "star-on" : "star-off"}
         >
-          ★
+          <FaStar />
         </span>
       ))}
     </div>
@@ -132,7 +144,8 @@ function FacultyFeedbackModal({
               </span>
 
               <span className="ffm-date">
-                📅 Feedback (
+                <FiCalendar style={{ marginRight: "6px", verticalAlign: "-2px" }} />
+                Feedback (
                 {selectedDate
                   ? new Date(
                       `${selectedDate}T00:00:00`
@@ -152,7 +165,7 @@ function FacultyFeedbackModal({
             onClick={onClose}
             aria-label="Close"
           >
-            ✕
+            <FiX size={18} />
           </button>
         </div>
 
@@ -169,7 +182,8 @@ function FacultyFeedbackModal({
           {/* Error */}
           {!loading && error && (
             <div className="ffm-empty-lectures">
-              ❌ {error}
+              <FiAlertCircle style={{ marginRight: "6px", verticalAlign: "-2px", color: "#ef4444" }} />
+              {error}
             </div>
           )}
 
@@ -184,7 +198,8 @@ function FacultyFeedbackModal({
 
                   <div className="ffm-ov-rating">
                     <strong>
-                      ⭐ {viewData?.overallRating || 0}
+                      <FaStar style={{ color: "#f59e0b", marginRight: "4px", verticalAlign: "-1px" }} />
+                      {viewData?.overallRating || 0}
                     </strong>{" "}
                     / 5.0
                   </div>
@@ -255,11 +270,13 @@ function FacultyFeedbackModal({
 
                           <div className="ffm-lec-meta">
                             <span>
-                              ⏰ {lecture.lectureTime}
+                              <FiClock style={{ marginRight: "4px", verticalAlign: "-2px" }} />
+                              {lecture.lectureTime}
                             </span>
 
                             <span>
-                              🏫 Class:{" "}
+                              <FiLayers style={{ marginRight: "4px", verticalAlign: "-2px" }} />
+                              Class:{" "}
                               {lecture.className || "-"}{" "}
                               {lecture.groups?.length > 0
                                 ? `(${lecture.groups.join(
@@ -269,7 +286,8 @@ function FacultyFeedbackModal({
                             </span>
 
                             <span>
-                              👥 Strength:{" "}
+                              <FiUsers style={{ marginRight: "4px", verticalAlign: "-2px" }} />
+                              Strength:{" "}
                               {lecture.strength || 0}
                             </span>
                           </div>
@@ -294,7 +312,8 @@ function FacultyFeedbackModal({
 
                           {isLowScore && (
                             <div className="ffm-needs-review-pill">
-                              ⚠️ Needs Review
+                              <FiAlertTriangle style={{ marginRight: "4px", verticalAlign: "-2px" }} />
+                              Needs Review
                             </div>
                           )}
                         </div>
@@ -404,9 +423,15 @@ function FacultyFeedbackModal({
                               )
                             }
                           >
-                            {isExpanded
-                              ? "Show Top 5 Metrics ▲"
-                              : "View 10 Metrics ▼"}
+                            {isExpanded ? (
+                              <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                                Show Top 5 Metrics <FiChevronUp />
+                              </span>
+                            ) : (
+                              <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                                View 10 Metrics <FiChevronDown />
+                              </span>
+                            )}
                           </button>
                         )}
                       </div>

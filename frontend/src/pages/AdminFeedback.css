@@ -370,10 +370,5 @@
 .af-view-btn:hover {
   background: #c2410c;
   border-color: #c2410c;
-  transform: translateY(-1px);
   box-shadow: 0 3px 8px rgba(234, 88, 12, 0.25);
-}
-
-.af-view-btn:active {
-  transform: translateY(0);
 }

@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { FaStar } from "react-icons/fa";
+import { FiAlertTriangle } from "react-icons/fi";
 import "./Reports.css";
 
 function Reports() {
@@ -143,7 +145,8 @@ function Reports() {
           </span>
 
           <div className="kpi-main-val">
-            ⭐ {overallReport.overallRating}{" "}
+            <FaStar style={{ color: "#f59e0b", marginRight: "6px", verticalAlign: "-2px" }} />
+            {overallReport.overallRating}{" "}
             <small>/ 5.0</small>
           </div>
 
@@ -228,7 +231,8 @@ function Reports() {
                   <h3>{deptName}</h3>
 
                   <div className="perf-score">
-                    ⭐ {rating} / 5
+                    <FaStar style={{ color: "#f59e0b", marginRight: "5px", verticalAlign: "-2px" }} />
+                    {rating} / 5
                   </div>
 
                   <div className="perf-bar-bg">
@@ -296,7 +300,8 @@ function Reports() {
         </div>
 
         <span className="leader-score">
-          ⭐ {f.rating}
+          <FaStar style={{ color: "#f59e0b", marginRight: "4px", verticalAlign: "-1px" }} />
+          {f.rating}
         </span>
       </div>
     ))
@@ -326,8 +331,9 @@ function Reports() {
 
                   <div className="alert-item-header">
 
-                    <strong>
-                      ⚠️ {a.facultyName}
+                    <strong style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <FiAlertTriangle style={{ color: "#ef4444" }} />
+                      {a.facultyName}
                     </strong>
 
                     <span className="alert-score-badge">

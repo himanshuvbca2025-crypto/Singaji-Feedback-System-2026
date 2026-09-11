@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { FaStar } from "react-icons/fa";
+import { FiAlertTriangle } from "react-icons/fi";
 import FacultyFeedbackModal from "../components/FacultyFeedbackModal.jsx";
 import "./AdminFeedback.css";
 
@@ -14,7 +16,7 @@ function StarDisplay({ value }) {
               : "star-off"
           }
         >
-          ★
+          <FaStar />
         </span>
       ))}
     </div>
@@ -294,7 +296,8 @@ function AdminFeedback() {
 
         {lowScoreCount > 0 && (
           <div className="af-alert-pill">
-            ⚠️ {lowScoreCount} low score alert
+            <FiAlertTriangle style={{ marginRight: "6px", verticalAlign: "-2px" }} />
+            {lowScoreCount} low score alert
             {lowScoreCount > 1 ? "s" : ""}
           </div>
         )}
@@ -321,7 +324,8 @@ function AdminFeedback() {
           </span>
 
           <strong className="af-summary-value">
-            ⭐ {campusAverage}
+            <FaStar style={{ color: "#f59e0b", marginRight: "6px", verticalAlign: "-2px" }} />
+            {campusAverage}
           </strong>
         </div>
 

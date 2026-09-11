@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { FiPlus, FiShare2, FiEdit2, FiTrash2 } from "react-icons/fi";
 import useAuth from "../hooks/useAuth.js";
 import ssecLogo from "../assets/rename.png";
 import "./FacultyDashboard.css";
@@ -637,9 +638,12 @@ function FacultyDashboard() {
                   fontWeight: "700",
                   fontSize: "14px",
                   cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                ➕ Add Schedule Row
+                <FiPlus style={{ marginRight: "6px" }} /> Add Schedule Row
               </button>
 
               <button
@@ -708,9 +712,12 @@ function FacultyDashboard() {
                   fontWeight: "700",
                   fontSize: "14px",
                   cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                📢 Share Schedule on Teams
+                <FiShare2 style={{ marginRight: "6px" }} /> Share Schedule on Teams
               </button>
 
               <div className="faculty-date-display">
@@ -866,11 +873,13 @@ function FacultyDashboard() {
                                 border: "none",
                                 background: "transparent",
                                 cursor: "pointer",
-                                fontSize: "18px",
+                                fontSize: "16px",
                                 padding: "4px",
+                                display: "inline-flex",
+                                alignItems: "center",
                               }}
                             >
-                              ✏️
+                              <FiEdit2 color="#2563eb" />
                             </button>
 
                             <button
@@ -881,11 +890,13 @@ function FacultyDashboard() {
                                 border: "none",
                                 background: "transparent",
                                 cursor: "pointer",
-                                fontSize: "18px",
+                                fontSize: "16px",
                                 padding: "4px",
+                                display: "inline-flex",
+                                alignItems: "center",
                               }}
                             >
-                              🗑️
+                              <FiTrash2 color="#ef4444" />
                             </button>
                           </div>
                         </td>
