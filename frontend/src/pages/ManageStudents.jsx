@@ -72,9 +72,7 @@ function ManageStudents() {
          const response = await fetch(
          "http://localhost:5000/api/students",
         {
-          headers: {
-            Authorization: `Bearer ${authUser?.token}`,
-          },
+          credentials: "include",
        }
       );
         const data = await response.json();
@@ -185,10 +183,10 @@ function ManageStudents() {
         "http://localhost:5000/api/selected-students",
         {
           method: "POST",
+           credentials: "include",
           headers: {
             "Content-Type": "application/json",
-             Authorization: `Bearer ${authUser?.token}`,
-          },
+            },
           body: JSON.stringify({
             department: selectedDepartment,
             level: selectedLevel,
@@ -245,9 +243,7 @@ function ManageStudents() {
         selectedDepartment
       )}&level=${encodeURIComponent(selectedLevel)}`,
         {
-        headers: {
-        Authorization: `Bearer ${authUser?.token}`,
-    },
+        credentials: "include",
   }
 );
 

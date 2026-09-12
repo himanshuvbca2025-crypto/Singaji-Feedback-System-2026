@@ -1117,8 +1117,9 @@ const getFacultyFeedbackView = async (req, res) => {
       for (const item of matchingSlots) {
         
        const actualStrength = await SelectedStudents.countDocuments({
-        level: { $in: schedule.groups || [] },
-      });
+  department: schedule.department,
+  level: { $in: schedule.groups || [] },
+});
 
         facultyLectures.push({
           scheduleId: schedule._id,

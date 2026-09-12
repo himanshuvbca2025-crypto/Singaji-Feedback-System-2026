@@ -39,9 +39,7 @@ function AdminDashboard() {
       const response = await fetch(
   "http://localhost:5000/api/schedules/today",
   {
-    headers: {
-      Authorization: `Bearer ${authUser?.token}`,
-    },
+    credentials: "include",
   }
 );
 
@@ -97,9 +95,7 @@ useEffect(() => {
       const todayResponse = await fetch(
         `http://localhost:5000/api/reports?date=${today}`,
         {
-          headers: {
-            Authorization: `Bearer ${authUser?.token}`,
-          },
+           credentials: "include",
         }
       );
 
@@ -118,9 +114,7 @@ useEffect(() => {
       const overallResponse = await fetch(
         "http://localhost:5000/api/reports",
         {
-          headers: {
-            Authorization: `Bearer ${authUser?.token}`,
-          },
+          credentials: "include",
         }
       );
 

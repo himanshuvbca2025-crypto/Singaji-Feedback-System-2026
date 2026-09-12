@@ -53,9 +53,7 @@ function ManageFaculty() {
         const response = await fetch(
           "http://localhost:5000/api/faculty",
         {
-           headers: {
-            Authorization: `Bearer ${authUser?.token}`,
-          },
+             credentials: "include",
         }
         );
 
@@ -138,9 +136,9 @@ function ManageFaculty() {
         `http://localhost:5000/api/faculty/${editingFaculty.id}`,
         {
           method: "PUT",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${authUser?.token}`,
           },
           body: JSON.stringify({
             name: editingFaculty.name,
@@ -209,9 +207,9 @@ function ManageFaculty() {
         "http://localhost:5000/api/faculty/create",
         {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${authUser?.token}`,
           },
           body: JSON.stringify({
             name: newFaculty.name.trim(),
@@ -268,9 +266,9 @@ function ManageFaculty() {
         `http://localhost:5000/api/faculty/${deletingFaculty.id}`,
         {
           method: "DELETE",
+          credentials: "include",
            headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${authUser?.token}`,
           },
         }
         

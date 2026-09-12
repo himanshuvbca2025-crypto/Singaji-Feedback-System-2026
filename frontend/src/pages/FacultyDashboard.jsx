@@ -87,9 +87,7 @@ function FacultyDashboard() {
       const response = await fetch("http://localhost:5000/api/faculty",
         
         {
-          headers: {
-          Authorization: `Bearer ${authUser?.token}`,
-        },
+        credentials: "include",
         });
 
       const data = await response.json();
@@ -130,9 +128,7 @@ function FacultyDashboard() {
           department
         )}`,
          {
-           headers: {
-           Authorization: `Bearer ${authUser?.token}`,
-    },
+          credentials: "include",
   }
       );
       const data = await response.json();
@@ -320,8 +316,8 @@ function FacultyDashboard() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-             Authorization: `Bearer ${authUser?.token}`,
           },
+          credentials: "include",
           body: JSON.stringify(scheduleData),
         }
       );
@@ -487,8 +483,8 @@ function FacultyDashboard() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-             Authorization: `Bearer ${authUser?.token}`,
           },
+          credentials: "include",
           body: JSON.stringify(scheduleData),
         }
       );
@@ -558,9 +554,7 @@ function FacultyDashboard() {
         `http://localhost:5000/api/schedules/${row.id}`,
         {
           method: "DELETE",
-          headers: {
-          Authorization: `Bearer ${authUser?.token}`,
-           },
+         credentials: "include",
         }
       );
 
@@ -953,7 +947,7 @@ function FacultyDashboard() {
                   onChange={(e) =>
                     setNewSchedule({
                       ...newSchedule,
-                      group: e.target.value,
+                      group: e.target.value.toUpperCase(),
                     })
                   }
                   required
@@ -1373,7 +1367,7 @@ function FacultyDashboard() {
                   placeholder="e.g. 1A or 1A, 1B"
                   value={newSchedule.group}
                   onChange={(e) =>
-                    setNewSchedule({ ...newSchedule, group: e.target.value })
+                    setNewSchedule({ ...newSchedule, group: e.target.value.toUpperCase() })
                   }
                   required
                 />

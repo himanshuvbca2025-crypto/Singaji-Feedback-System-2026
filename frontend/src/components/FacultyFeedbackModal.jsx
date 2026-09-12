@@ -58,9 +58,7 @@ function FacultyFeedbackModal({
          faculty.facultyId
        )}&date=${selectedDate}`,
     {
-          headers: {
-          Authorization: `Bearer ${authUser?.token}`,
-    },
+          credentials: "include",
   }
 );
 

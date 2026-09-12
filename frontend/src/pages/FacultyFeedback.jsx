@@ -42,26 +42,13 @@ function FacultyFeedback() {
     setError("");
 
     try {
-      const authUser = getAuthData();
-
-      if (!authUser?.token) {
-        setError(
-          "Authentication token not found. Please login again."
-        );
-
-        setFeedbackData(null);
-        return;
-      }
+      
 
       const response = await fetch(
         `http://localhost:5000/api/feedback/my-feedback?date=${selectedDate}`,
         {
           method: "GET",
-
-          headers: {
-            Authorization: `Bearer ${authUser.token}`,
-            "Content-Type": "application/json",
-          },
+         credentials: "include",
         }
       );
 

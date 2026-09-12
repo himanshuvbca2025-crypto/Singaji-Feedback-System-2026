@@ -98,9 +98,7 @@ function AdminFeedback() {
           : "http://localhost:5000/api/feedback/all";
 
       const response = await fetch(url, {
-       headers: {
-       Authorization: `Bearer ${authUser?.token}`,
-    },
+      credentials: "include",
 });
         const data = await response.json();
 

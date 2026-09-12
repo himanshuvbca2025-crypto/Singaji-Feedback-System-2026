@@ -28,9 +28,7 @@ function FacultySchedule() {
             user.department
           )}`,
            {
-           headers: {
-            Authorization: `Bearer ${authUser?.token}`,
-            },
+              credentials: "include",
           }
         );
 

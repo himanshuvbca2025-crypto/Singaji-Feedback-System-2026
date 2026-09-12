@@ -52,9 +52,7 @@ function FacultyHistory() {
         const facultyResponse = await fetch(
           "http://localhost:5000/api/faculty",
           {
-           headers: {
-            Authorization: `Bearer ${authUser?.token}`,
-            },
+            credentials: "include",
           }
         );
 
@@ -129,9 +127,7 @@ function FacultyHistory() {
         const historyResponse = await fetch(
           historyUrl,
            {
-                headers: {
-                Authorization: `Bearer ${authUser?.token}`,
-            },
+               credentials: "include",
           }
         );
 

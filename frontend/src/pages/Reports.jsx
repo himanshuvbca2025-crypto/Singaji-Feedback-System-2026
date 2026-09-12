@@ -45,9 +45,7 @@ function Reports() {
         const response = await fetch(
           `http://localhost:5000/api/reports?date=${selectedDate}`,
           {
-              headers: {
-             Authorization: `Bearer ${authUser?.token}`,
-            },
+             credentials: "include",
           }
           
         );

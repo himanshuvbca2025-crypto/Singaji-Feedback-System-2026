@@ -23,7 +23,7 @@ router.get(
 
 router.post('/submit', submitFeedback);
 
-router.get('/all',getAllFeedback);
+router.get('/all',protect,authorize("Admin", "Faculty"), getAllFeedback);
 
 router.get('/faculty/:facultyId', protect, authorize("Admin"), getFeedbackByFaculty);
 

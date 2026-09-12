@@ -24,9 +24,7 @@ const authUser = JSON.parse(localStorage.getItem("authUser"));
      const response = await fetch(
      "http://localhost:5000/api/questions",
      {
-    headers: {
-      Authorization: `Bearer ${authUser?.token}`,
-    },
+    credentials: "include",
   }
 );
 
@@ -75,9 +73,9 @@ const authUser = JSON.parse(localStorage.getItem("authUser"));
       "http://localhost:5000/api/questions/create",
       {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-           Authorization: `Bearer ${authUser?.token}`,
         },
         body: JSON.stringify({
           text: newQuestion.text,
@@ -131,9 +129,9 @@ const authUser = JSON.parse(localStorage.getItem("authUser"));
       `http://localhost:5000/api/questions/${editingQuestion.id}`,
       {
         method: "PUT",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-           Authorization: `Bearer ${authUser?.token}`,
         },
         body: JSON.stringify({
           text: editingQuestion.text,
@@ -185,9 +183,7 @@ const authUser = JSON.parse(localStorage.getItem("authUser"));
       `http://localhost:5000/api/questions/${editingQuestion.id}`,
       {
         method: "DELETE",
-        headers: {
-           Authorization: `Bearer ${authUser?.token}`,
-        },
+       credentials: "include",
       }
     );
 

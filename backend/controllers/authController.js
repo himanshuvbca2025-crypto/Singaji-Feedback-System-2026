@@ -37,6 +37,7 @@ const Login = async (req, res) => {
           message: "Invalid Gmail or password",
         });
       }
+
       const token = jwt.sign(
         {
           userId: admin._id,
@@ -48,12 +49,16 @@ const Login = async (req, res) => {
         }
       );
 
-
+      res.cookie("accessToken", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 60 * 60 * 1000,
+      });
 
       return res.status(200).json({
         success: true,
         role: "Admin",
-        token,
         message: "Admin login successful",
 
         user: {
@@ -103,10 +108,16 @@ const Login = async (req, res) => {
         }
       );
 
+      res.cookie("accessToken", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 60 * 60 * 1000,
+      });
+
       return res.status(200).json({
         success: true,
         role: "Faculty",
-        token,
         message: "Faculty login successful",
 
         user: {

@@ -40,9 +40,7 @@ function ManageLectures() {
         const response = await fetch(
           `http://localhost:5000/api/schedules/today?date=${selectedDate}`,
           {
-              headers: {
-                Authorization: `Bearer ${authUser?.token}`,
-              },
+            credentials: "include",
           }
         );
 
