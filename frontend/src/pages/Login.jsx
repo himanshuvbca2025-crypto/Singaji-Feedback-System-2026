@@ -24,7 +24,6 @@ function Login() {
 
       const response = await fetch("https://singaji-feedback-system-02026.onrender.com/api/auth/login", {
         method: "POST",
-        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
