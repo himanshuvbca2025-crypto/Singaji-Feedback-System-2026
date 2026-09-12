@@ -51,7 +51,7 @@ function ManageFaculty() {
     const fetchFaculty = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/faculty",
+          "https://singaji-feedback-system-02026.onrender.com/api/faculty",
         {
              credentials: "include",
         }
@@ -133,7 +133,7 @@ function ManageFaculty() {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/faculty/${editingFaculty.id}`,
+        `https://singaji-feedback-system-02026.onrender.com/api/faculty/${editingFaculty.id}`,
         {
           method: "PUT",
           credentials: "include",
@@ -204,7 +204,7 @@ function ManageFaculty() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/faculty/create",
+        "https://singaji-feedback-system-02026.onrender.com/api/faculty/create",
         {
           method: "POST",
           credentials: "include",
@@ -263,7 +263,7 @@ function ManageFaculty() {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/faculty/${deletingFaculty.id}`,
+        `https://singaji-feedback-system-02026.onrender.com/api/faculty/${deletingFaculty.id}`,
         {
           method: "DELETE",
           credentials: "include",

@@ -37,7 +37,7 @@ function AdminDashboard() {
   const fetchTodaySchedules = async () => {
     try {
       const response = await fetch(
-  "http://localhost:5000/api/schedules/today",
+  "https://singaji-feedback-system-02026.onrender.com/api/schedules/today",
   {
     credentials: "include",
   }
@@ -93,7 +93,7 @@ useEffect(() => {
       // =====================================================
 
       const todayResponse = await fetch(
-        `http://localhost:5000/api/reports?date=${today}`,
+        `https://singaji-feedback-system-02026.onrender.com/api/reports?date=${today}`,
         {
            credentials: "include",
         }
@@ -112,7 +112,7 @@ useEffect(() => {
       // =====================================================
 
       const overallResponse = await fetch(
-        "http://localhost:5000/api/reports",
+        "https://singaji-feedback-system-02026.onrender.com/api/reports",
         {
           credentials: "include",
         }

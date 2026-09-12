@@ -70,7 +70,7 @@ function ManageStudents() {
        
 
          const response = await fetch(
-         "http://localhost:5000/api/students",
+         "https://singaji-feedback-system-02026.onrender.com/api/students",
         {
           credentials: "include",
        }
@@ -180,7 +180,7 @@ function ManageStudents() {
       console.log("Selected students:", selectedStudentData);
 
       const response = await fetch(
-        "http://localhost:5000/api/selected-students",
+        "https://singaji-feedback-system-02026.onrender.com/api/selected-students",
         {
           method: "POST",
            credentials: "include",
@@ -239,7 +239,7 @@ function ManageStudents() {
 
     try {
       const response = await fetch(
-       `http://localhost:5000/api/selected-students?department=${encodeURIComponent(
+       `https://singaji-feedback-system-02026.onrender.com/api/selected-students?department=${encodeURIComponent(
         selectedDepartment
       )}&level=${encodeURIComponent(selectedLevel)}`,
         {

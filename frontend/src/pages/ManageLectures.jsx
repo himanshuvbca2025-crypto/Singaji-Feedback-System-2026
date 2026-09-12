@@ -38,7 +38,7 @@ function ManageLectures() {
         setLoading(true);
 
         const response = await fetch(
-          `http://localhost:5000/api/schedules/today?date=${selectedDate}`,
+          `https://singaji-feedback-system-02026.onrender.com/api/schedules/today?date=${selectedDate}`,
           {
             credentials: "include",
           }

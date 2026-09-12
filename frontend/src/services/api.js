@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Placeholder base URL – replace with actual backend URL when ready
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'https://singaji-feedback-system-02026.onrender.com/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

@@ -43,7 +43,7 @@ function Reports() {
     const fetchReport = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/reports?date=${selectedDate}`,
+          `https://singaji-feedback-system-02026.onrender.com/api/reports?date=${selectedDate}`,
           {
              credentials: "include",
           }

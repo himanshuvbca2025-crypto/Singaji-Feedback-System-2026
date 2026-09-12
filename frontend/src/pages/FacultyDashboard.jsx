@@ -84,7 +84,7 @@ function FacultyDashboard() {
   useEffect(() => {
   const fetchFaculty = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/faculty",
+      const response = await fetch("https://singaji-feedback-system-02026.onrender.com/api/faculty",
         
         {
         credentials: "include",
@@ -124,7 +124,7 @@ function FacultyDashboard() {
       if (!department) return;
 
       const response = await fetch(
-        `http://localhost:5000/api/schedules/today?department=${encodeURIComponent(
+        `https://singaji-feedback-system-02026.onrender.com/api/schedules/today?department=${encodeURIComponent(
           department
         )}`,
          {
@@ -311,7 +311,7 @@ function FacultyDashboard() {
       };
 
       const response = await fetch(
-        "http://localhost:5000/api/schedules/create",
+        "https://singaji-feedback-system-02026.onrender.com/api/schedules/create",
         {
           method: "POST",
           headers: {
@@ -478,7 +478,7 @@ function FacultyDashboard() {
       };
 
       const response = await fetch(
-        `http://localhost:5000/api/schedules/${editingScheduleId}`,
+        `https://singaji-feedback-system-02026.onrender.com/api/schedules/${editingScheduleId}`,
         {
           method: "PUT",
           headers: {
@@ -551,7 +551,7 @@ function FacultyDashboard() {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/schedules/${row.id}`,
+        `https://singaji-feedback-system-02026.onrender.com/api/schedules/${row.id}`,
         {
           method: "DELETE",
          credentials: "include",
