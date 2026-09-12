@@ -54,7 +54,7 @@ function FacultyFeedback() {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/feedback/my-feedback?date=${selectedDate}`,
+        `https://singaji-feedback-system-02026.onrender.com/api/feedback/my-feedback?date=${selectedDate}`,
         {
           method: "GET",
 

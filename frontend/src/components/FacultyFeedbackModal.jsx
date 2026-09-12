@@ -54,7 +54,7 @@ function FacultyFeedbackModal({
         setViewData(null);
 
       const response = await fetch(
-        `http://localhost:5000/api/feedback/faculty-view?facultyId=${encodeURIComponent(
+        `https://singaji-feedback-system-02026.onrender.com/api/feedback/faculty-view?facultyId=${encodeURIComponent(
          faculty.facultyId
        )}&date=${selectedDate}`,
     {

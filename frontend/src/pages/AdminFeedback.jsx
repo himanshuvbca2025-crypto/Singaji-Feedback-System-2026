@@ -92,10 +92,10 @@ function AdminFeedback() {
     const fetchFeedbacks = async () => {
       try {
         const url = dateFilter
-          ? `http://localhost:5000/api/feedback/all?date=${encodeURIComponent(
+          ? `https://singaji-feedback-system-02026.onrender.com/api/feedback/all?date=${encodeURIComponent(
               dateFilter
             )}`
-          : "http://localhost:5000/api/feedback/all";
+          : "https://singaji-feedback-system-02026.onrender.com/api/feedback/all";
 
       const response = await fetch(url, {
        headers: {

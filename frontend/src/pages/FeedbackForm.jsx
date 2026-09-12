@@ -97,7 +97,7 @@ function FeedbackForm() {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/feedback/verify-token?token=${encodeURIComponent(
+          `https://singaji-feedback-system-02026.onrender.com/api/feedback/verify-token?token=${encodeURIComponent(
             token
           )}`
         );
@@ -146,7 +146,7 @@ function FeedbackForm() {
         setLoadingQuestions(true);
 
         const response = await fetch(
-          "http://localhost:5000/api/questions"
+          "https://singaji-feedback-system-02026.onrender.com/api/questions"
         );
 
         const data = await response.json();
@@ -306,7 +306,7 @@ function FeedbackForm() {
       // ==========================================
 
       const response = await fetch(
-        "http://localhost:5000/api/feedback/submit",
+        "https://singaji-feedback-system-02026.onrender.com/api/feedback/submit",
         {
           method: "POST",
 

@@ -22,7 +22,7 @@ function Login() {
       setError("");
       setIsLoading(true);
 
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch("https://singaji-feedback-system-02026.onrender.com/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

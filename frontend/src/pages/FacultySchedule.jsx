@@ -24,7 +24,7 @@ function FacultySchedule() {
         if (!user?.department) return;
 
         const response = await fetch(
-          `http://localhost:5000/api/schedules/today?department=${encodeURIComponent(
+          `https://singaji-feedback-system-02026.onrender.com/api/schedules/today?department=${encodeURIComponent(
             user.department
           )}`,
            {

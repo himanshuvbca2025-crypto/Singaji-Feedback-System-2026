@@ -22,7 +22,7 @@ const authUser = JSON.parse(localStorage.getItem("authUser"));
      
 
      const response = await fetch(
-     "http://localhost:5000/api/questions",
+     "https://singaji-feedback-system-02026.onrender.com/api/questions",
      {
     headers: {
       Authorization: `Bearer ${authUser?.token}`,
@@ -72,7 +72,7 @@ const authUser = JSON.parse(localStorage.getItem("authUser"));
 
   try {
     const response = await fetch(
-      "http://localhost:5000/api/questions/create",
+      "https://singaji-feedback-system-02026.onrender.com/api/questions/create",
       {
         method: "POST",
         headers: {
@@ -128,7 +128,7 @@ const authUser = JSON.parse(localStorage.getItem("authUser"));
 
   try {
     const response = await fetch(
-      `http://localhost:5000/api/questions/${editingQuestion.id}`,
+      `https://singaji-feedback-system-02026.onrender.com/api/questions/${editingQuestion.id}`,
       {
         method: "PUT",
         headers: {
@@ -182,7 +182,7 @@ const authUser = JSON.parse(localStorage.getItem("authUser"));
 
   try {
     const response = await fetch(
-      `http://localhost:5000/api/questions/${editingQuestion.id}`,
+      `https://singaji-feedback-system-02026.onrender.com/api/questions/${editingQuestion.id}`,
       {
         method: "DELETE",
         headers: {

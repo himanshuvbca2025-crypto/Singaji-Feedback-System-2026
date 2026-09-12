@@ -50,7 +50,7 @@ function FacultyHistory() {
         // =====================================================
 
         const facultyResponse = await fetch(
-          "http://localhost:5000/api/faculty",
+          "https://singaji-feedback-system-02026.onrender.com/api/faculty",
           {
            headers: {
             Authorization: `Bearer ${authUser?.token}`,
@@ -122,7 +122,7 @@ function FacultyHistory() {
         // =====================================================
 
       const historyUrl =
-        `http://localhost:5000/api/feedback/faculty-history/${encodeURIComponent(
+        `https://singaji-feedback-system-02026.onrender.com/api/feedback/faculty-history/${encodeURIComponent(
          facultyId
        )}`;
 
